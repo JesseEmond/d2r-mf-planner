@@ -13,10 +13,10 @@ per valuable item (all needed because MF affects only the quality roll):
 
 Also stores rune_prob (Pul+), gc_prob (Grand Charm), sc_prob (Small Charm).
 
-Outputs data/drop_odds.json.
+Targets are read from public/data/run_config.json; only monsters with a monster_id
+field are processed (empty monsters lists for unavailable runs are skipped).
 
-Note: TARGETS intentionally starts with Andy only. Additional monsters are added when
-the run-routine config (Milestone 2) maps user-selected runs to monster drop tables.
+Outputs data/drop_odds.json.
 """
 
 import json
@@ -29,16 +29,12 @@ import parse_treasure_classes as ptc
 
 OUT = Path(__file__).parent.parent / "data" / "drop_odds.json"
 VALUABLES_PATH = Path(__file__).parent.parent / "data" / "valuables.json"
+RUN_CONFIG_PATH = Path(__file__).parent.parent / "public" / "data" / "run_config.json"
 
 # High rune codes: Pul (r21) through Zod (r33)
 HIGH_RUNE_CODES = frozenset(f"r{n}" for n in range(21, 34))
 GC_CODE = "cm3"
 SC_CODE = "cm1"
-
-# monster_id: monstats Id or superunique name; superunique=True for the latter
-TARGETS = [
-    {"key": "andy", "monster_id": "andariel", "difficulty": "hell", "superunique": False},
-]
 
 # Items in valuables.json that are intentionally absent from the TC drop system.
 # Annihilus drops from Uber Diablo (token event); Hellfire Torch from Uber Tristram.
@@ -187,6 +183,25 @@ def _compute(target: dict, name_to_entry: dict, valuables: list[str]) -> dict:
     }
 
 
+def _load_targets() -> list[dict]:
+    """Read run_config.json and return a flat list of monster targets to compute."""
+    run_config = json.loads(RUN_CONFIG_PATH.read_text())
+    seen: set[str] = set()
+    targets: list[dict] = []
+    for run in run_config["runs"]:
+        for mon in run["monsters"]:
+            if "monster_id" not in mon or mon["id"] in seen:
+                continue
+            targets.append({
+                "key": mon["id"],
+                "monster_id": mon["monster_id"],
+                "difficulty": mon["difficulty"],
+                "superunique": mon["superunique"],
+            })
+            seen.add(mon["id"])
+    return targets
+
+
 def main() -> None:
     valuables: list[str] = json.loads(VALUABLES_PATH.read_text())
     name_to_entry = _build_name_to_entry()
@@ -196,8 +211,9 @@ def main() -> None:
         print(f"ERROR: {len(unknown)} valuables not found in game data: {', '.join(unknown)}", file=sys.stderr)
         sys.exit(1)
 
+    targets = _load_targets()
     result: dict = {"monsters": {}}
-    for target in TARGETS:
+    for target in targets:
         print(f"Computing {target['key']} ({target['monster_id']}) …")
         data = _compute(target, name_to_entry, valuables)
         result["monsters"][target["key"]] = data
