@@ -18,6 +18,42 @@ OUT = Path(__file__).parent.parent / "data" / "valuables.json"
 TIER_RANK = {"trash": 0, "none": 1, "low": 2, "med": 3, "high": 4}
 MIN_TIER = "low"
 
+# Items from Reign of the Warlock (2026) not yet on the Maxroll valuables page.
+# Source: https://maxroll.gg/d2/items/new-items-in-reign-of-the-warlock
+MANUAL_ADDITIONS = [
+    # Unique Grimoires (Warlock off-hand)
+    "Ars Al'Diabolos",
+    "Ars Tor'Baalos",
+    "Ars Dul'Mephistos",
+    "Measured Wrath",
+    # Other unique items
+    "Dreadfang",
+    "Bloodpact Shard",
+    "Wraithstep",
+    "Sling",
+    "Opalvein",
+    "Entropy Locket",
+    "Gheed's Wager",
+    "Hellwarden's Will",
+    # Bane's Garments set — excluded, not valuable enough
+    # "Bane's Oathmaker",
+    # "Bane's Wraithskin",
+    # "Bane's Authority",
+    # Horazon's Splendor set
+    "Horazon's Countenance",
+    "Horazon's Dominion",
+    "Horazon's Hold",
+    "Horazon's Legacy",
+    "Horazon's Secrets",
+    # Colossal Ancient Jewels — excluded, not droppable in normal MF runs
+    # "Defender's Bile",
+    # "Guardian's Thunder",
+    # "Protector's Frost",
+    # "Defender's Fire",
+    # "Protector's Stone",
+    # "Guardian's Light",
+]
+
 
 def fetch(url: str) -> str:
     r = requests.get(
@@ -103,6 +139,9 @@ def main() -> None:
     if not items:
         print("ERROR: could not extract items — inspect page structure", file=sys.stderr)
         sys.exit(1)
+
+    items = sorted(set(items) | set(MANUAL_ADDITIONS))
+    print(f"  +{len(MANUAL_ADDITIONS)} manual additions → {len(items)} total")
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(items, indent=2))

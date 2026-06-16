@@ -264,6 +264,19 @@
           "unique_weight": 1,
           "unique_total_weight": 1
         },
+        "Dreadfang": {
+          "base_prob": 0.014023663106287066,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 2
+        },
         "Duriel's Shell": {
           "base_prob": 0.010809422656112925,
           "quality_params": {
@@ -289,6 +302,19 @@
           },
           "unique_weight": 10,
           "unique_total_weight": 57
+        },
+        "Entropy Locket": {
+          "base_prob": 0.04508050089445438,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 60,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 69
         },
         "Flame Rift": {
           "base_prob": 0.02254025044722719,
@@ -472,6 +498,45 @@
           "unique_weight": 1,
           "unique_total_weight": 1
         },
+        "Horazon's Dominion": {
+          "base_prob": 0.0038633914944729945,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 983,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Hold": {
+          "base_prob": 0.004059879012096747,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 983,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Secrets": {
+          "base_prob": 0.0011253914460691184,
+          "quality_params": {
+            "base_chance": 120,
+            "divisor": 3,
+            "min_chance": 5600,
+            "quality_factor": 983,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
         "Hotspur": {
           "base_prob": 0.0005334950471871465,
           "quality_params": {
@@ -615,6 +680,19 @@
           "unique_weight": 1,
           "unique_total_weight": 1
         },
+        "Measured Wrath": {
+          "base_prob": 0.004059879012096747,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 3,
+          "unique_total_weight": 3
+        },
         "Nagelring": {
           "base_prob": 0.09016100178890876,
           "quality_params": {
@@ -653,6 +731,19 @@
           },
           "unique_weight": 1,
           "unique_total_weight": 1
+        },
+        "Opalvein": {
+          "base_prob": 0.09016100178890876,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 57
         },
         "Raven Frost": {
           "base_prob": 0.09016100178890876,
@@ -874,6 +965,19 @@
           },
           "unique_weight": 1,
           "unique_total_weight": 1
+        },
+        "Sling": {
+          "base_prob": 0.09016100178890876,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 57
         },
         "Snowclash": {
           "base_prob": 0.0019316957472364973,
