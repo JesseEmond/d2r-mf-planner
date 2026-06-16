@@ -12,3 +12,6 @@ for file in treasureclassex.txt itemratio.txt weapons.txt armor.txt monstats.txt
 done
 
 echo "Done."
+
+# data/raw/item-names.json must be extracted manually via CascViewer from the D2R game files.
+# Path inside the CASC archive: data/local/lng/strings/item-names.json

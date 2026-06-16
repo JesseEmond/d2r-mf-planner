@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Fetches trade-value items (>= Low tier) from Maxroll.gg and writes
-public/data/valuables.json — a sorted JSON array of item names.
+data/valuables.json — a sorted JSON array of item names.
 """
 
 import json
@@ -12,7 +12,7 @@ import requests
 from bs4 import BeautifulSoup
 
 URL = "https://maxroll.gg/d2/items/valuable-unique-set-items"
-OUT = Path(__file__).parent.parent / "public" / "data" / "valuables.json"
+OUT = Path(__file__).parent.parent / "data" / "valuables.json"
 
 # Worst-to-best rank; MIN_TIER controls the cutoff (inclusive).
 TIER_RANK = {"trash": 0, "none": 1, "low": 2, "med": 3, "high": 4}
