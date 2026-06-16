@@ -1,0 +1,17 @@
+:root {
+  --color-unique: #C7B377;
+  --color-set: #00FF00;
+  --color-magic: #4850B8;
+  --color-rune: #FFA800;
+  --color-bg: #0d0e11;
+  --color-surface: #1a1c23;
+  --color-border: #2e3140;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: #d0d0d0;
+  font-family: "Times New Roman", "Georgia", serif;
+  margin: 0;
+  padding: 0;
+}
