@@ -1,0 +1,49 @@
+{
+  "runs": [
+    {
+      "id": "andy",
+      "label": "Andy (Hell)",
+      "monsters": [
+        {
+          "id": "andy",
+          "monster_id": "andariel",
+          "difficulty": "hell",
+          "superunique": false,
+          "amount": 1,
+          "probability": 1.0
+        }
+      ],
+      "available": true
+    },
+    {
+      "id": "meph",
+      "label": "Mephisto (Meph)",
+      "monsters": [],
+      "available": false
+    },
+    {
+      "id": "cows",
+      "label": "Cow King (Cows)",
+      "monsters": [],
+      "available": false
+    },
+    {
+      "id": "travincal",
+      "label": "Council (Travincal)",
+      "monsters": [],
+      "available": false
+    },
+    {
+      "id": "pindle",
+      "label": "Pindleskin (Pindle)",
+      "monsters": [],
+      "available": false
+    },
+    {
+      "id": "ancient_tunnels",
+      "label": "Ancient Tunnels",
+      "monsters": [],
+      "available": false
+    }
+  ]
+}
