@@ -18,6 +18,17 @@ OUT = Path(__file__).parent.parent / "data" / "valuables.json"
 TIER_RANK = {"trash": 0, "none": 1, "low": 2, "med": 3, "high": 4}
 MIN_TIER = "low"
 
+# Original Sunder Charm names → Latent (droppable) versions introduced in patch 3.2.
+# Maxroll still uses the old names; we remap them to match uniqueitems.txt display names.
+NAME_FIXES = {
+    "Cold Rupture":        "Latent Cold Rupture",
+    "Flame Rift":          "Latent Flame Rift",
+    "Crack of the Heavens":"Latent Crack of the Heavens",
+    "Rotting Fissure":     "Latent Rotting Fissure",
+    "Bone Break":          "Latent Bone Break",
+    "Black Cleft":         "Latent Black Cleft",
+}
+
 # Items from Reign of the Warlock (2026) not yet on the Maxroll valuables page.
 # Source: https://maxroll.gg/d2/items/new-items-in-reign-of-the-warlock
 MANUAL_ADDITIONS = [
@@ -140,7 +151,7 @@ def main() -> None:
         print("ERROR: could not extract items — inspect page structure", file=sys.stderr)
         sys.exit(1)
 
-    items = sorted(set(items) | set(MANUAL_ADDITIONS))
+    items = sorted({NAME_FIXES.get(i, i) for i in items} | set(MANUAL_ADDITIONS))
     print(f"  +{len(MANUAL_ADDITIONS)} manual additions → {len(items)} total")
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

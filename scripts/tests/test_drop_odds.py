@@ -160,12 +160,54 @@ def test_shako_drop_rate_300_mf():
 # Gheed's Fortune — tests unique_weight / unique_total_weight selection
 # ---------------------------------------------------------------------------
 
+LATENT_SUNDERS = [
+    "Latent Cold Rupture",
+    "Latent Flame Rift",
+    "Latent Crack of the Heavens",
+    "Latent Rotting Fissure",
+    "Latent Bone Break",
+    "Latent Black Cleft",
+]
+
 def test_gheed_selection_weight():
-    """Gheed's Fortune shares the Grand Charm pool; weight < total."""
+    """Gheed's Fortune is 1-of-7 in the Unique GC pool (Gheed's + 6 Latent Sunders)."""
     db = _load_db()
     item = db["monsters"]["andy"]["drops"]["Gheed's Fortune"]
     assert item["unique_weight"] == 1
-    assert item["unique_total_weight"] > 1   # other GC uniques (Sunder Charms) in same pool
+    assert item["unique_total_weight"] == 7, (
+        f"Expected 7 unique GCs (Gheed's + 6 Latent Sunders), got {item['unique_total_weight']}"
+    )
+
+
+def test_latent_sunders_in_andy_drops():
+    """All 6 Latent Sunder Charms appear in Andy's drops (patch 3.2: any monster can drop them)."""
+    db = _load_db()
+    drops = db["monsters"]["andy"]["drops"]
+    for name in LATENT_SUNDERS:
+        assert name in drops, f"{name} missing from Andy's drops"
+
+
+def test_latent_sunder_selection_weight():
+    """Each Latent Sunder is 1-of-7 in the Unique GC pool, equal to Gheed's."""
+    db = _load_db()
+    drops = db["monsters"]["andy"]["drops"]
+    for name in LATENT_SUNDERS:
+        item = drops[name]
+        assert item["unique_weight"] == 1
+        assert item["unique_total_weight"] == 7, (
+            f"{name}: unique_total_weight={item['unique_total_weight']}, expected 7"
+        )
+
+
+def test_latent_sunder_same_base_prob_as_gheed():
+    """Latent Sunders share the same base_prob as Gheed's (same cm3 TC path)."""
+    db = _load_db()
+    drops = db["monsters"]["andy"]["drops"]
+    gheed_prob = drops["Gheed's Fortune"]["base_prob"]
+    for name in LATENT_SUNDERS:
+        assert drops[name]["base_prob"] == gheed_prob, (
+            f"{name}: base_prob={drops[name]['base_prob']}, expected {gheed_prob}"
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -203,6 +245,9 @@ if __name__ == "__main__":
         test_shako_drop_rate_200_mf,
         test_shako_drop_rate_300_mf,
         test_gheed_selection_weight,
+        test_latent_sunders_in_andy_drops,
+        test_latent_sunder_selection_weight,
+        test_latent_sunder_same_base_prob_as_gheed,
         test_rune_prob_nonzero_and_small,
         test_gc_and_sc_base_prob_equal,
     ]

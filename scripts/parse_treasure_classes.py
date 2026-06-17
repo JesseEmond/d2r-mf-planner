@@ -221,15 +221,21 @@ def _load_item_ratio() -> dict[tuple[int, int, int], ItemRatioRow]:
 
 
 def _load_unique_items() -> dict[str, list[UniqueEntry]]:
+    import json as _json
+    names_path = os.path.join(RAW_DIR, 'item-names.json')
+    key_to_display = {e['Key']: e['enUS'] for e in _json.loads(open(names_path, encoding='utf-8-sig').read()) if 'Key' in e and 'enUS' in e}
+
     by_code: dict[str, list[UniqueEntry]] = {}
     for row in _csv_rows('uniqueitems.txt'):
-        name = row.get('index', '').strip()
+        index = row.get('index', '').strip()
         code = row.get('code', '').strip()
         disabled = row.get('disabled', '0').strip()
+        spawnable = row.get('spawnable', '').strip()
         lvl_s = row.get('lvl', '').strip()
         rarity_s = row.get('rarity', '1').strip()
-        if not code or not name or disabled == '1':
+        if not code or not index or disabled == '1' or spawnable != '1':
             continue
+        name = key_to_display.get(index, index)
         by_code.setdefault(code, []).append(UniqueEntry(
             name=name,
             qlvl=int(lvl_s) if lvl_s else 0,
