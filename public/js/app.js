@@ -1,4 +1,4 @@
-import { createApp, reactive, computed, watch } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+import { createApp, defineComponent, reactive, computed, watch } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 import { GEAR_SLOTS, PRESET_ITEMS } from './gear-db.js';
 
 const FCR_BREAKPOINTS = [
@@ -124,20 +124,114 @@ watch(state, () => {
   history.replaceState(null, '', `?s=${encoded}`);
 }, { deep: true });
 
+const GearSlot = defineComponent({
+  props: {
+    slotId:     { type: String, required: true },
+    slotLabel:  { type: String, required: true },
+    presets:    { type: Array,  required: true },
+    modelValue: { type: Object, required: true },
+  },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    function update(patch) {
+      emit('update:modelValue', { ...props.modelValue, ...patch });
+    }
+    function updateCustom(patch) {
+      emit('update:modelValue', {
+        ...props.modelValue,
+        custom: { ...props.modelValue.custom, ...patch },
+      });
+    }
+    function stats() {
+      const slot = props.modelValue;
+      if (!slot.preset || slot.preset === 'custom') return slot.custom;
+      return props.presets.find(p => p.id === slot.preset) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+    }
+    return { update, updateCustom, stats };
+  },
+  template: `
+    <div class="gear-slot">
+      <label class="slot-label">{{ slotLabel }}</label>
+      <select
+        :value="modelValue.preset ?? ''"
+        @change="update({ preset: $event.target.value || null })"
+        class="slot-select"
+      >
+        <option value="">— none —</option>
+        <option v-for="p in presets" :key="p.id" :value="p.id">{{ p.name }}</option>
+      </select>
+
+      <div v-if="modelValue.preset === 'custom'" class="custom-inputs">
+        <input type="text"   placeholder="Name"       :value="modelValue.custom.name"       @input="updateCustom({ name: $event.target.value })"              class="custom-text" />
+        <label>FCR <input   type="number" min="0" :value="modelValue.custom.fcr"        @input="updateCustom({ fcr: +$event.target.value })"       class="custom-num" /></label>
+        <label>MF  <input   type="number" min="0" :value="modelValue.custom.mf"         @input="updateCustom({ mf: +$event.target.value })"        class="custom-num" /></label>
+        <label>+All <input  type="number" min="0" :value="modelValue.custom.allSkills"  @input="updateCustom({ allSkills: +$event.target.value })"  class="custom-num" /></label>
+        <label>+Cold <input type="number" min="0" :value="modelValue.custom.coldSkills" @input="updateCustom({ coldSkills: +$event.target.value })" class="custom-num" /></label>
+      </div>
+
+      <div v-if="modelValue.preset" class="stat-pills">
+        <span v-if="stats().fcr"       class="pill pill-fcr">FCR +{{ stats().fcr }}%</span>
+        <span v-if="stats().mf"        class="pill pill-mf">MF +{{ stats().mf }}%</span>
+        <span v-if="stats().allSkills"  class="pill pill-skill">+{{ stats().allSkills }} All</span>
+        <span v-if="stats().coldSkills" class="pill pill-cold">+{{ stats().coldSkills }} Cold</span>
+      </div>
+    </div>
+  `,
+});
+
+const GROUP_A = ['head', 'amulet', 'weapon', 'shield', 'armor'];
+const GROUP_B = ['gloves', 'belt', 'boots', 'ring1', 'ring2', 'charms'];
+
 createApp({
+  components: { GearSlot },
   setup() {
     return {
       state,
       GEAR_SLOTS,
       PRESET_ITEMS,
+      GROUP_A,
+      GROUP_B,
       totalFCR,
       totalMF,
       totalAllSkills,
       totalColdSkills,
       effectiveColdMastery,
       fcrBreakpoint,
-      slotStats,
     };
   },
-  template: `<div>App mounted — commit 4 scaffold</div>`,
+  template: `
+    <div class="app-root">
+      <header class="app-header">
+        <h1>D2R Blizzard Sorc — ETTVD Optimizer</h1>
+      </header>
+
+      <main class="app-grid">
+        <section class="gear-panel">
+          <h2 class="panel-title">Gear</h2>
+          <div class="slot-group">
+            <gear-slot
+              v-for="id in GROUP_A" :key="id"
+              :slot-id="id"
+              :slot-label="GEAR_SLOTS.find(s => s.id === id).label"
+              :presets="PRESET_ITEMS[id]"
+              v-model="state.gear[id]"
+            />
+          </div>
+          <div class="slot-group">
+            <gear-slot
+              v-for="id in GROUP_B" :key="id"
+              :slot-id="id"
+              :slot-label="GEAR_SLOTS.find(s => s.id === id).label"
+              :presets="PRESET_ITEMS[id]"
+              v-model="state.gear[id]"
+            />
+          </div>
+        </section>
+
+        <aside class="side-panel">
+          <div class="stat-summary placeholder">Stat summary — coming in commit 6</div>
+        </aside>
+      </main>
+    </div>
+  `,
 }).mount('#app');
