@@ -1393,7 +1393,7 @@
       "monster_id": "andariel",
       "difficulty": "hell",
       "combat": {
-        "hp": 59650,
+        "hp": 60031,
         "cold_resist": 66
       }
     }
