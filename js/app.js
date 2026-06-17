@@ -245,7 +245,7 @@ createApp({
   template: `
     <div class="app-root">
       <header class="app-header sticky-header">
-        <h1>D2R Blizzard Sorc — <span title="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine">ETTVD</span> Optimizer</h1>
+        <h1>D2R Blizzard Sorc — <abbr title="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine">ETTVD</abbr> Optimizer</h1>
       </header>
 
       <main class="app-grid">
@@ -323,7 +323,7 @@ createApp({
       </main>
 
       <footer class="app-footer">
-        <span class="footer-label" title="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine">ETTVD:</span>
+        <abbr class="footer-label" title="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine">ETTVD:</abbr>
         <span class="footer-value">— <span class="coming-soon">coming soon</span></span>
       </footer>
     </div>
