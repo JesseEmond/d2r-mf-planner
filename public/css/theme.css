@@ -134,8 +134,21 @@ body {
 .pill-skill { background: #2a1e40; color: #c8a0ff; }
 .pill-cold  { background: #142030; color: #80d0ff; }
 
+/* Sticky header */
+.sticky-header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: var(--color-bg);
+}
+
 /* Side panel */
 .side-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.summary-block {
   background: var(--color-surface);
   border: 1px solid var(--color-border);
   border-radius: 4px;
@@ -146,3 +159,75 @@ body {
   font-size: 0.82rem;
   font-style: italic;
 }
+
+/* Stat summary */
+.stat-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.2rem 0;
+  font-size: 0.85rem;
+}
+.stat-label {
+  flex: 1;
+  color: #aaa;
+}
+.stat-value {
+  font-family: system-ui, sans-serif;
+  color: #e0e0e0;
+}
+.fcr-badge {
+  font-size: 0.72rem;
+  font-family: system-ui, sans-serif;
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-weight: 600;
+}
+.badge-green   { background: #1a3a1a; color: #4dff4d; }
+.badge-amber   { background: #3a2a00; color: var(--color-rune); }
+.badge-default { background: #2a2a2a; color: #888; }
+
+.cm-breakdown { color: #666; font-size: 0.75rem; }
+.cm-input-row { padding: 0.3rem 0 0.1rem; }
+.cm-label { font-size: 0.82rem; color: #aaa; display: flex; align-items: center; gap: 0.4rem; }
+
+/* Run routine */
+.run-row { padding: 0.2rem 0; }
+.run-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+.run-disabled { color: #555; cursor: default; }
+.run-checkbox { accent-color: var(--color-unique); }
+.coming-soon {
+  font-size: 0.7rem;
+  color: #555;
+  font-style: italic;
+  font-family: system-ui, sans-serif;
+}
+.overhead-row {
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+  font-size: 0.82rem;
+}
+.overhead-row label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #aaa;
+}
+.unit { color: #666; font-size: 0.78rem; }
+
+/* Footer */
+.app-footer {
+  border-top: 1px solid var(--color-border);
+  padding: 0.6rem 1.5rem;
+  font-size: 0.82rem;
+  color: #555;
+  font-family: system-ui, sans-serif;
+}
+.footer-label { color: #888; margin-right: 0.4rem; }
