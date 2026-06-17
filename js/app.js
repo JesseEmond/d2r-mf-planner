@@ -1,4 +1,4 @@
-import { createApp, defineComponent, reactive, computed, watch } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+import { createApp, defineComponent, reactive, computed, watch, ref, onMounted } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 import { GEAR_SLOTS, PRESET_ITEMS } from './gear-db.js';
 
 const FCR_BREAKPOINTS = [
@@ -182,26 +182,56 @@ const GearSlot = defineComponent({
 const GROUP_A = ['head', 'amulet', 'weapon', 'shield', 'armor'];
 const GROUP_B = ['gloves', 'belt', 'boots', 'ring1', 'ring2', 'charms'];
 
+const fcrBadgeClass = computed(() => {
+  const fcr = totalFCR.value;
+  const currentIdx = FCR_BREAKPOINTS.findIndex(bp => fcr >= bp.minFCR);
+  if (currentIdx > 0) {
+    const nextFaster = FCR_BREAKPOINTS[currentIdx - 1];
+    if (fcr >= nextFaster.minFCR - 5) return 'badge-amber';
+  }
+  if (FCR_BREAKPOINTS.some(bp => bp.minFCR === fcr)) return 'badge-green';
+  return 'badge-default';
+});
+
 createApp({
   components: { GearSlot },
   setup() {
+    const runConfig = ref([]);
+
+    onMounted(async () => {
+      try {
+        const res = await fetch('data/run_config.json');
+        const json = await res.json();
+        runConfig.value = json.runs;
+        for (const run of json.runs) {
+          if (run.available && state.run.bosses[run.id] === undefined) {
+            state.run.bosses[run.id] = true;
+          }
+        }
+      } catch (e) {
+        console.error('Failed to load run_config.json', e);
+      }
+    });
+
     return {
       state,
       GEAR_SLOTS,
       PRESET_ITEMS,
       GROUP_A,
       GROUP_B,
+      runConfig,
       totalFCR,
       totalMF,
       totalAllSkills,
       totalColdSkills,
       effectiveColdMastery,
       fcrBreakpoint,
+      fcrBadgeClass,
     };
   },
   template: `
     <div class="app-root">
-      <header class="app-header">
+      <header class="app-header sticky-header">
         <h1>D2R Blizzard Sorc — ETTVD Optimizer</h1>
       </header>
 
@@ -229,9 +259,88 @@ createApp({
         </section>
 
         <aside class="side-panel">
-          <div class="stat-summary placeholder">Stat summary — coming in commit 6</div>
+          <!-- Stat Summary -->
+          <section class="summary-block">
+            <h2 class="panel-title">Stats</h2>
+
+            <div class="stat-row">
+              <span class="stat-label">FCR</span>
+              <span class="stat-value">{{ totalFCR }}%</span>
+              <span class="fcr-badge" :class="fcrBadgeClass">{{ fcrBreakpoint.frames }}f</span>
+            </div>
+
+            <div class="stat-row">
+              <span class="stat-label">Magic Find</span>
+              <span class="stat-value">{{ totalMF }}%</span>
+            </div>
+
+            <div class="stat-row">
+              <span class="stat-label">+All Skills</span>
+              <span class="stat-value">{{ totalAllSkills }}</span>
+            </div>
+
+            <div class="stat-row">
+              <span class="stat-label">+Cold Skills</span>
+              <span class="stat-value">{{ totalColdSkills }}</span>
+            </div>
+
+            <div class="stat-row cold-mastery-row">
+              <span class="stat-label">Cold Mastery</span>
+              <span class="stat-value">
+                Lv {{ effectiveColdMastery }}
+                <span class="cm-breakdown">({{ state.coldMasteryBase }} base)</span>
+              </span>
+            </div>
+            <div class="cm-input-row">
+              <label class="cm-label">
+                Base pts (0–20)
+                <input
+                  type="number" min="0" max="20"
+                  v-model.number="state.coldMasteryBase"
+                  class="custom-num"
+                />
+              </label>
+            </div>
+          </section>
+
+          <!-- Run Routine -->
+          <section class="summary-block">
+            <h2 class="panel-title">Run Routine</h2>
+
+            <div v-if="runConfig.length === 0" class="placeholder">Loading…</div>
+
+            <div v-for="run in runConfig" :key="run.id" class="run-row">
+              <label :class="['run-label', !run.available && 'run-disabled']">
+                <input
+                  type="checkbox"
+                  :disabled="!run.available"
+                  v-model="state.run.bosses[run.id]"
+                  class="run-checkbox"
+                />
+                {{ run.label }}
+                <span v-if="!run.available" class="coming-soon">coming soon</span>
+              </label>
+            </div>
+
+            <div class="overhead-row">
+              <label class="stat-label">
+                Travel/overhead
+                <input
+                  type="number" min="0"
+                  v-model.number="state.run.overheadSecs"
+                  class="custom-num"
+                />
+                <span class="unit">s</span>
+              </label>
+            </div>
+          </section>
         </aside>
       </main>
+
+      <footer class="app-footer">
+        <span class="footer-label">ETTVD:</span>
+        <span class="footer-value">— <span class="coming-soon">coming soon</span></span>
+      </footer>
     </div>
   `,
 }).mount('#app');
