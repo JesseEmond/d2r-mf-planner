@@ -216,3 +216,5 @@ body {
   font-family: system-ui, sans-serif;
 }
 .footer-label { color: #888; margin-right: 0.4rem; }
+
+[title] { cursor: help; }
