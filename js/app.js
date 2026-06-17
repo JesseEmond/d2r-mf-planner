@@ -11,6 +11,9 @@ const FCR_BREAKPOINTS = [
   { minFCR: 0,   frames: 13 },
 ];
 
+// ── MF / EV engine constants ───────────────────────────────────────────────
+const SKILLER_GC_PROB = 1 / 21;   // ~1/21 chance a GC rolls a class-specific skill prefix
+
 // ── Combat engine constants ────────────────────────────────────────────────
 const BLIZZARD_COOLDOWN_SECS  = 1.8;
 const ICE_BLAST_HIT_RATE      = 0.80;   // fraction of ice blasts that connect

@@ -14,11 +14,9 @@
     "Atma\u2019s Scarab",
     "Azurewrath",
     "Bartuc's Cut-Throat",
-    "Black Cleft",
     "Blade of Ali Baba",
     "Bloodfist",
     "Bloodpact Shard",
-    "Bone Break",
     "Boneflame",
     "Bonehew",
     "Boneshade",
@@ -27,11 +25,9 @@
     "Butcher's Pupil",
     "Cerebus' Bite",
     "Chance Guards",
-    "Cold Rupture",
     "Cow King's Hide",
     "Cow King's Hooves",
     "Cow King's Horns",
-    "Crack of the Heavens",
     "Crown of Ages",
     "Crown of Thieves",
     "Darkforce Spawn",
@@ -49,7 +45,6 @@
     "Earth Shifter",
     "Entropy Locket",
     "Eschuta's Temper",
-    "Flame Rift",
     "Fleshripper",
     "Frostburn",
     "Gargoyle's Bite",
@@ -93,6 +88,12 @@
     "Jalal's Mane",
     "Kira's Guardian",
     "Lacerator",
+    "Latent Black Cleft",
+    "Latent Bone Break",
+    "Latent Cold Rupture",
+    "Latent Crack of the Heavens",
+    "Latent Flame Rift",
+    "Latent Rotting Fissure",
     "Laying of Hands",
     "Leviathan",
     "Lidless Wall",
@@ -125,7 +126,6 @@
     "Razortail",
     "Ribcracker",
     "Rockstopper",
-    "Rotting Fissure",
     "Sandstorm Trek",
     "Schaefer's Hammer",
     "Seraph\u2019s Hymn",
@@ -242,18 +242,18 @@
           "unique_weight": 5,
           "unique_total_weight": 69
         },
-        "Black Cleft": {
-          "base_prob": 0.02254025044722719,
+        "Bartuc's Cut-Throat": {
+          "base_prob": 0.0033951016163550557,
           "quality_params": {
-            "base_chance": 400,
-            "divisor": 1,
+            "base_chance": 240,
+            "divisor": 3,
             "min_chance": 6400,
             "quality_factor": 983,
-            "qlvl": 69,
+            "qlvl": 50,
             "quality_type": "unique"
           },
           "unique_weight": 1,
-          "unique_total_weight": 13
+          "unique_total_weight": 1
         },
         "Blade of Ali Baba": {
           "base_prob": 0.007802586345653578,
@@ -281,19 +281,6 @@
           "unique_weight": 1,
           "unique_total_weight": 1
         },
-        "Bone Break": {
-          "base_prob": 0.02254025044722719,
-          "quality_params": {
-            "base_chance": 400,
-            "divisor": 1,
-            "min_chance": 6400,
-            "quality_factor": 983,
-            "qlvl": 69,
-            "quality_type": "unique"
-          },
-          "unique_weight": 1,
-          "unique_total_weight": 13
-        },
         "Bonehew": {
           "base_prob": 0.014023663106287066,
           "quality_params": {
@@ -306,6 +293,19 @@
           },
           "unique_weight": 1,
           "unique_total_weight": 1
+        },
+        "Bul-Kathos' Wedding Band": {
+          "base_prob": 0.09016100178890876,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 66,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 57
         },
         "Buriza-Do Kyanon": {
           "base_prob": 0.0035130623632367015,
@@ -333,6 +333,19 @@
           "unique_weight": 1,
           "unique_total_weight": 1
         },
+        "Cerebus' Bite": {
+          "base_prob": 0.001306165263999506,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 71,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
         "Chance Guards": {
           "base_prob": 0.006833614272998332,
           "quality_params": {
@@ -345,19 +358,6 @@
           },
           "unique_weight": 1,
           "unique_total_weight": 1
-        },
-        "Cold Rupture": {
-          "base_prob": 0.02254025044722719,
-          "quality_params": {
-            "base_chance": 400,
-            "divisor": 1,
-            "min_chance": 6400,
-            "quality_factor": 983,
-            "qlvl": 69,
-            "quality_type": "unique"
-          },
-          "unique_weight": 1,
-          "unique_total_weight": 13
         },
         "Cow King's Hide": {
           "base_prob": 0.016352385332067742,
@@ -384,19 +384,6 @@
           },
           "unique_weight": 7,
           "unique_total_weight": 7
-        },
-        "Crack of the Heavens": {
-          "base_prob": 0.02254025044722719,
-          "quality_params": {
-            "base_chance": 400,
-            "divisor": 1,
-            "min_chance": 6400,
-            "quality_factor": 983,
-            "qlvl": 69,
-            "quality_type": "unique"
-          },
-          "unique_weight": 1,
-          "unique_total_weight": 13
         },
         "Crown of Thieves": {
           "base_prob": 0.009571591848798109,
@@ -436,6 +423,19 @@
           },
           "unique_weight": 7,
           "unique_total_weight": 7
+        },
+        "Demon Limb": {
+          "base_prob": 0.01148591021855773,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 71,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
         },
         "Demon Machine": {
           "base_prob": 0.0053708150441649305,
@@ -502,19 +502,6 @@
           "unique_weight": 1,
           "unique_total_weight": 69
         },
-        "Flame Rift": {
-          "base_prob": 0.02254025044722719,
-          "quality_params": {
-            "base_chance": 400,
-            "divisor": 1,
-            "min_chance": 6400,
-            "quality_factor": 983,
-            "qlvl": 69,
-            "quality_type": "unique"
-          },
-          "unique_weight": 1,
-          "unique_total_weight": 13
-        },
         "Frostburn": {
           "base_prob": 0.019016595131033154,
           "quality_params": {
@@ -523,6 +510,19 @@
             "min_chance": 6400,
             "quality_factor": 983,
             "qlvl": 39,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Gerke's Sanctuary": {
+          "base_prob": 0.0038633914944729945,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 52,
             "quality_type": "unique"
           },
           "unique_weight": 1,
@@ -539,7 +539,7 @@
             "quality_type": "unique"
           },
           "unique_weight": 1,
-          "unique_total_weight": 13
+          "unique_total_weight": 7
         },
         "Goblin Toe": {
           "base_prob": 0.010982885214638395,
@@ -554,6 +554,19 @@
           "unique_weight": 1,
           "unique_total_weight": 1
         },
+        "Goldstrike Arch": {
+          "base_prob": 0.0053708150441649305,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 54,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
         "Goldwrap": {
           "base_prob": 0.007321923476425595,
           "quality_params": {
@@ -562,6 +575,19 @@
             "min_chance": 6400,
             "quality_factor": 983,
             "qlvl": 36,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Gore Rider": {
+          "base_prob": 0.0053708150441649305,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 55,
             "quality_type": "unique"
           },
           "unique_weight": 1,
@@ -644,6 +670,19 @@
           },
           "unique_weight": 1,
           "unique_total_weight": 1
+        },
+        "Hellwarden's Will": {
+          "base_prob": 0.010809422656112925,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 55,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 3
         },
         "Herald of Zakarum": {
           "base_prob": 0.0019316957472364973,
@@ -827,6 +866,84 @@
           "unique_weight": 1,
           "unique_total_weight": 1
         },
+        "Latent Black Cleft": {
+          "base_prob": 0.02254025044722719,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Bone Break": {
+          "base_prob": 0.02254025044722719,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Cold Rupture": {
+          "base_prob": 0.02254025044722719,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Crack of the Heavens": {
+          "base_prob": 0.02254025044722719,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Flame Rift": {
+          "base_prob": 0.02254025044722719,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Rotting Fissure": {
+          "base_prob": 0.02254025044722719,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
         "Laying of Hands": {
           "base_prob": 0.0023928979621995273,
           "quality_params": {
@@ -878,6 +995,19 @@
           },
           "unique_weight": 3,
           "unique_total_weight": 3
+        },
+        "Moser's Blessed Circle": {
+          "base_prob": 0.005991271658269711,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 39,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
         },
         "Nagelring": {
           "base_prob": 0.09016100178890876,
@@ -931,6 +1061,45 @@
           "unique_weight": 1,
           "unique_total_weight": 57
         },
+        "Peasant Crown": {
+          "base_prob": 0.004476872173723848,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 36,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Que-Hegan's Wisdom": {
+          "base_prob": 0.009641268385572357,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 59,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Raven Claw": {
+          "base_prob": 0.007894254987894773,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 20,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
         "Raven Frost": {
           "base_prob": 0.09016100178890876,
           "quality_params": {
@@ -982,19 +1151,6 @@
           },
           "unique_weight": 1,
           "unique_total_weight": 1
-        },
-        "Rotting Fissure": {
-          "base_prob": 0.02254025044722719,
-          "quality_params": {
-            "base_chance": 400,
-            "divisor": 1,
-            "min_chance": 6400,
-            "quality_factor": 983,
-            "qlvl": 69,
-            "quality_type": "unique"
-          },
-          "unique_weight": 1,
-          "unique_total_weight": 13
         },
         "Sandstorm Trek": {
           "base_prob": 0.0011253914460691184,
@@ -1308,6 +1464,19 @@
           "unique_weight": 1,
           "unique_total_weight": 57
         },
+        "Thundergod's Vigor": {
+          "base_prob": 0.004028111283123698,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 55,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
         "Titan's Revenge": {
           "base_prob": 0.00920127497764887,
           "quality_params": {
@@ -1360,6 +1529,45 @@
           "unique_weight": 7,
           "unique_total_weight": 7
         },
+        "Valkyrie Wing": {
+          "base_prob": 0.0038633914944729945,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 52,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Vampire Gaze": {
+          "base_prob": 0.0019316957472364973,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 49,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "War Traveler": {
+          "base_prob": 0.002897543620854745,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
         "Waterwalk": {
           "base_prob": 0.00199709055275657,
           "quality_params": {
@@ -1368,6 +1576,19 @@
             "min_chance": 6400,
             "quality_factor": 983,
             "qlvl": 40,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Witchwild String": {
+          "base_prob": 0.003390627921778563,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 47,
             "quality_type": "unique"
           },
           "unique_weight": 1,
