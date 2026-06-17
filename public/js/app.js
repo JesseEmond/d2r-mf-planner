@@ -275,8 +275,8 @@ createApp({
     onMounted(async () => {
       try {
         const [rcRes, dbRes] = await Promise.all([
-          fetch('data/run_config.json'),
-          fetch('data/db.json'),
+          fetch('data/run_config.json', { cache: 'no-cache' }),
+          fetch('data/db.json',         { cache: 'no-cache' }),
         ]);
         const [rc, db] = await Promise.all([rcRes.json(), dbRes.json()]);
         runConfig.value = rc.runs;
@@ -316,10 +316,13 @@ createApp({
           `Travel: ~${run.teleports ?? 0} teleports × ${frames} frames/cast ÷ ${D2_FPS} FPS = ${travelSecs.toFixed(1)}s`,
         ];
         if (combat.hp) {
-          const mult = coldDmgMultiplier(combat.cold_resist ?? 0, cmLevel);
+          const monResist  = combat.cold_resist ?? 0;
+          const cmReduction = cmResistReduction(cmLevel);
+          const effResist  = Math.max(-100, monResist - cmReduction);
+          const mult       = coldDmgMultiplier(monResist, cmLevel);
           assumptionLines.push(
             `HP: ${combat.hp.toLocaleString()}`,
-            `Cold resist: ${combat.cold_resist ?? 0}% → ${mult.toFixed(2)}× damage multiplier`,
+            `Monster cold resist: ${monResist}% − Cold Mastery lv ${cmLevel} (−${cmReduction}%) → eff. resist: ${effResist}% → ${mult.toFixed(2)}× damage multiplier`,
           );
         }
 
