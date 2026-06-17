@@ -40,7 +40,6 @@ function encodeState(state) {
   }
   const out = { gear };
   if (state.coldMasteryBase !== 20) out.cm = state.coldMasteryBase;
-  if (state.run.overheadSecs !== 30) out.oh = state.run.overheadSecs;
   const bosses = {};
   for (const [k, v] of Object.entries(state.run.bosses)) {
     if (v) bosses[k] = 1;
@@ -70,7 +69,6 @@ function decodeState(b64, state) {
       }
     }
     if (out.cm != null) state.coldMasteryBase = out.cm;
-    if (out.oh != null) state.run.overheadSecs = out.oh;
     if (out.bosses) {
       for (const [k, v] of Object.entries(out.bosses)) {
         state.run.bosses[k] = !!v;
@@ -93,7 +91,7 @@ function slotStats(slot) {
 const state = reactive({
   gear: makeGear(),
   coldMasteryBase: 20,
-  run: { bosses: {}, overheadSecs: 30 },
+  run: { bosses: {} },
 });
 
 const params = new URLSearchParams(window.location.search);
@@ -263,42 +261,26 @@ createApp({
           <section class="summary-block">
             <h2 class="panel-title">Stats</h2>
 
-            <div class="stat-row">
-              <span class="stat-label">FCR</span>
-              <span class="stat-value">{{ totalFCR }}%</span>
-              <span class="fcr-badge" :class="fcrBadgeClass">{{ fcrBreakpoint.frames }}f</span>
-            </div>
-
-            <div class="stat-row">
-              <span class="stat-label">Magic Find</span>
-              <span class="stat-value">{{ totalMF }}%</span>
-            </div>
-
-            <div class="stat-row">
-              <span class="stat-label">+All Skills</span>
-              <span class="stat-value">{{ totalAllSkills }}</span>
-            </div>
-
-            <div class="stat-row">
-              <span class="stat-label">+Cold Skills</span>
-              <span class="stat-value">{{ totalColdSkills }}</span>
-            </div>
-
-            <div class="stat-row cold-mastery-row">
-              <span class="stat-label">Cold Mastery</span>
-              <span class="stat-value">
-                Lv {{ effectiveColdMastery }}
-                <span class="cm-breakdown">({{ state.coldMasteryBase }} base)</span>
+            <div class="summary-pills">
+              <span class="pill pill-fcr">
+                FCR {{ totalFCR }}%
+                <span class="fcr-badge" :class="fcrBadgeClass">{{ fcrBreakpoint.frames }}f</span>
               </span>
+              <span v-if="totalMF"        class="pill pill-mf">MF +{{ totalMF }}%</span>
+              <span v-if="totalAllSkills"  class="pill pill-skill">+{{ totalAllSkills }} All Skills</span>
+              <span v-if="totalColdSkills" class="pill pill-cold">+{{ totalColdSkills }} Cold Skills</span>
+              <span class="pill pill-cold">Cold Mastery Lv {{ effectiveColdMastery }}</span>
             </div>
+
             <div class="cm-input-row">
               <label class="cm-label">
-                Base pts (0–20)
+                Cold Mastery base pts (0–20)
                 <input
                   type="number" min="0" max="20"
                   v-model.number="state.coldMasteryBase"
                   class="custom-num"
                 />
+                <span class="cm-breakdown">(+{{ totalAllSkills + totalColdSkills }} from gear)</span>
               </label>
             </div>
           </section>
@@ -319,18 +301,6 @@ createApp({
                 />
                 {{ run.label }}
                 <span v-if="!run.available" class="coming-soon">coming soon</span>
-              </label>
-            </div>
-
-            <div class="overhead-row">
-              <label class="stat-label">
-                Travel/overhead
-                <input
-                  type="number" min="0"
-                  v-model.number="state.run.overheadSecs"
-                  class="custom-num"
-                />
-                <span class="unit">s</span>
               </label>
             </div>
           </section>
