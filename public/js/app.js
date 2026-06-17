@@ -117,6 +117,20 @@ const fcrBreakpoint = computed(() => {
   return FCR_BREAKPOINTS.find(bp => fcr >= bp.minFCR) ?? FCR_BREAKPOINTS[FCR_BREAKPOINTS.length - 1];
 });
 
+const fcrTooltip = computed(() => {
+  const fcr = totalFCR.value;
+  const currentIdx = FCR_BREAKPOINTS.findIndex(bp => fcr >= bp.minFCR);
+  const current = FCR_BREAKPOINTS[currentIdx];
+  let tip = `${current.frames} frames per cast`;
+  if (currentIdx > 0) {
+    const next = FCR_BREAKPOINTS[currentIdx - 1];
+    tip += ` · next breakpoint: ${next.minFCR}% FCR for ${next.frames}f (+${next.minFCR - fcr} needed)`;
+  } else {
+    tip += ' · maximum breakpoint reached';
+  }
+  return tip;
+});
+
 watch(state, () => {
   const encoded = encodeState(state);
   history.replaceState(null, '', `?s=${encoded}`);
@@ -168,10 +182,10 @@ const GearSlot = defineComponent({
       </div>
 
       <div v-if="modelValue.preset" class="stat-pills">
-        <span v-if="stats().fcr"       class="pill pill-fcr">FCR +{{ stats().fcr }}%</span>
-        <span v-if="stats().mf"        class="pill pill-mf">MF +{{ stats().mf }}%</span>
-        <span v-if="stats().allSkills"  class="pill pill-skill">+{{ stats().allSkills }} All</span>
-        <span v-if="stats().coldSkills" class="pill pill-cold">+{{ stats().coldSkills }} Cold</span>
+        <span v-if="stats().fcr"       class="pill pill-fcr"   title="Faster Cast Rate — reduces casting animation length">FCR +{{ stats().fcr }}%</span>
+        <span v-if="stats().mf"        class="pill pill-mf"    title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ stats().mf }}%</span>
+        <span v-if="stats().allSkills"  class="pill pill-skill" title="+All Skills — adds to all character skill levels">+{{ stats().allSkills }} All</span>
+        <span v-if="stats().coldSkills" class="pill pill-cold"  title="+Cold Skills — adds to cold skill levels only">+{{ stats().coldSkills }} Cold</span>
       </div>
     </div>
   `,
@@ -225,6 +239,7 @@ createApp({
       effectiveColdMastery,
       fcrBreakpoint,
       fcrBadgeClass,
+      fcrTooltip,
     };
   },
   template: `
@@ -262,14 +277,14 @@ createApp({
             <h2 class="panel-title">Stats</h2>
 
             <div class="summary-pills">
-              <span class="pill pill-fcr">
+              <span class="pill pill-fcr" title="Faster Cast Rate — reduces casting animation length">
                 FCR {{ totalFCR }}%
-                <span class="fcr-badge" :class="fcrBadgeClass">{{ fcrBreakpoint.frames }}f</span>
+                <span class="fcr-badge" :class="fcrBadgeClass" :title="fcrTooltip">{{ fcrBreakpoint.frames }}f</span>
               </span>
-              <span v-if="totalMF"        class="pill pill-mf">MF +{{ totalMF }}%</span>
-              <span v-if="totalAllSkills"  class="pill pill-skill">+{{ totalAllSkills }} All Skills</span>
-              <span v-if="totalColdSkills" class="pill pill-cold">+{{ totalColdSkills }} Cold Skills</span>
-              <span class="pill pill-cold">Cold Mastery Lv {{ effectiveColdMastery }}</span>
+              <span v-if="totalMF"        class="pill pill-mf"    title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ totalMF }}%</span>
+              <span v-if="totalAllSkills"  class="pill pill-skill" title="+All Skills — adds to all character skill levels">+{{ totalAllSkills }} All Skills</span>
+              <span v-if="totalColdSkills" class="pill pill-cold"  title="+Cold Skills — adds to cold skill levels only">+{{ totalColdSkills }} Cold Skills</span>
+              <span class="pill pill-cold" title="Cold Mastery — reduces enemy cold resistance; effective level includes +All Skills and +Cold Skills from gear">Cold Mastery Lv {{ effectiveColdMastery }}</span>
             </div>
 
             <div class="cm-input-row">
@@ -308,7 +323,7 @@ createApp({
       </main>
 
       <footer class="app-footer">
-        <span class="footer-label">ETTVD:</span>
+        <span class="footer-label" title="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine">ETTVD:</span>
         <span class="footer-value">— <span class="coming-soon">coming soon</span></span>
       </footer>
     </div>
