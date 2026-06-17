@@ -17,31 +17,31 @@
     },
     {
       "id": "meph",
-      "label": "Mephisto (Meph)",
+      "label": "Meph (Hell)",
       "monsters": [],
       "available": false
     },
     {
       "id": "cows",
-      "label": "Cow King (Cows)",
+      "label": "Cow Level (Hell)",
       "monsters": [],
       "available": false
     },
     {
       "id": "travincal",
-      "label": "Council (Travincal)",
+      "label": "Trav (Hell)",
       "monsters": [],
       "available": false
     },
     {
       "id": "pindle",
-      "label": "Pindleskin (Pindle)",
+      "label": "Pindle (Hell)",
       "monsters": [],
       "available": false
     },
     {
       "id": "ancient_tunnels",
-      "label": "Ancient Tunnels",
+      "label": "Ancient Tunnels (Hell)",
       "monsters": [],
       "available": false
     }

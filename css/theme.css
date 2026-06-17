@@ -161,20 +161,18 @@ body {
 }
 
 /* Stat summary */
-.stat-row {
+.summary-pills {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.2rem 0;
-  font-size: 0.85rem;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.6rem;
+}
+.summary-pills .pill {
+  font-size: 0.78rem;
 }
 .stat-label {
   flex: 1;
   color: #aaa;
-}
-.stat-value {
-  font-family: system-ui, sans-serif;
-  color: #e0e0e0;
 }
 .fcr-badge {
   font-size: 0.72rem;
@@ -187,9 +185,9 @@ body {
 .badge-amber   { background: #3a2a00; color: var(--color-rune); }
 .badge-default { background: #2a2a2a; color: #888; }
 
-.cm-breakdown { color: #666; font-size: 0.75rem; }
+.cm-breakdown { color: #666; font-size: 0.72rem; font-family: system-ui, sans-serif; }
 .cm-input-row { padding: 0.3rem 0 0.1rem; }
-.cm-label { font-size: 0.82rem; color: #aaa; display: flex; align-items: center; gap: 0.4rem; }
+.cm-label { font-size: 0.82rem; color: #aaa; display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap; }
 
 /* Run routine */
 .run-row { padding: 0.2rem 0; }
@@ -208,19 +206,6 @@ body {
   font-style: italic;
   font-family: system-ui, sans-serif;
 }
-.overhead-row {
-  margin-top: 0.6rem;
-  padding-top: 0.5rem;
-  border-top: 1px solid var(--color-border);
-  font-size: 0.82rem;
-}
-.overhead-row label {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  color: #aaa;
-}
-.unit { color: #666; font-size: 0.78rem; }
 
 /* Footer */
 .app-footer {
