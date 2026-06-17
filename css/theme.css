@@ -218,4 +218,4 @@ body {
 .footer-label { color: #888; margin-right: 0.4rem; }
 
 [title] { cursor: help; }
-abbr[title] { text-decoration: underline dotted; }
+abbr[title] { text-decoration: underline dashed; text-decoration-color: #555; }
