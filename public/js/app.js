@@ -188,6 +188,7 @@ const blizzDps = computed(() => blizzDmgPerCast.value / BLIZZARD_COOLDOWN_SECS);
 const iceBlastDps = computed(() =>
   effectiveIceBlastsPerWindow.value * iceBlastDmgPerHit.value / BLIZZARD_COOLDOWN_SECS
 );
+const totalDps = computed(() => blizzDps.value + iceBlastDps.value);
 const combatAssumptions = computed(() => {
   const frames = fcrBreakpoint.value.frames;
   const ibs = effectiveIceBlastsPerWindow.value;
@@ -195,7 +196,7 @@ const combatAssumptions = computed(() => {
     `Blizzard: 1 cast / ${BLIZZARD_COOLDOWN_SECS}s cooldown, ~${BLIZZARD_BOLTS_VS_BOSS} bolts hitting boss per cast`,
     `Ice Blast: ${ibs.toFixed(1)} effective casts per window at ${ICE_BLAST_HIT_RATE * 100}% hit rate (${frames} frames/cast)`,
     `Skill levels assume ${BLIZZARD_HARD_PTS} hard points in each spell; scale with +All/+Cold Skills from gear`,
-    `Boss HP = raw monstats value × 10 (prime evil boss multiplier)`,
+    `Boss HP = avg(minHP, maxHP) × L-HP[level] ÷ 100 (from monlvl.txt)`,
     `Damage values are approximate`,
   ].join('\n');
 });
@@ -317,7 +318,7 @@ createApp({
         if (combat.hp) {
           const mult = coldDmgMultiplier(combat.cold_resist ?? 0, cmLevel);
           assumptionLines.push(
-            `HP: ${combat.hp.toLocaleString()} (raw × boss mult)`,
+            `HP: ${combat.hp.toLocaleString()}`,
             `Cold resist: ${combat.cold_resist ?? 0}% → ${mult.toFixed(2)}× damage multiplier`,
           );
         }
@@ -351,6 +352,7 @@ createApp({
       fcrTooltip,
       blizzDps,
       iceBlastDps,
+      totalDps,
       combatAssumptions,
     };
   },
@@ -413,6 +415,11 @@ createApp({
               Combat
               <span class="info-icon" :title="combatAssumptions">i</span>
             </h2>
+            <div class="summary-pills">
+              <span class="pill pill-total" title="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)">
+                Total ~{{ Math.round(totalDps).toLocaleString() }} DPS
+              </span>
+            </div>
             <div class="summary-pills">
               <span class="pill pill-skill" title="Blizzard damage per second (approximate, single-target boss)">
                 Blizzard ~{{ Math.round(blizzDps).toLocaleString() }} DPS
