@@ -466,16 +466,32 @@ def get_item_ratio(item_code: str) -> ItemRatioRow:
     return _get_item_ratio()[(1, 0, class_specific)]
 
 
+_monlvl_cache: dict[int, dict[str, int]] | None = None
+
+
+def _get_monlvl() -> dict[int, dict[str, int]]:
+    """Return monlvl lookup: {level: {'HP': ..., 'HP(N)': ..., 'HP(H)': ..., 'L-HP': ..., 'L-HP(N)': ..., 'L-HP(H)': ...}}."""
+    global _monlvl_cache
+    if _monlvl_cache is None:
+        _monlvl_cache = {}
+        for row in _csv_rows('monlvl.txt'):
+            try:
+                lvl = int(row['Level'])
+            except (KeyError, ValueError):
+                continue
+            _monlvl_cache[lvl] = {k: int(v) for k, v in row.items() if v.strip().lstrip('-').isdigit()}
+    return _monlvl_cache
+
+
 def get_monster_combat_stats(monster_id: str, difficulty: str = 'hell') -> dict:
     """Return HP and cold resistance for a monster at the given difficulty.
 
-    HP is scaled by a boss multiplier for prime-evil act bosses (primeevil=1 in
-    monstats.txt) because the game engine applies an additional HP multiplier not
-    stored in the text files.  The multiplier constant is approximate.
+    HP formula: avg(minHP, maxHP) * L-HP(difficulty)[monster_level] / 100
+    Uses the L-HP column from monlvl.txt, which applies to boss/named monsters.
     """
-    PRIME_EVIL_HP_MULT = 50
-
     suffix = {'normal': '', 'nightmare': '(N)', 'hell': '(H)'}[difficulty]
+    lhp_col = {'normal': 'L-HP', 'nightmare': 'L-HP(N)', 'hell': 'L-HP(H)'}[difficulty]
+    lvl_col = {'normal': 'Level', 'nightmare': 'Level(N)', 'hell': 'Level(H)'}[difficulty]
 
     def _ri(row: dict, col: str) -> int:
         v = row.get(col, '') or ''
@@ -484,6 +500,8 @@ def get_monster_combat_stats(monster_id: str, difficulty: str = 'hell') -> dict:
         except ValueError:
             return 0
 
+    monlvl = _get_monlvl()
+
     for row in _csv_rows('monstats.txt'):
         if row.get('Id', '').strip() != monster_id:
             continue
@@ -491,9 +509,9 @@ def get_monster_combat_stats(monster_id: str, difficulty: str = 'hell') -> dict:
         max_hp = _ri(row, f'MaxHP{suffix}' if suffix else 'maxHP')
         avg_hp = (min_hp + max_hp) // 2
         cold_resist = _ri(row, f'ResCo{suffix}' if suffix else 'ResCo')
-        is_prime_evil = row.get('primeevil', '0').strip() == '1'
-        hp_mult = PRIME_EVIL_HP_MULT if is_prime_evil else 1
-        return {'hp': avg_hp * hp_mult, 'cold_resist': cold_resist}
+        level = _ri(row, lvl_col if suffix else 'Level')
+        lhp_scale = monlvl.get(level, {}).get(lhp_col, 100)
+        return {'hp': avg_hp * lhp_scale // 100, 'cold_resist': cold_resist}
 
     return {'hp': 0, 'cold_resist': 0}
 
