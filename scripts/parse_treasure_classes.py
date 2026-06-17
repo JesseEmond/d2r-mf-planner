@@ -466,6 +466,38 @@ def get_item_ratio(item_code: str) -> ItemRatioRow:
     return _get_item_ratio()[(1, 0, class_specific)]
 
 
+def get_monster_combat_stats(monster_id: str, difficulty: str = 'hell') -> dict:
+    """Return HP and cold resistance for a monster at the given difficulty.
+
+    HP is scaled by a boss multiplier for prime-evil act bosses (primeevil=1 in
+    monstats.txt) because the game engine applies an additional HP multiplier not
+    stored in the text files.  The multiplier constant is approximate.
+    """
+    PRIME_EVIL_HP_MULT = 50
+
+    suffix = {'normal': '', 'nightmare': '(N)', 'hell': '(H)'}[difficulty]
+
+    def _ri(row: dict, col: str) -> int:
+        v = row.get(col, '') or ''
+        try:
+            return int(v.strip())
+        except ValueError:
+            return 0
+
+    for row in _csv_rows('monstats.txt'):
+        if row.get('Id', '').strip() != monster_id:
+            continue
+        min_hp = _ri(row, f'MinHP{suffix}' if suffix else 'minHP')
+        max_hp = _ri(row, f'MaxHP{suffix}' if suffix else 'maxHP')
+        avg_hp = (min_hp + max_hp) // 2
+        cold_resist = _ri(row, f'ResCo{suffix}' if suffix else 'ResCo')
+        is_prime_evil = row.get('primeevil', '0').strip() == '1'
+        hp_mult = PRIME_EVIL_HP_MULT if is_prime_evil else 1
+        return {'hp': avg_hp * hp_mult, 'cold_resist': cold_resist}
+
+    return {'hp': 0, 'cold_resist': 0}
+
+
 def get_unique_candidates(item_code: str, ilvl: int) -> list[tuple[str, int]]:
     """
     Return (name, rarity) for all unique and set items of this base type with qlvl <= ilvl.

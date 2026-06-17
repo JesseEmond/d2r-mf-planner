@@ -13,6 +13,8 @@ Writes:
 import json
 from pathlib import Path
 
+import parse_treasure_classes as ptc
+
 ROOT = Path(__file__).parent.parent
 VALUABLES_IN = ROOT / "data" / "valuables.json"
 DROP_ODDS_IN = ROOT / "data" / "drop_odds.json"
@@ -23,9 +25,18 @@ def main() -> None:
     valuables: list[str] = json.loads(VALUABLES_IN.read_text())
     drop_odds: dict = json.loads(DROP_ODDS_IN.read_text())
 
+    monsters = drop_odds["monsters"]
+    for entry in monsters.values():
+        monster_id = entry.get("monster_id")
+        difficulty = entry.get("difficulty", "hell")
+        if monster_id:
+            stats = ptc.get_monster_combat_stats(monster_id, difficulty)
+            if stats["hp"]:
+                entry["combat"] = stats
+
     db = {
         "valuables": valuables,
-        "monsters": drop_odds["monsters"],
+        "monsters": monsters,
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

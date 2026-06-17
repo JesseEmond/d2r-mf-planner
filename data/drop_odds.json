@@ -1203,7 +1203,9 @@
       },
       "rune_prob": 0.0008962410843387278,
       "gc_base_prob": 0.02254025044722719,
-      "sc_base_prob": 0.02254025044722719
+      "sc_base_prob": 0.02254025044722719,
+      "monster_id": "andariel",
+      "difficulty": "hell"
     }
   }
 }

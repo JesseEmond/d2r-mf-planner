@@ -216,6 +216,8 @@ def main() -> None:
     for target in targets:
         print(f"Computing {target['key']} ({target['monster_id']}) …")
         data = _compute(target, name_to_entry, valuables)
+        data["monster_id"] = target["monster_id"]
+        data["difficulty"] = target["difficulty"]
         result["monsters"][target["key"]] = data
         print(
             f"  → {len(data['drops'])} valuables, "
