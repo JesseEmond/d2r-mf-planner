@@ -245,7 +245,7 @@ createApp({
   template: `
     <div class="app-root">
       <header class="app-header sticky-header">
-        <h1>D2R Blizzard Sorc — ETTVD Optimizer</h1>
+        <h1>D2R Blizzard Sorc — <span title="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine">ETTVD</span> Optimizer</h1>
       </header>
 
       <main class="app-grid">
