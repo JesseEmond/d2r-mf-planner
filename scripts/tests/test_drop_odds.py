@@ -214,11 +214,11 @@ def test_latent_sunder_same_base_prob_as_gheed():
 # Rune and charm base probabilities
 # ---------------------------------------------------------------------------
 
-def test_rune_prob_nonzero_and_small():
-    """Andy drops high runes (Pul+) rarely but with a nonzero probability."""
+def test_good_rune_prob_nonzero_and_small():
+    """Andy drops good runes (Pul+) rarely but with a nonzero probability."""
     db = _load_db()
-    rune_prob = db["monsters"]["andy"]["rune_prob"]
-    assert 0 < rune_prob < 0.01
+    good_rune_prob = db["monsters"]["andy"]["good_rune_prob"]
+    assert 0 < good_rune_prob < 0.01
 
 
 def test_gc_and_sc_base_prob_equal():
@@ -227,6 +227,43 @@ def test_gc_and_sc_base_prob_equal():
     andy = db["monsters"]["andy"]
     assert andy["gc_base_prob"] == andy["sc_base_prob"]
     assert andy["gc_base_prob"] > 0
+
+
+# ---------------------------------------------------------------------------
+# GC skiller fraction and SC valuable fraction
+# ---------------------------------------------------------------------------
+
+def test_skiller_fraction_plausible():
+    """About 1-in-10 to 1-in-15 magic GCs are any-class skillers at ilvl 99 (community benchmark)."""
+    import sys
+    sys.path.insert(0, str(DB_PATH.parent.parent.parent / "scripts"))
+    import parse_treasure_classes as ptc
+    frac = ptc.get_skiller_gc_fraction(ilvl=99)
+    assert 0.03 <= frac <= 0.20, f"skiller_fraction={frac:.4f} outside expected range [0.03, 0.20]"
+
+
+def test_skiller_fraction_zero_below_ilvl50():
+    """No skiller prefixes can roll below ilvl 50."""
+    import sys
+    sys.path.insert(0, str(DB_PATH.parent.parent.parent / "scripts"))
+    import parse_treasure_classes as ptc
+    frac = ptc.get_skiller_gc_fraction(ilvl=49)
+    assert frac == 0.0, f"Expected 0.0 skiller fraction at ilvl 49, got {frac}"
+
+
+def test_gc_skiller_frac_nonzero_and_less_than_one():
+    """Andy's gc_skiller_frac is a small positive fraction."""
+    db = _load_db()
+    andy = db["monsters"]["andy"]
+    frac = andy["gc_skiller_frac"]
+    assert 0 < frac < 1, f"gc_skiller_frac={frac} should be in (0, 1)"
+
+
+def test_sc_valuable_frac_nonzero_and_less_than_one():
+    """Andy's sc_valuable_frac is a small positive fraction (Shimmering, of Good Luck, of Vita)."""
+    db = _load_db()
+    frac = db["monsters"]["andy"]["sc_valuable_frac"]
+    assert 0 < frac < 1, f"sc_valuable_frac={frac} should be in (0, 1)"
 
 
 # ---------------------------------------------------------------------------
@@ -248,8 +285,12 @@ if __name__ == "__main__":
         test_latent_sunders_in_andy_drops,
         test_latent_sunder_selection_weight,
         test_latent_sunder_same_base_prob_as_gheed,
-        test_rune_prob_nonzero_and_small,
+        test_good_rune_prob_nonzero_and_small,
         test_gc_and_sc_base_prob_equal,
+        test_skiller_fraction_plausible,
+        test_skiller_fraction_zero_below_ilvl50,
+        test_gc_skiller_frac_nonzero_and_less_than_one,
+        test_sc_valuable_frac_nonzero_and_less_than_one,
     ]
     passed = failed = 0
     for t in tests:

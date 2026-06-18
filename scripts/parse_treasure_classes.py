@@ -472,6 +472,71 @@ def get_item_ratio(item_code: str) -> ItemRatioRow:
     return _get_item_ratio()[(1, 0, class_specific)]
 
 
+_GC_PREFIX_ROWS: list[dict] | None = None
+
+
+def _build_type_ancestors(code: str) -> frozenset[str]:
+    all_rows = {r.get('Code', '').strip(): r for r in _csv_rows('itemtypes.txt') if r.get('Code', '').strip()}
+    visited: set[str] = set()
+    stack = [code]
+    while stack:
+        c = stack.pop()
+        if c in visited:
+            continue
+        visited.add(c)
+        row = all_rows.get(c, {})
+        for eq in ('Equiv1', 'Equiv2'):
+            parent = row.get(eq, '').strip()
+            if parent:
+                stack.append(parent)
+    return frozenset(visited)
+
+
+def _get_gc_prefix_rows() -> list[dict]:
+    """Return magicprefix rows applicable to cm3, with spawnable=1 and frequency>0."""
+    global _GC_PREFIX_ROWS
+    if _GC_PREFIX_ROWS is not None:
+        return _GC_PREFIX_ROWS
+
+    gc_itype = _get_item_type_map().get('cm3', '')
+    gc_ancestors = _build_type_ancestors(gc_itype)
+
+    result = []
+    for row in _csv_rows('magicprefix.txt'):
+        if row.get('spawnable', '').strip() != '1':
+            continue
+        freq_s = row.get('frequency', '').strip()
+        freq = int(freq_s) if freq_s else 0
+        if freq <= 0:
+            continue
+        itypes = {row.get(f'itype{i}', '').strip() for i in range(1, 8)} - {''}
+        etypes = {row.get(f'etype{i}', '').strip() for i in range(1, 6)} - {''}
+        if not itypes.intersection(gc_ancestors):
+            continue
+        if etypes.intersection(gc_ancestors):
+            continue
+        result.append(row)
+    _GC_PREFIX_ROWS = result
+    return result
+
+
+def get_skiller_gc_fraction(ilvl: int) -> float:
+    """Return fraction of magic GC prefixes that are class skill tree prefixes at the given ilvl (all 8 classes)."""
+    total_weight = skiller_weight = 0
+    for row in _get_gc_prefix_rows():
+        lvl = int(row.get('level', '0') or '0')
+        maxlvl = int(row.get('maxlevel', '0') or '0')
+        if ilvl < lvl:
+            continue
+        if maxlvl and ilvl > maxlvl:
+            continue
+        freq = int(row.get('frequency', '0') or '0')
+        total_weight += freq
+        if row.get('mod1code', '').strip() == 'skilltab':
+            skiller_weight += freq
+    return skiller_weight / total_weight if total_weight > 0 else 0.0
+
+
 _monlvl_cache: dict[int, dict[str, int]] | None = None
 
 
