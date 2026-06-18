@@ -11,8 +11,16 @@ const FCR_BREAKPOINTS = [
   { minFCR: 0,   frames: 13 },
 ];
 
-// ── MF / EV engine constants ───────────────────────────────────────────────
-const SKILLER_GC_PROB = 1 / 21;   // ~1/21 chance a GC rolls a class-specific skill prefix
+// ── MF / EV engine ────────────────────────────────────────────────────────
+
+function effUniqueMF(rawMF) { return rawMF === 0 ? 0 : (rawMF * 250) / (rawMF + 250); }
+function effSetMF(rawMF)    { return rawMF === 0 ? 0 : (rawMF * 500) / (rawMF + 500); }
+
+function qualityCheckProb(qp, mlvl, effMF) {
+  const baseQc = Math.floor((qp.base_chance - Math.floor(mlvl / qp.divisor)) * 1024 / qp.quality_factor) + qp.base_chance;
+  const qc = Math.min(Math.floor(baseQc * 100 / (100 + effMF)), qp.min_chance);
+  return 1 / qc;
+}
 
 // ── Combat engine constants ────────────────────────────────────────────────
 const BLIZZARD_COOLDOWN_SECS  = 1.8;
@@ -21,6 +29,8 @@ const D2_FPS                  = 25;
 const BLIZZARD_BOLTS_VS_BOSS  = 4;      // approx bolts hitting a stationary boss
 const BLIZZARD_HARD_PTS       = 20;     // assumed max hard points
 const ICE_BLAST_HARD_PTS      = 20;     // assumed max hard points
+
+const DEFAULT_BOSSES = { andy: true };
 
 // ── State helpers ──────────────────────────────────────────────────────────
 function makeSlot() {
@@ -50,16 +60,18 @@ function encodeState(state) {
       gear[id] = entry;
     }
   }
-  const out = { gear };
+  const out = {};
+  if (Object.keys(gear).length) out.gear = gear;
   if (state.coldMasteryBase !== 20) out.cm = state.coldMasteryBase;
   const bosses = {};
   for (const [k, v] of Object.entries(state.run.bosses)) {
-    if (v) bosses[k] = 1;
+    if (v === (DEFAULT_BOSSES[k] ?? false)) continue; // matches default, skip
+    bosses[k] = v ? 1 : 0;
   }
   if (Object.keys(bosses).length) out.bosses = bosses;
   const uf = Object.entries(state.ui.folds).filter(([, v]) => !v).map(([k]) => k);
   if (uf.length) out.uf = uf;
-  return btoa(JSON.stringify(out));
+  return Object.keys(out).length ? btoa(JSON.stringify(out)) : null;
 }
 
 function decodeState(b64, state) {
@@ -110,8 +122,8 @@ function slotStats(slot) {
 const state = reactive({
   gear: makeGear(),
   coldMasteryBase: 20,
-  run: { bosses: {} },
-  ui: { folds: { breakdown: true } },
+  run: { bosses: { ...DEFAULT_BOSSES } },
+  ui: { folds: { breakdown: true, dropOddsBoss: true } },
 });
 
 const params = new URLSearchParams(window.location.search);
@@ -206,7 +218,7 @@ const combatAssumptions = computed(() => {
 
 watch(state, () => {
   const encoded = encodeState(state);
-  history.replaceState(null, '', `?s=${encoded}`);
+  history.replaceState(null, '', encoded ? `?s=${encoded}` : location.pathname);
 }, { deep: true });
 
 // ── GearSlot component ─────────────────────────────────────────────────────
@@ -284,11 +296,6 @@ createApp({
         const [rc, db] = await Promise.all([rcRes.json(), dbRes.json()]);
         runConfig.value = rc.runs;
         monsterDb.value = db;
-        for (const run of rc.runs) {
-          if (run.available && state.run.bosses[run.id] === undefined) {
-            state.run.bosses[run.id] = true;
-          }
-        }
       } catch (e) {
         console.error('Failed to load data', e);
       }
@@ -340,6 +347,90 @@ createApp({
       return stats;
     });
 
+    const runDropProbs = computed(() => {
+      if (!monsterDb.value) return {};
+      const valuableSet = new Set(monsterDb.value.valuables);
+      const rawMF = totalMF.value;
+      const uMF = effUniqueMF(rawMF);
+      const sMF = effSetMF(rawMF);
+
+      const result = {};
+      for (const run of runConfig.value) {
+        if (!run.available || !state.run.bosses[run.id]) continue;
+        const mon = monsterDb.value.monsters[run.id];
+        if (!mon) continue;
+
+        const mlvl = mon.mlvl;
+        let noValuableItem = 1;
+        for (const [name, item] of Object.entries(mon.drops)) {
+          if (!valuableSet.has(name)) continue;
+          const qp = item.quality_params;
+          const mf = qp.quality_type === 'set' ? sMF : uMF;
+          const prob = item.base_prob * qualityCheckProb(qp, mlvl, mf) * (item.unique_weight / item.unique_total_weight);
+          noValuableItem *= (1 - prob);
+        }
+        const itemProb     = 1 - noValuableItem;
+        const runeProb     = mon.good_rune_prob ?? 0;
+        const skillerProb  = (mon.gc_base_prob ?? 0) * (mon.gc_skiller_frac ?? 0);
+        const valuableScProb = (mon.sc_base_prob ?? 0) * (mon.sc_valuable_frac ?? 0);
+        result[run.id] = { itemProb, runeProb, skillerProb, valuableScProb,
+          total: 1 - (1 - itemProb) * (1 - runeProb) * (1 - skillerProb) * (1 - valuableScProb) };
+      }
+      return result;
+    });
+
+    const totalDropProbs = computed(() => {
+      const runs = Object.values(runDropProbs.value);
+      if (!runs.length) return null;
+      const agg = { itemProb: 1, runeProb: 1, skillerProb: 1, valuableScProb: 1, total: 1 };
+      for (const r of runs) {
+        agg.itemProb      *= (1 - r.itemProb);
+        agg.runeProb      *= (1 - r.runeProb);
+        agg.skillerProb   *= (1 - r.skillerProb);
+        agg.valuableScProb *= (1 - r.valuableScProb);
+        agg.total         *= (1 - r.total);
+      }
+      return {
+        itemProb:       1 - agg.itemProb,
+        runeProb:       1 - agg.runeProb,
+        skillerProb:    1 - agg.skillerProb,
+        valuableScProb: 1 - agg.valuableScProb,
+        total:          1 - agg.total,
+      };
+    });
+
+    const ettvd = computed(() => {
+      let totalRunSecs = 0;
+      for (const run of runConfig.value) {
+        if (state.run.bosses[run.id] && runStats.value[run.id]) {
+          totalRunSecs += runStats.value[run.id].totalSecs;
+        }
+      }
+      if (totalRunSecs === 0 || !totalDropProbs.value) return null;
+
+      const p = totalDropProbs.value;
+      const secs = (prob) => prob > 0 ? totalRunSecs / prob : null;
+      return {
+        total:    secs(p.total),
+        items:    secs(p.itemProb),
+        rune:     secs(p.runeProb),
+        skiller:  secs(p.skillerProb),
+        valueSc:  secs(p.valuableScProb),
+      };
+    });
+
+    function fmtOneIn(prob) {
+      if (!prob || prob <= 0) return '—';
+      return `1/${Math.round(1 / prob).toLocaleString()}`;
+    }
+
+    function fmtEttvd(secs) {
+      if (secs < 3600) return `${Math.round(secs / 60)} min`;
+      const h = Math.floor(secs / 3600);
+      const m = Math.round((secs % 3600) / 60);
+      return m > 0 ? `${h}h ${m}min` : `${h}h`;
+    }
+
     return {
       state,
       GEAR_SLOTS,
@@ -348,6 +439,13 @@ createApp({
       GROUP_B,
       runConfig,
       runStats,
+      runDropProbs,
+      ettvd,
+      fmtEttvd,
+      fmtOneIn,
+      totalDropProbs,
+      effUniqueMF,
+      effSetMF,
       totalFCR,
       totalMF,
       totalAllSkills,
@@ -369,29 +467,128 @@ createApp({
       </header>
 
       <main class="app-grid">
-        <section class="gear-panel">
-          <h2 class="panel-title">Gear</h2>
-          <div class="slot-group">
-            <gear-slot
-              v-for="id in GROUP_A" :key="id"
-              :slot-id="id"
-              :slot-label="GEAR_SLOTS.find(s => s.id === id).label"
-              :presets="PRESET_ITEMS[id]"
-              v-model="state.gear[id]"
-            />
-          </div>
-          <div class="slot-group">
-            <gear-slot
-              v-for="id in GROUP_B" :key="id"
-              :slot-id="id"
-              :slot-label="GEAR_SLOTS.find(s => s.id === id).label"
-              :presets="PRESET_ITEMS[id]"
-              v-model="state.gear[id]"
-            />
-          </div>
-        </section>
+        <div class="left-col">
+          <section class="gear-panel">
+            <h2 class="panel-title">Gear</h2>
+            <div class="slot-group">
+              <gear-slot
+                v-for="id in GROUP_A" :key="id"
+                :slot-id="id"
+                :slot-label="GEAR_SLOTS.find(s => s.id === id).label"
+                :presets="PRESET_ITEMS[id]"
+                v-model="state.gear[id]"
+              />
+            </div>
+            <div class="slot-group">
+              <gear-slot
+                v-for="id in GROUP_B" :key="id"
+                :slot-id="id"
+                :slot-label="GEAR_SLOTS.find(s => s.id === id).label"
+                :presets="PRESET_ITEMS[id]"
+                v-model="state.gear[id]"
+              />
+            </div>
+          </section>
+
+          <!-- Drop Odds -->
+          <section class="summary-block">
+            <h2 class="panel-title">Drop Odds</h2>
+            <div class="summary-pills">
+              <span class="pill pill-mf" title="Effective MF applied to unique quality checks after diminishing returns: MF×250÷(MF+250)">
+                Eff. Unique MF {{ Math.round(effUniqueMF(totalMF)) }}%
+              </span>
+              <span class="pill pill-mf" title="Effective MF applied to set quality checks after diminishing returns: MF×500÷(MF+500)">
+                Eff. Set MF {{ Math.round(effSetMF(totalMF)) }}%
+              </span>
+            </div>
+
+            <template v-if="totalDropProbs">
+              <div class="breakdown-run-label">Per run cycle</div>
+              <div class="breakdown-row breakdown-total">
+                <span>Any valuable <span class="info-icon" title="P(at least one valuable drops across all selected bosses in one full run cycle)">i</span></span>
+                <span>{{ fmtOneIn(totalDropProbs.total) }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Uniques / Sets <span class="info-icon" title="Any item from the Maxroll trade-value list — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+                <span>{{ fmtOneIn(totalDropProbs.itemProb) }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
+                <span>{{ fmtOneIn(totalDropProbs.runeProb) }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
+                <span>{{ fmtOneIn(totalDropProbs.skillerProb) }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
+                <span>{{ fmtOneIn(totalDropProbs.valuableScProb) }}</span>
+              </div>
+            </template>
+
+            <div v-if="totalDropProbs" class="fold-section">
+              <button class="fold-header" @click="state.ui.folds.dropOddsBoss = !state.ui.folds.dropOddsBoss">
+                <span class="fold-arrow">{{ state.ui.folds.dropOddsBoss ? '▶' : '▼' }}</span>
+                Per-boss breakdown
+              </button>
+              <div v-if="!state.ui.folds.dropOddsBoss" class="breakdown-content">
+                <template v-for="run in runConfig" :key="run.id">
+                  <template v-if="run.available && state.run.bosses[run.id] && runDropProbs[run.id]">
+                    <div class="breakdown-run-label">{{ run.label }}</div>
+                    <div class="breakdown-row breakdown-total">
+                      <span>Any valuable <span class="info-icon" title="P(at least one of: trade-value unique/set, good rune, skiller GC, or valuable SC drops this run)">i</span></span>
+                      <span>{{ fmtOneIn(runDropProbs[run.id].total) }}</span>
+                    </div>
+                    <div class="breakdown-row breakdown-sub">
+                      <span>Uniques / Sets <span class="info-icon" title="Any item from the Maxroll trade-value list — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+                      <span>{{ fmtOneIn(runDropProbs[run.id].itemProb) }}</span>
+                    </div>
+                    <div class="breakdown-row breakdown-sub">
+                      <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
+                      <span>{{ fmtOneIn(runDropProbs[run.id].runeProb) }}</span>
+                    </div>
+                    <div class="breakdown-row breakdown-sub">
+                      <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
+                      <span>{{ fmtOneIn(runDropProbs[run.id].skillerProb) }}</span>
+                    </div>
+                    <div class="breakdown-row breakdown-sub">
+                      <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
+                      <span>{{ fmtOneIn(runDropProbs[run.id].valuableScProb) }}</span>
+                    </div>
+                  </template>
+                </template>
+              </div>
+            </div>
+            <div v-if="!totalDropProbs" class="placeholder">Select a run above</div>
+          </section>
+        </div>
 
         <aside class="side-panel">
+
+          <!-- ETTVD -->
+          <section class="ettvd-block summary-block">
+            <h2 class="panel-title"><abbr title="Expected Time To Valuable Drop — estimated average time until a desirable item drops, given your gear, MF, and run routine">ETTVD</abbr>: Time To Valuable Drop</h2>
+            <div v-if="ettvd" class="ettvd-main">{{ fmtEttvd(ettvd.total) }}</div>
+            <div v-else class="ettvd-main ettvd-empty">—</div>
+            <div v-if="ettvd" class="ettvd-breakdown">
+              <div class="breakdown-row breakdown-sub">
+                <span>Uniques / Sets <span class="info-icon" title="Expected time between any item from the Maxroll trade-value list — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+                <span>{{ fmtEttvd(ettvd.items) }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Good Rune <span class="info-icon" title="Expected time between any Pul+ rune drop">i</span></span>
+                <span>{{ fmtEttvd(ettvd.rune) }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Any Skiller GC <span class="info-icon" title="Expected time between any class skiller Grand Charm drop">i</span></span>
+                <span>{{ fmtEttvd(ettvd.skiller) }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Valuable SC <span class="info-icon" title="Expected time between a max-roll +5 all res, +7% MF, or +20 life Small Charm drop">i</span></span>
+                <span>{{ fmtEttvd(ettvd.valueSc) }}</span>
+              </div>
+            </div>
+          </section>
 
           <!-- Stat Summary -->
           <section class="summary-block">
@@ -486,11 +683,6 @@ createApp({
 
         </aside>
       </main>
-
-      <footer class="app-footer">
-        <abbr class="footer-label" title="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine">ETTVD:</abbr>
-        <span class="footer-value">— <span class="coming-soon">coming soon</span></span>
-      </footer>
     </div>
   `,
 }).mount('#app');
