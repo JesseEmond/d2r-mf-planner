@@ -1608,9 +1608,11 @@
           "unique_total_weight": 1
         }
       },
-      "rune_prob": 0.0008962410843387278,
+      "good_rune_prob": 0.0008962410843387278,
       "gc_base_prob": 0.02254025044722719,
+      "gc_skiller_frac": 0.04897959183673469,
       "sc_base_prob": 0.02254025044722719,
+      "sc_valuable_frac": 0.0567987567987568,
       "monster_id": "andariel",
       "difficulty": "hell",
       "combat": {
