@@ -620,64 +620,64 @@ createApp({
               </span>
             </div>
 
-            <template v-if="totalDropProbs">
-              <div class="breakdown-run-label">Per run cycle</div>
-              <div class="breakdown-row breakdown-total">
-                <span>Any valuable <span class="info-icon" title="P(at least one valuable drops across all selected bosses in one full run cycle)">i</span></span>
-                <span>{{ fmtOneIn(totalDropProbs.total) }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Uniques / Sets <span class="info-icon" title="Any item from the Maxroll trade-value list — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
-                <span>{{ fmtOneIn(totalDropProbs.itemProb) }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
-                <span>{{ fmtOneIn(totalDropProbs.runeProb) }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
-                <span>{{ fmtOneIn(totalDropProbs.skillerProb) }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
-                <span>{{ fmtOneIn(totalDropProbs.valuableScProb) }}</span>
-              </div>
-            </template>
+            <div class="breakdown-run-label">Per run cycle</div>
+            <div class="breakdown-row breakdown-total">
+              <span>Any valuable <span class="info-icon" title="P(at least one valuable drops across all selected bosses in one full run cycle)">i</span></span>
+              <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.total) : '---' }}</span>
+            </div>
+            <div class="breakdown-row breakdown-sub">
+              <span>Uniques / Sets <span class="info-icon" title="Any item from the Maxroll trade-value list — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+              <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.itemProb) : '---' }}</span>
+            </div>
+            <div class="breakdown-row breakdown-sub">
+              <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
+              <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.runeProb) : '---' }}</span>
+            </div>
+            <div class="breakdown-row breakdown-sub">
+              <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
+              <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.skillerProb) : '---' }}</span>
+            </div>
+            <div class="breakdown-row breakdown-sub">
+              <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
+              <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.valuableScProb) : '---' }}</span>
+            </div>
 
-            <div v-if="totalDropProbs" class="fold-section">
+            <div class="fold-section">
               <button class="fold-header" @click="state.ui.folds.dropOddsBoss = !state.ui.folds.dropOddsBoss">
                 <span class="fold-arrow">{{ state.ui.folds.dropOddsBoss ? '▶' : '▼' }}</span>
                 Per-boss breakdown
               </button>
               <div v-if="!state.ui.folds.dropOddsBoss" class="breakdown-content">
-                <template v-for="run in runConfig" :key="run.id">
-                  <template v-if="run.available && state.run.bosses[run.id] && runDropProbs[run.id]">
-                    <div class="breakdown-run-label">{{ run.label }}</div>
-                    <div class="breakdown-row breakdown-total">
-                      <span>Any valuable <span class="info-icon" title="P(at least one of: trade-value unique/set, good rune, skiller GC, or valuable SC drops this run)">i</span></span>
-                      <span>{{ fmtOneIn(runDropProbs[run.id].total) }}</span>
-                    </div>
-                    <div class="breakdown-row breakdown-sub">
-                      <span>Uniques / Sets <span class="info-icon" title="Any item from the Maxroll trade-value list — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
-                      <span>{{ fmtOneIn(runDropProbs[run.id].itemProb) }}</span>
-                    </div>
-                    <div class="breakdown-row breakdown-sub">
-                      <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
-                      <span>{{ fmtOneIn(runDropProbs[run.id].runeProb) }}</span>
-                    </div>
-                    <div class="breakdown-row breakdown-sub">
-                      <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
-                      <span>{{ fmtOneIn(runDropProbs[run.id].skillerProb) }}</span>
-                    </div>
-                    <div class="breakdown-row breakdown-sub">
-                      <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
-                      <span>{{ fmtOneIn(runDropProbs[run.id].valuableScProb) }}</span>
-                    </div>
+                <template v-if="totalDropProbs">
+                  <template v-for="run in runConfig" :key="run.id">
+                    <template v-if="run.available && state.run.bosses[run.id] && runDropProbs[run.id]">
+                      <div class="breakdown-run-label">{{ run.label }}</div>
+                      <div class="breakdown-row breakdown-total">
+                        <span>Any valuable <span class="info-icon" title="P(at least one of: trade-value unique/set, good rune, skiller GC, or valuable SC drops this run)">i</span></span>
+                        <span>{{ fmtOneIn(runDropProbs[run.id].total) }}</span>
+                      </div>
+                      <div class="breakdown-row breakdown-sub">
+                        <span>Uniques / Sets <span class="info-icon" title="Any item from the Maxroll trade-value list — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+                        <span>{{ fmtOneIn(runDropProbs[run.id].itemProb) }}</span>
+                      </div>
+                      <div class="breakdown-row breakdown-sub">
+                        <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
+                        <span>{{ fmtOneIn(runDropProbs[run.id].runeProb) }}</span>
+                      </div>
+                      <div class="breakdown-row breakdown-sub">
+                        <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
+                        <span>{{ fmtOneIn(runDropProbs[run.id].skillerProb) }}</span>
+                      </div>
+                      <div class="breakdown-row breakdown-sub">
+                        <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
+                        <span>{{ fmtOneIn(runDropProbs[run.id].valuableScProb) }}</span>
+                      </div>
+                    </template>
                   </template>
                 </template>
+                <div v-else class="placeholder">Select a run above</div>
               </div>
             </div>
-            <div v-if="!totalDropProbs" class="placeholder">Select a run above</div>
           </section>
 
           <hr class="section-divider" />
@@ -767,24 +767,23 @@ createApp({
             <hr class="panel-divider" />
 
             <h2 class="panel-title"><abbr title="Expected Time To Valuable Drop — estimated average time until a desirable item drops, given target gear, MF, and run routine">ETTVD</abbr>: Time To Valuable Drop</h2>
-            <div v-if="targetEttvd" class="ettvd-main ettvd-target">{{ fmtEttvd(targetEttvd.total) }}</div>
-            <div v-else class="ettvd-main ettvd-empty">—</div>
-            <div v-if="targetEttvd" class="ettvd-breakdown">
+            <div :class="['ettvd-main', 'ettvd-target', !targetEttvd && 'ettvd-empty']">{{ targetEttvd ? fmtEttvd(targetEttvd.total) : '---' }}</div>
+            <div class="ettvd-breakdown">
               <div class="breakdown-row breakdown-sub">
                 <span>Uniques / Sets</span>
-                <span>{{ fmtEttvd(targetEttvd.items) }}</span>
+                <span>{{ targetEttvd ? fmtEttvd(targetEttvd.items) : '---' }}</span>
               </div>
               <div class="breakdown-row breakdown-sub">
                 <span>Good Rune</span>
-                <span>{{ fmtEttvd(targetEttvd.rune) }}</span>
+                <span>{{ targetEttvd ? fmtEttvd(targetEttvd.rune) : '---' }}</span>
               </div>
               <div class="breakdown-row breakdown-sub">
                 <span>Any Skiller GC</span>
-                <span>{{ fmtEttvd(targetEttvd.skiller) }}</span>
+                <span>{{ targetEttvd ? fmtEttvd(targetEttvd.skiller) : '---' }}</span>
               </div>
               <div class="breakdown-row breakdown-sub">
                 <span>Valuable SC</span>
-                <span>{{ fmtEttvd(targetEttvd.valueSc) }}</span>
+                <span>{{ targetEttvd ? fmtEttvd(targetEttvd.valueSc) : '---' }}</span>
               </div>
             </div>
           </section>
@@ -796,24 +795,23 @@ createApp({
           <!-- ETTVD -->
           <section class="ettvd-block summary-block">
             <h2 class="panel-title"><abbr title="Expected Time To Valuable Drop — estimated average time until a desirable item drops, given your gear, MF, and run routine">ETTVD</abbr>: Time To Valuable Drop</h2>
-            <div v-if="ettvd" class="ettvd-main">{{ fmtEttvd(ettvd.total) }}</div>
-            <div v-else class="ettvd-main ettvd-empty">—</div>
-            <div v-if="ettvd" class="ettvd-breakdown">
+            <div :class="['ettvd-main', !ettvd && 'ettvd-empty']">{{ ettvd ? fmtEttvd(ettvd.total) : '---' }}</div>
+            <div class="ettvd-breakdown">
               <div class="breakdown-row breakdown-sub">
                 <span>Uniques / Sets <span class="info-icon" title="Expected time between any item from the Maxroll trade-value list — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
-                <span>{{ fmtEttvd(ettvd.items) }}</span>
+                <span>{{ ettvd ? fmtEttvd(ettvd.items) : '---' }}</span>
               </div>
               <div class="breakdown-row breakdown-sub">
                 <span>Good Rune <span class="info-icon" title="Expected time between any Pul+ rune drop">i</span></span>
-                <span>{{ fmtEttvd(ettvd.rune) }}</span>
+                <span>{{ ettvd ? fmtEttvd(ettvd.rune) : '---' }}</span>
               </div>
               <div class="breakdown-row breakdown-sub">
                 <span>Any Skiller GC <span class="info-icon" title="Expected time between any class skiller Grand Charm drop">i</span></span>
-                <span>{{ fmtEttvd(ettvd.skiller) }}</span>
+                <span>{{ ettvd ? fmtEttvd(ettvd.skiller) : '---' }}</span>
               </div>
               <div class="breakdown-row breakdown-sub">
                 <span>Valuable SC <span class="info-icon" title="Expected time between a max-roll +5 all res, +7% MF, or +20 life Small Charm drop">i</span></span>
-                <span>{{ fmtEttvd(ettvd.valueSc) }}</span>
+                <span>{{ ettvd ? fmtEttvd(ettvd.valueSc) : '---' }}</span>
               </div>
             </div>
           </section>
@@ -842,26 +840,29 @@ createApp({
               >i</span>
             </div>
 
-            <div v-if="Object.values(runStats).some(s => s.hasKillData)" class="fold-section">
+            <div class="fold-section">
               <button class="fold-header" @click="state.ui.folds.breakdown = !state.ui.folds.breakdown">
                 <span class="fold-arrow">{{ state.ui.folds.breakdown ? '▶' : '▼' }}</span>
                 Per-boss breakdown
               </button>
               <div v-if="!state.ui.folds.breakdown" class="breakdown-content">
-                <template v-for="run in runConfig" :key="run.id">
-                  <template v-if="state.run.bosses[run.id] && runStats[run.id]?.hasKillData">
-                    <div class="breakdown-run-label">{{ run.label }}</div>
-                    <div class="breakdown-row">
-                      <span>Travel</span><span>{{ runStats[run.id].travelSecs.toFixed(1) }}s</span>
-                    </div>
-                    <div class="breakdown-row">
-                      <span>Kill</span><span>{{ runStats[run.id].killSecs.toFixed(1) }}s</span>
-                    </div>
-                    <div class="breakdown-row breakdown-total">
-                      <span>Total</span><span>{{ runStats[run.id].totalSecs.toFixed(1) }}s</span>
-                    </div>
+                <template v-if="Object.values(runStats).some(s => s.hasKillData)">
+                  <template v-for="run in runConfig" :key="run.id">
+                    <template v-if="state.run.bosses[run.id] && runStats[run.id]?.hasKillData">
+                      <div class="breakdown-run-label">{{ run.label }}</div>
+                      <div class="breakdown-row">
+                        <span>Travel</span><span>{{ runStats[run.id].travelSecs.toFixed(1) }}s</span>
+                      </div>
+                      <div class="breakdown-row">
+                        <span>Kill</span><span>{{ runStats[run.id].killSecs.toFixed(1) }}s</span>
+                      </div>
+                      <div class="breakdown-row breakdown-total">
+                        <span>Total</span><span>{{ runStats[run.id].totalSecs.toFixed(1) }}s</span>
+                      </div>
+                    </template>
                   </template>
                 </template>
+                <div v-else class="placeholder">Select at least one</div>
               </div>
             </div>
           </section>
