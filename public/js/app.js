@@ -1,6 +1,8 @@
 import { createApp, defineComponent, reactive, computed, watch, ref, onMounted } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 import { GEAR_SLOTS, PRESET_ITEMS } from './gear-db.js';
 
+// ── Constants ──────────────────────────────────────────────────────────────
+
 const FCR_BREAKPOINTS = [
   { minFCR: 200, frames: 7 },
   { minFCR: 105, frames: 8 },
@@ -11,10 +13,39 @@ const FCR_BREAKPOINTS = [
   { minFCR: 0,   frames: 13 },
 ];
 
-// ── MF / EV engine ────────────────────────────────────────────────────────
+const BLIZZARD_COOLDOWN_SECS = 1.8;
+const ICE_BLAST_HIT_RATE     = 0.80;
+const D2_FPS                 = 25;
+const BLIZZARD_BOLTS_VS_BOSS = 4;
+const BLIZZARD_HARD_PTS      = 20;
+const ICE_BLAST_HARD_PTS     = 20;
 
-function effUniqueMF(rawMF) { return rawMF === 0 ? 0 : (rawMF * 250) / (rawMF + 250); }
-function effSetMF(rawMF)    { return rawMF === 0 ? 0 : (rawMF * 500) / (rawMF + 500); }
+const DEFAULT_BOSSES = { andy: true };
+
+const TARGET_GEAR_PRESETS = [
+  {
+    id: 'TEMP_GEAR',
+    name: 'TEMP_GEAR',
+    slots: {
+      head:   'griffons',
+      amulet: 'maras',
+      weapon: 'hoto',
+      shield: 'spirit',
+      armor:  'vipermagi',
+      gloves: 'magefist',
+      belt:   'arachnid',
+      boots:  'war_traveler',
+      ring1:  'soj',
+      ring2:  'soj',
+    },
+  },
+];
+
+// ── Pure computation functions ─────────────────────────────────────────────
+// No Vue dependency — the optimizer can call these directly.
+
+export function effUniqueMF(rawMF) { return rawMF === 0 ? 0 : (rawMF * 250) / (rawMF + 250); }
+export function effSetMF(rawMF)    { return rawMF === 0 ? 0 : (rawMF * 500) / (rawMF + 500); }
 
 function qualityCheckProb(qp, mlvl, effMF) {
   const baseQc = Math.floor((qp.base_chance - Math.floor(mlvl / qp.divisor)) * 1024 / qp.quality_factor) + qp.base_chance;
@@ -22,17 +53,170 @@ function qualityCheckProb(qp, mlvl, effMF) {
   return 1 / qc;
 }
 
-// ── Combat engine constants ────────────────────────────────────────────────
-const BLIZZARD_COOLDOWN_SECS  = 1.8;
-const ICE_BLAST_HIT_RATE      = 0.80;   // fraction of ice blasts that connect
-const D2_FPS                  = 25;
-const BLIZZARD_BOLTS_VS_BOSS  = 4;      // approx bolts hitting a stationary boss
-const BLIZZARD_HARD_PTS       = 20;     // assumed max hard points
-const ICE_BLAST_HARD_PTS      = 20;     // assumed max hard points
+function blizzDmgFormula(slvl)    { return BLIZZARD_BOLTS_VS_BOSS * (20 * slvl + 10); }
+function iceBlastDmgFormula(slvl) { return 10 * slvl + 10; }
+function iceBlastsPerWindow(framesPerCast) {
+  return (Math.floor(BLIZZARD_COOLDOWN_SECS / (framesPerCast / D2_FPS)) - 1) * ICE_BLAST_HIT_RATE;
+}
+function cmResistReduction(cmLevel) { return 15 + 5 * cmLevel; }
+function coldDmgMultiplier(monsterColdResist, cmLevel) {
+  return (100 - Math.max(-100, monsterColdResist - cmResistReduction(cmLevel))) / 100;
+}
 
-const DEFAULT_BOSSES = { andy: true };
+export function computeFcrBreakpoint(fcr) {
+  return FCR_BREAKPOINTS.find(bp => fcr >= bp.minFCR) ?? FCR_BREAKPOINTS[FCR_BREAKPOINTS.length - 1];
+}
+
+function computeFcrTooltip(fcr) {
+  const idx = FCR_BREAKPOINTS.findIndex(bp => fcr >= bp.minFCR);
+  const cur = FCR_BREAKPOINTS[idx];
+  let tip = `${cur.frames} frames per cast`;
+  if (idx > 0) {
+    const next = FCR_BREAKPOINTS[idx - 1];
+    tip += ` · next breakpoint: ${next.minFCR}% FCR for ${next.frames}f (+${next.minFCR - fcr} needed)`;
+  } else {
+    tip += ' · maximum breakpoint reached';
+  }
+  return tip;
+}
+
+function computeFcrBadgeClass(fcr) {
+  const idx = FCR_BREAKPOINTS.findIndex(bp => fcr >= bp.minFCR);
+  if (idx > 0 && fcr >= FCR_BREAKPOINTS[idx - 1].minFCR - 5) return 'badge-amber';
+  if (FCR_BREAKPOINTS.some(bp => bp.minFCR === fcr)) return 'badge-green';
+  return 'badge-default';
+}
+
+export function computeGearTotals(getSlotStats) {
+  const t = { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  for (const { id } of GEAR_SLOTS) {
+    const s = getSlotStats(id);
+    t.fcr        += s.fcr        || 0;
+    t.mf         += s.mf         || 0;
+    t.allSkills  += s.allSkills  || 0;
+    t.coldSkills += s.coldSkills || 0;
+  }
+  return t;
+}
+
+export function computeCombat(totals, effCM) {
+  const bp        = computeFcrBreakpoint(totals.fcr);
+  const blizzSlvl = BLIZZARD_HARD_PTS + totals.allSkills + totals.coldSkills;
+  const ibSlvl    = ICE_BLAST_HARD_PTS + totals.allSkills + totals.coldSkills;
+  const ibs       = iceBlastsPerWindow(bp.frames);
+  const blizzDmg  = blizzDmgFormula(blizzSlvl);
+  const ibDmg     = iceBlastDmgFormula(ibSlvl);
+  const blizzDps  = blizzDmg / BLIZZARD_COOLDOWN_SECS;
+  const ibDps     = ibs * ibDmg / BLIZZARD_COOLDOWN_SECS;
+  return { effCM, bp, blizzDps, iceBlastDps: ibDps, totalDps: blizzDps + ibDps, blizzDmg, ibDmg, ibs };
+}
+
+function computeCombatAssumptions(combat) {
+  const { bp, ibs } = combat;
+  return [
+    `Blizzard: 1 cast / ${BLIZZARD_COOLDOWN_SECS}s cooldown, ~${BLIZZARD_BOLTS_VS_BOSS} bolts hitting boss per cast`,
+    `Ice Blast: ${ibs.toFixed(1)} effective casts per window at ${ICE_BLAST_HIT_RATE * 100}% hit rate (${bp.frames} frames/cast)`,
+    `Skill levels assume ${BLIZZARD_HARD_PTS} hard points in each spell; scale with +All/+Cold Skills from gear`,
+    `Boss HP = avg(minHP, maxHP) × L-HP[level] ÷ 100 (from monlvl.txt)`,
+    `Damage values are approximate`,
+  ].join('\n');
+}
+
+export function computeRunStats(combat, runConfigData, monsterDbData, runBosses) {
+  const { bp, effCM, blizzDmg, ibDmg, ibs } = combat;
+  const stats = {};
+  for (const run of runConfigData) {
+    if (!run.available) continue;
+    const travelSecs = (run.teleports ?? 0) * bp.frames / D2_FPS;
+    let killSecs = 0;
+    const monCombat = monsterDbData?.monsters?.[run.id]?.combat ?? {};
+
+    if (runBosses[run.id] && monCombat.hp) {
+      const mult   = coldDmgMultiplier(monCombat.cold_resist ?? 0, effCM);
+      const effDps = (blizzDmg / BLIZZARD_COOLDOWN_SECS + ibs * ibDmg / BLIZZARD_COOLDOWN_SECS) * mult;
+      const amount = (run.monsters ?? []).reduce((s, m) => s + (m.amount ?? 1), 0) || 1;
+      killSecs = (monCombat.hp / effDps) * amount;
+    }
+
+    const lines = [`Travel: ~${run.teleports ?? 0} teleports × ${bp.frames} frames/cast ÷ ${D2_FPS} FPS = ${travelSecs.toFixed(1)}s`];
+    if (monCombat.hp) {
+      const monResist = monCombat.cold_resist ?? 0;
+      const cmRed     = cmResistReduction(effCM);
+      const effRes    = Math.max(-100, monResist - cmRed);
+      const mult      = coldDmgMultiplier(monResist, effCM);
+      lines.push(
+        `HP: ${monCombat.hp.toLocaleString()}`,
+        `Monster cold resist: ${monResist}% − Cold Mastery lv ${effCM} (−${cmRed}%) → eff. resist: ${effRes}% → ${mult.toFixed(2)}× damage multiplier`,
+      );
+    }
+
+    stats[run.id] = { travelSecs, killSecs, totalSecs: travelSecs + killSecs,
+      hasKillData: killSecs > 0, assumptions: lines.join('\n') };
+  }
+  return stats;
+}
+
+export function computeRunDropProbs(mf, runConfigData, monsterDbData, runBosses, valuableSet) {
+  const uMF = effUniqueMF(mf);
+  const sMF = effSetMF(mf);
+  const result = {};
+  for (const run of runConfigData) {
+    if (!run.available || !runBosses[run.id]) continue;
+    const mon = monsterDbData.monsters[run.id];
+    if (!mon) continue;
+
+    let noValuableItem = 1;
+    for (const [name, item] of Object.entries(mon.drops)) {
+      if (!valuableSet.has(name)) continue;
+      const qp  = item.quality_params;
+      const mfV = qp.quality_type === 'set' ? sMF : uMF;
+      const prob = item.base_prob * qualityCheckProb(qp, mon.mlvl, mfV) * (item.unique_weight / item.unique_total_weight);
+      noValuableItem *= (1 - prob);
+    }
+    const itemProb       = 1 - noValuableItem;
+    const runeProb       = mon.good_rune_prob ?? 0;
+    const skillerProb    = (mon.gc_base_prob ?? 0) * (mon.gc_skiller_frac ?? 0);
+    const valuableScProb = (mon.sc_base_prob ?? 0) * (mon.sc_valuable_frac ?? 0);
+    result[run.id] = { itemProb, runeProb, skillerProb, valuableScProb,
+      total: 1 - (1 - itemProb) * (1 - runeProb) * (1 - skillerProb) * (1 - valuableScProb) };
+  }
+  return result;
+}
+
+export function aggregateDropProbs(perBossProbs) {
+  const runs = Object.values(perBossProbs);
+  if (!runs.length) return null;
+  const agg = { itemProb: 1, runeProb: 1, skillerProb: 1, valuableScProb: 1, total: 1 };
+  for (const r of runs) {
+    agg.itemProb       *= (1 - r.itemProb);
+    agg.runeProb       *= (1 - r.runeProb);
+    agg.skillerProb    *= (1 - r.skillerProb);
+    agg.valuableScProb *= (1 - r.valuableScProb);
+    agg.total          *= (1 - r.total);
+  }
+  return {
+    itemProb:       1 - agg.itemProb,
+    runeProb:       1 - agg.runeProb,
+    skillerProb:    1 - agg.skillerProb,
+    valuableScProb: 1 - agg.valuableScProb,
+    total:          1 - agg.total,
+  };
+}
+
+export function computeEttvd(runStatsData, runConfigData, runBosses, totalDropProbsData) {
+  let totalRunSecs = 0;
+  for (const run of runConfigData) {
+    if (runBosses[run.id] && runStatsData[run.id]) totalRunSecs += runStatsData[run.id].totalSecs;
+  }
+  if (totalRunSecs === 0 || !totalDropProbsData) return null;
+  const p = totalDropProbsData;
+  const secs = (prob) => prob > 0 ? totalRunSecs / prob : null;
+  return { total: secs(p.total), items: secs(p.itemProb), rune: secs(p.runeProb),
+    skiller: secs(p.skillerProb), valueSc: secs(p.valuableScProb) };
+}
 
 // ── State helpers ──────────────────────────────────────────────────────────
+
 function makeSlot() {
   return { preset: null, custom: { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 } };
 }
@@ -65,7 +249,7 @@ function encodeState(state) {
   if (state.coldMasteryBase !== 20) out.cm = state.coldMasteryBase;
   const bosses = {};
   for (const [k, v] of Object.entries(state.run.bosses)) {
-    if (v === (DEFAULT_BOSSES[k] ?? false)) continue; // matches default, skip
+    if (v === (DEFAULT_BOSSES[k] ?? false)) continue;
     bosses[k] = v ? 1 : 0;
   }
   if (Object.keys(bosses).length) out.bosses = bosses;
@@ -83,27 +267,18 @@ function decodeState(b64, state) {
           const e = out.gear[id];
           state.gear[id].preset = e.p ?? null;
           if (e.p === 'custom') {
-            state.gear[id].custom = {
-              name: e.n ?? '',
-              fcr: e.f ?? 0,
-              mf: e.m ?? 0,
-              allSkills: e.a ?? 0,
-              coldSkills: e.cs ?? 0,
-            };
+            state.gear[id].custom = { name: e.n ?? '', fcr: e.f ?? 0, mf: e.m ?? 0,
+              allSkills: e.a ?? 0, coldSkills: e.cs ?? 0 };
           }
         }
       }
     }
     if (out.cm != null) state.coldMasteryBase = out.cm;
     if (out.bosses) {
-      for (const [k, v] of Object.entries(out.bosses)) {
-        state.run.bosses[k] = !!v;
-      }
+      for (const [k, v] of Object.entries(out.bosses)) state.run.bosses[k] = !!v;
     }
     if (out.uf) {
-      for (const key of out.uf) {
-        if (key in state.ui.folds) state.ui.folds[key] = false;
-      }
+      for (const key of out.uf) { if (key in state.ui.folds) state.ui.folds[key] = false; }
     }
   } catch {}
 }
@@ -119,102 +294,103 @@ function slotStats(slot) {
 }
 
 // ── Reactive state ─────────────────────────────────────────────────────────
+
 const state = reactive({
   gear: makeGear(),
   coldMasteryBase: 20,
   run: { bosses: { ...DEFAULT_BOSSES } },
   ui: { folds: { breakdown: true, dropOddsBoss: true } },
+  targetPresetId: 'TEMP_GEAR',
 });
 
 const params = new URLSearchParams(window.location.search);
 if (params.has('s')) decodeState(params.get('s'), state);
 
-// ── Gear computeds ─────────────────────────────────────────────────────────
-const totalFCR = computed(() =>
-  GEAR_SLOTS.reduce((sum, { id }) => sum + (slotStats(state.gear[id]).fcr || 0), 0)
+// ── Shared data refs (populated via onMounted fetch) ───────────────────────
+
+const runConfig = ref([]);
+const monsterDb = ref(null);
+
+// ── Build factory ──────────────────────────────────────────────────────────
+// Creates a set of Vue computeds for one gear configuration.
+// getSlotStats(slotId) → { fcr, mf, allSkills, coldSkills }
+
+function makeBuild(getSlotStats) {
+  const gearTotals = computed(() => computeGearTotals(getSlotStats));
+
+  const totalFCR        = computed(() => gearTotals.value.fcr);
+  const totalMF         = computed(() => gearTotals.value.mf);
+  const totalAllSkills  = computed(() => gearTotals.value.allSkills);
+  const totalColdSkills = computed(() => gearTotals.value.coldSkills);
+  const effectiveColdMastery = computed(() =>
+    state.coldMasteryBase + totalAllSkills.value + totalColdSkills.value
+  );
+
+  const fcrBreakpoint = computed(() => computeFcrBreakpoint(totalFCR.value));
+  const fcrTooltip    = computed(() => computeFcrTooltip(totalFCR.value));
+  const fcrBadgeClass = computed(() => computeFcrBadgeClass(totalFCR.value));
+
+  const combat = computed(() => computeCombat(gearTotals.value, effectiveColdMastery.value));
+  const blizzDps          = computed(() => combat.value.blizzDps);
+  const iceBlastDps       = computed(() => combat.value.iceBlastDps);
+  const totalDps          = computed(() => combat.value.totalDps);
+  const combatAssumptions = computed(() => computeCombatAssumptions(combat.value));
+
+  const runStats = computed(() => {
+    if (!runConfig.value.length || !monsterDb.value) return {};
+    return computeRunStats(combat.value, runConfig.value, monsterDb.value, state.run.bosses);
+  });
+
+  const runDropProbs = computed(() => {
+    if (!monsterDb.value) return {};
+    const valuableSet = new Set(monsterDb.value.valuables);
+    return computeRunDropProbs(totalMF.value, runConfig.value, monsterDb.value, state.run.bosses, valuableSet);
+  });
+
+  const totalDropProbs = computed(() => aggregateDropProbs(runDropProbs.value));
+
+  const ettvd = computed(() =>
+    computeEttvd(runStats.value, runConfig.value, state.run.bosses, totalDropProbs.value)
+  );
+
+  return {
+    totalFCR, totalMF, totalAllSkills, totalColdSkills,
+    effectiveColdMastery, fcrBreakpoint, fcrTooltip, fcrBadgeClass,
+    blizzDps, iceBlastDps, totalDps, combatAssumptions,
+    runStats, runDropProbs, totalDropProbs, ettvd,
+  };
+}
+
+// ── Build instances ────────────────────────────────────────────────────────
+
+const currentBuild = makeBuild((slotId) => slotStats(state.gear[slotId]));
+
+// ── Target gear UI helpers ─────────────────────────────────────────────────
+
+const targetPreset = computed(() =>
+  TARGET_GEAR_PRESETS.find(p => p.id === state.targetPresetId) ?? null
 );
-const totalMF = computed(() =>
-  GEAR_SLOTS.reduce((sum, { id }) => sum + (slotStats(state.gear[id]).mf || 0), 0)
-);
-const totalAllSkills = computed(() =>
-  GEAR_SLOTS.reduce((sum, { id }) => sum + (slotStats(state.gear[id]).allSkills || 0), 0)
-);
-const totalColdSkills = computed(() =>
-  GEAR_SLOTS.reduce((sum, { id }) => sum + (slotStats(state.gear[id]).coldSkills || 0), 0)
-);
-const effectiveColdMastery = computed(() =>
-  state.coldMasteryBase + totalAllSkills.value + totalColdSkills.value
-);
-const fcrBreakpoint = computed(() => {
-  const fcr = totalFCR.value;
-  return FCR_BREAKPOINTS.find(bp => fcr >= bp.minFCR) ?? FCR_BREAKPOINTS[FCR_BREAKPOINTS.length - 1];
-});
-const fcrTooltip = computed(() => {
-  const fcr = totalFCR.value;
-  const currentIdx = FCR_BREAKPOINTS.findIndex(bp => fcr >= bp.minFCR);
-  const current = FCR_BREAKPOINTS[currentIdx];
-  let tip = `${current.frames} frames per cast`;
-  if (currentIdx > 0) {
-    const next = FCR_BREAKPOINTS[currentIdx - 1];
-    tip += ` · next breakpoint: ${next.minFCR}% FCR for ${next.frames}f (+${next.minFCR - fcr} needed)`;
-  } else {
-    tip += ' · maximum breakpoint reached';
+
+function getTargetSlotItem(slotId) {
+  const preset = targetPreset.value;
+  if (!preset) return null;
+  const itemId = preset.slots[slotId];
+  if (!itemId) return null;
+  return (PRESET_ITEMS[slotId] ?? []).find(p => p.id === itemId) ?? null;
+}
+
+const targetSlots = computed(() => {
+  const out = {};
+  for (const { id } of GEAR_SLOTS) {
+    const item = getTargetSlotItem(id);
+    out[id] = { item, stats: item ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 } };
   }
-  return tip;
+  return out;
 });
 
-const fcrBadgeClass = computed(() => {
-  const fcr = totalFCR.value;
-  const currentIdx = FCR_BREAKPOINTS.findIndex(bp => fcr >= bp.minFCR);
-  if (currentIdx > 0) {
-    const nextFaster = FCR_BREAKPOINTS[currentIdx - 1];
-    if (fcr >= nextFaster.minFCR - 5) return 'badge-amber';
-  }
-  if (FCR_BREAKPOINTS.some(bp => bp.minFCR === fcr)) return 'badge-green';
-  return 'badge-default';
-});
+const targetBuild = makeBuild((slotId) => getTargetSlotItem(slotId) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 });
 
-// ── Combat engine helpers ──────────────────────────────────────────────────
-function blizzDmgFormula(slvl) {
-  return BLIZZARD_BOLTS_VS_BOSS * (20 * slvl + 10);
-}
-function iceBlastDmgFormula(slvl) {
-  return 10 * slvl + 10;
-}
-function iceBlastsPerWindow(framesPerCast) {
-  const totalCasts = Math.floor(BLIZZARD_COOLDOWN_SECS / (framesPerCast / D2_FPS));
-  return (totalCasts - 1) * ICE_BLAST_HIT_RATE;
-}
-function cmResistReduction(cmLevel) {
-  return 15 + 5 * cmLevel;
-}
-function coldDmgMultiplier(monsterColdResist, cmLevel) {
-  const effectiveResist = Math.max(-100, monsterColdResist - cmResistReduction(cmLevel));
-  return (100 - effectiveResist) / 100;
-}
-
-// ── Combat computeds ───────────────────────────────────────────────────────
-const blizzSlvl = computed(() => BLIZZARD_HARD_PTS + totalAllSkills.value + totalColdSkills.value);
-const iceBlastSlvl = computed(() => ICE_BLAST_HARD_PTS + totalAllSkills.value + totalColdSkills.value);
-const effectiveIceBlastsPerWindow = computed(() => iceBlastsPerWindow(fcrBreakpoint.value.frames));
-const blizzDmgPerCast = computed(() => blizzDmgFormula(blizzSlvl.value));
-const iceBlastDmgPerHit = computed(() => iceBlastDmgFormula(iceBlastSlvl.value));
-const blizzDps = computed(() => blizzDmgPerCast.value / BLIZZARD_COOLDOWN_SECS);
-const iceBlastDps = computed(() =>
-  effectiveIceBlastsPerWindow.value * iceBlastDmgPerHit.value / BLIZZARD_COOLDOWN_SECS
-);
-const totalDps = computed(() => blizzDps.value + iceBlastDps.value);
-const combatAssumptions = computed(() => {
-  const frames = fcrBreakpoint.value.frames;
-  const ibs = effectiveIceBlastsPerWindow.value;
-  return [
-    `Blizzard: 1 cast / ${BLIZZARD_COOLDOWN_SECS}s cooldown, ~${BLIZZARD_BOLTS_VS_BOSS} bolts hitting boss per cast`,
-    `Ice Blast: ${ibs.toFixed(1)} effective casts per window at ${ICE_BLAST_HIT_RATE * 100}% hit rate (${frames} frames/cast)`,
-    `Skill levels assume ${BLIZZARD_HARD_PTS} hard points in each spell; scale with +All/+Cold Skills from gear`,
-    `Boss HP = avg(minHP, maxHP) × L-HP[level] ÷ 100 (from monlvl.txt)`,
-    `Damage values are approximate`,
-  ].join('\n');
-});
+// ── URL sync ───────────────────────────────────────────────────────────────
 
 watch(state, () => {
   const encoded = encodeState(state);
@@ -222,6 +398,7 @@ watch(state, () => {
 }, { deep: true });
 
 // ── GearSlot component ─────────────────────────────────────────────────────
+
 const GearSlot = defineComponent({
   props: {
     slotId:     { type: String, required: true },
@@ -281,12 +458,10 @@ const GROUP_A = ['head', 'amulet', 'weapon', 'shield', 'armor'];
 const GROUP_B = ['gloves', 'belt', 'boots', 'ring1', 'ring2', 'charms'];
 
 // ── App ────────────────────────────────────────────────────────────────────
+
 createApp({
   components: { GearSlot },
   setup() {
-    const runConfig = ref([]);
-    const monsterDb = ref(null);
-
     onMounted(async () => {
       try {
         const [rcRes, dbRes] = await Promise.all([
@@ -299,124 +474,6 @@ createApp({
       } catch (e) {
         console.error('Failed to load data', e);
       }
-    });
-
-    const runStats = computed(() => {
-      const frames   = fcrBreakpoint.value.frames;
-      const cmLevel  = effectiveColdMastery.value;
-      const blizzDmg = blizzDmgPerCast.value;
-      const ibDmg    = iceBlastDmgPerHit.value;
-      const ibs      = effectiveIceBlastsPerWindow.value;
-
-      const stats = {};
-      for (const run of runConfig.value) {
-        if (!run.available) continue;
-        const travelSecs = (run.teleports ?? 0) * frames / D2_FPS;
-        let killSecs = 0;
-
-        const combat = monsterDb.value?.monsters?.[run.id]?.combat ?? {};
-        if (state.run.bosses[run.id] && combat.hp) {
-          const mult    = coldDmgMultiplier(combat.cold_resist ?? 0, cmLevel);
-          const effDps  = (blizzDmg / BLIZZARD_COOLDOWN_SECS + ibs * ibDmg / BLIZZARD_COOLDOWN_SECS) * mult;
-          const amount  = (run.monsters ?? []).reduce((s, m) => s + (m.amount ?? 1), 0) || 1;
-          killSecs = (combat.hp / effDps) * amount;
-        }
-
-        const assumptionLines = [
-          `Travel: ~${run.teleports ?? 0} teleports × ${frames} frames/cast ÷ ${D2_FPS} FPS = ${travelSecs.toFixed(1)}s`,
-        ];
-        if (combat.hp) {
-          const monResist  = combat.cold_resist ?? 0;
-          const cmReduction = cmResistReduction(cmLevel);
-          const effResist  = Math.max(-100, monResist - cmReduction);
-          const mult       = coldDmgMultiplier(monResist, cmLevel);
-          assumptionLines.push(
-            `HP: ${combat.hp.toLocaleString()}`,
-            `Monster cold resist: ${monResist}% − Cold Mastery lv ${cmLevel} (−${cmReduction}%) → eff. resist: ${effResist}% → ${mult.toFixed(2)}× damage multiplier`,
-          );
-        }
-
-        stats[run.id] = {
-          travelSecs,
-          killSecs,
-          totalSecs: travelSecs + killSecs,
-          hasKillData: killSecs > 0,
-          assumptions: assumptionLines.join('\n'),
-        };
-      }
-      return stats;
-    });
-
-    const runDropProbs = computed(() => {
-      if (!monsterDb.value) return {};
-      const valuableSet = new Set(monsterDb.value.valuables);
-      const rawMF = totalMF.value;
-      const uMF = effUniqueMF(rawMF);
-      const sMF = effSetMF(rawMF);
-
-      const result = {};
-      for (const run of runConfig.value) {
-        if (!run.available || !state.run.bosses[run.id]) continue;
-        const mon = monsterDb.value.monsters[run.id];
-        if (!mon) continue;
-
-        const mlvl = mon.mlvl;
-        let noValuableItem = 1;
-        for (const [name, item] of Object.entries(mon.drops)) {
-          if (!valuableSet.has(name)) continue;
-          const qp = item.quality_params;
-          const mf = qp.quality_type === 'set' ? sMF : uMF;
-          const prob = item.base_prob * qualityCheckProb(qp, mlvl, mf) * (item.unique_weight / item.unique_total_weight);
-          noValuableItem *= (1 - prob);
-        }
-        const itemProb     = 1 - noValuableItem;
-        const runeProb     = mon.good_rune_prob ?? 0;
-        const skillerProb  = (mon.gc_base_prob ?? 0) * (mon.gc_skiller_frac ?? 0);
-        const valuableScProb = (mon.sc_base_prob ?? 0) * (mon.sc_valuable_frac ?? 0);
-        result[run.id] = { itemProb, runeProb, skillerProb, valuableScProb,
-          total: 1 - (1 - itemProb) * (1 - runeProb) * (1 - skillerProb) * (1 - valuableScProb) };
-      }
-      return result;
-    });
-
-    const totalDropProbs = computed(() => {
-      const runs = Object.values(runDropProbs.value);
-      if (!runs.length) return null;
-      const agg = { itemProb: 1, runeProb: 1, skillerProb: 1, valuableScProb: 1, total: 1 };
-      for (const r of runs) {
-        agg.itemProb      *= (1 - r.itemProb);
-        agg.runeProb      *= (1 - r.runeProb);
-        agg.skillerProb   *= (1 - r.skillerProb);
-        agg.valuableScProb *= (1 - r.valuableScProb);
-        agg.total         *= (1 - r.total);
-      }
-      return {
-        itemProb:       1 - agg.itemProb,
-        runeProb:       1 - agg.runeProb,
-        skillerProb:    1 - agg.skillerProb,
-        valuableScProb: 1 - agg.valuableScProb,
-        total:          1 - agg.total,
-      };
-    });
-
-    const ettvd = computed(() => {
-      let totalRunSecs = 0;
-      for (const run of runConfig.value) {
-        if (state.run.bosses[run.id] && runStats.value[run.id]) {
-          totalRunSecs += runStats.value[run.id].totalSecs;
-        }
-      }
-      if (totalRunSecs === 0 || !totalDropProbs.value) return null;
-
-      const p = totalDropProbs.value;
-      const secs = (prob) => prob > 0 ? totalRunSecs / prob : null;
-      return {
-        total:    secs(p.total),
-        items:    secs(p.itemProb),
-        rune:     secs(p.runeProb),
-        skiller:  secs(p.skillerProb),
-        valueSc:  secs(p.valuableScProb),
-      };
     });
 
     function fmtOneIn(prob) {
@@ -438,26 +495,46 @@ createApp({
       GROUP_A,
       GROUP_B,
       runConfig,
-      runStats,
-      runDropProbs,
-      ettvd,
+      TARGET_GEAR_PRESETS,
+      targetPreset,
+      targetSlots,
       fmtEttvd,
       fmtOneIn,
-      totalDropProbs,
       effUniqueMF,
       effSetMF,
-      totalFCR,
-      totalMF,
-      totalAllSkills,
-      totalColdSkills,
-      effectiveColdMastery,
-      fcrBreakpoint,
-      fcrBadgeClass,
-      fcrTooltip,
-      blizzDps,
-      iceBlastDps,
-      totalDps,
-      combatAssumptions,
+
+      // Current build — same names as before so the template is unchanged
+      totalFCR:             currentBuild.totalFCR,
+      totalMF:              currentBuild.totalMF,
+      totalAllSkills:       currentBuild.totalAllSkills,
+      totalColdSkills:      currentBuild.totalColdSkills,
+      effectiveColdMastery: currentBuild.effectiveColdMastery,
+      fcrBreakpoint:        currentBuild.fcrBreakpoint,
+      fcrBadgeClass:        currentBuild.fcrBadgeClass,
+      fcrTooltip:           currentBuild.fcrTooltip,
+      blizzDps:             currentBuild.blizzDps,
+      iceBlastDps:          currentBuild.iceBlastDps,
+      totalDps:             currentBuild.totalDps,
+      combatAssumptions:    currentBuild.combatAssumptions,
+      runStats:             currentBuild.runStats,
+      runDropProbs:         currentBuild.runDropProbs,
+      totalDropProbs:       currentBuild.totalDropProbs,
+      ettvd:                currentBuild.ettvd,
+
+      // Target build — 'target' prefix keeps template names distinct
+      targetTotalFCR:             targetBuild.totalFCR,
+      targetTotalMF:              targetBuild.totalMF,
+      targetTotalAllSkills:       targetBuild.totalAllSkills,
+      targetTotalColdSkills:      targetBuild.totalColdSkills,
+      targetEffectiveColdMastery: targetBuild.effectiveColdMastery,
+      targetFcrBreakpoint:        targetBuild.fcrBreakpoint,
+      targetFcrBadgeClass:        targetBuild.fcrBadgeClass,
+      targetFcrTooltip:           targetBuild.fcrTooltip,
+      targetBlizzDps:             targetBuild.blizzDps,
+      targetIceBlastDps:          targetBuild.iceBlastDps,
+      targetTotalDps:             targetBuild.totalDps,
+      targetCombatAssumptions:    targetBuild.combatAssumptions,
+      targetEttvd:                targetBuild.ettvd,
     };
   },
   template: `
@@ -469,7 +546,7 @@ createApp({
       <main class="app-grid">
         <div class="left-col">
           <section class="gear-panel">
-            <h2 class="panel-title">Gear</h2>
+            <h2 class="panel-title">Current Gear</h2>
             <div class="slot-group">
               <gear-slot
                 v-for="id in GROUP_A" :key="id"
@@ -487,6 +564,47 @@ createApp({
                 :presets="PRESET_ITEMS[id]"
                 v-model="state.gear[id]"
               />
+            </div>
+
+            <hr class="panel-divider" />
+
+            <h2 class="panel-title">Stats</h2>
+            <div class="summary-pills">
+              <span class="pill pill-fcr" :title="fcrTooltip">
+                FCR {{ totalFCR }}%
+                <span class="fcr-badge" :class="fcrBadgeClass" :title="fcrTooltip">{{ fcrBreakpoint.frames }}f</span>
+              </span>
+              <span v-if="totalMF"         class="pill pill-mf"    title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ totalMF }}%</span>
+              <span v-if="totalAllSkills"  class="pill pill-skill" title="+All Skills — adds to all character skill levels">+{{ totalAllSkills }} All Skills</span>
+              <span v-if="totalColdSkills" class="pill pill-cold"  title="+Cold Skills — adds to cold skill levels only">+{{ totalColdSkills }} Cold Skills</span>
+              <span class="pill pill-cold" title="Cold Mastery — reduces enemy cold resistance; effective level includes +All Skills and +Cold Skills from gear">Cold Mastery Lv {{ effectiveColdMastery }}</span>
+            </div>
+            <div class="cm-input-row">
+              <label class="cm-label">
+                Cold Mastery base pts (0–20)
+                <input type="number" min="0" max="20" v-model.number="state.coldMasteryBase" class="custom-num" />
+                <span class="cm-breakdown">(+{{ totalAllSkills + totalColdSkills }} from gear)</span>
+              </label>
+            </div>
+
+            <hr class="panel-divider" />
+
+            <h2 class="panel-title">
+              Combat
+              <span class="info-icon" :title="combatAssumptions">i</span>
+            </h2>
+            <div class="summary-pills">
+              <span class="pill pill-total" title="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)">
+                Total ~{{ Math.round(totalDps).toLocaleString() }} DPS
+              </span>
+            </div>
+            <div class="summary-pills">
+              <span class="pill pill-skill" title="Blizzard damage per second (approximate, single-target boss)">
+                Blizzard ~{{ Math.round(blizzDps).toLocaleString() }} DPS
+              </span>
+              <span class="pill pill-cold" title="Effective Ice Blast DPS accounting for hit rate and current FCR">
+                Ice Blast ~{{ Math.round(iceBlastDps).toLocaleString() }} DPS
+              </span>
             </div>
           </section>
 
@@ -561,6 +679,116 @@ createApp({
             </div>
             <div v-if="!totalDropProbs" class="placeholder">Select a run above</div>
           </section>
+
+          <hr class="section-divider" />
+
+          <!-- Target Gear -->
+          <section class="gear-panel target-panel">
+            <div class="target-preset-row">
+              <h2 class="panel-title" style="margin:0">Target Gear</h2>
+              <label class="target-preset-label">
+                Preset
+                <select v-model="state.targetPresetId" class="slot-select target-preset-select">
+                  <option v-for="p in TARGET_GEAR_PRESETS" :key="p.id" :value="p.id">{{ p.name }}</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="target-slot-group">
+              <div v-for="id in GROUP_A" :key="id" class="target-slot-row">
+                <span class="slot-label">{{ GEAR_SLOTS.find(s => s.id === id).label }}</span>
+                <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
+                  {{ targetSlots[id].item?.name ?? '—' }}
+                </span>
+                <div class="stat-pills">
+                  <span v-if="targetSlots[id].stats.fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ targetSlots[id].stats.fcr }}%</span>
+                  <span v-if="targetSlots[id].stats.mf"         class="pill pill-mf"    title="Magic Find">MF +{{ targetSlots[id].stats.mf }}%</span>
+                  <span v-if="targetSlots[id].stats.allSkills"  class="pill pill-skill" title="+All Skills">+{{ targetSlots[id].stats.allSkills }} All</span>
+                  <span v-if="targetSlots[id].stats.coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ targetSlots[id].stats.coldSkills }} Cold</span>
+                </div>
+              </div>
+            </div>
+            <div class="target-slot-group">
+              <div v-for="id in GROUP_B" :key="id" class="target-slot-row">
+                <span class="slot-label">{{ GEAR_SLOTS.find(s => s.id === id).label }}</span>
+                <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
+                  {{ targetSlots[id].item?.name ?? '—' }}
+                </span>
+                <div class="stat-pills">
+                  <span v-if="targetSlots[id].stats.fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ targetSlots[id].stats.fcr }}%</span>
+                  <span v-if="targetSlots[id].stats.mf"         class="pill pill-mf"    title="Magic Find">MF +{{ targetSlots[id].stats.mf }}%</span>
+                  <span v-if="targetSlots[id].stats.allSkills"  class="pill pill-skill" title="+All Skills">+{{ targetSlots[id].stats.allSkills }} All</span>
+                  <span v-if="targetSlots[id].stats.coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ targetSlots[id].stats.coldSkills }} Cold</span>
+                </div>
+              </div>
+            </div>
+
+            <hr class="panel-divider" />
+
+            <h2 class="panel-title">Target Stats</h2>
+            <div class="summary-pills">
+              <span class="pill pill-fcr" :title="targetFcrTooltip">
+                FCR {{ targetTotalFCR }}%
+                <span class="fcr-badge" :class="targetFcrBadgeClass" :title="targetFcrTooltip">{{ targetFcrBreakpoint.frames }}f</span>
+              </span>
+              <span v-if="targetTotalMF"         class="pill pill-mf"    title="Magic Find">MF +{{ targetTotalMF }}%</span>
+              <span v-if="targetTotalAllSkills"  class="pill pill-skill" title="+All Skills">+{{ targetTotalAllSkills }} All Skills</span>
+              <span v-if="targetTotalColdSkills" class="pill pill-cold"  title="+Cold Skills">+{{ targetTotalColdSkills }} Cold Skills</span>
+              <span class="pill pill-cold" title="Cold Mastery effective level includes +All Skills and +Cold Skills from target gear">Cold Mastery Lv {{ targetEffectiveColdMastery }}</span>
+            </div>
+            <div class="cm-input-row">
+              <label class="cm-label">
+                Cold Mastery base pts
+                <span class="custom-num cm-readonly">{{ state.coldMasteryBase }}</span>
+                <span class="cm-breakdown">(from above · +{{ targetTotalAllSkills + targetTotalColdSkills }} from target gear)</span>
+              </label>
+            </div>
+
+            <hr class="panel-divider" />
+
+            <h2 class="panel-title">
+              Target Combat
+              <span class="info-icon" :title="targetCombatAssumptions">i</span>
+            </h2>
+            <div class="summary-pills">
+              <span class="pill pill-total" title="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)">
+                Total ~{{ Math.round(targetTotalDps).toLocaleString() }} DPS
+              </span>
+            </div>
+            <div class="summary-pills">
+              <span class="pill pill-skill" title="Blizzard damage per second (approximate, single-target boss)">
+                Blizzard ~{{ Math.round(targetBlizzDps).toLocaleString() }} DPS
+              </span>
+              <span class="pill pill-cold" title="Effective Ice Blast DPS accounting for hit rate and target FCR">
+                Ice Blast ~{{ Math.round(targetIceBlastDps).toLocaleString() }} DPS
+              </span>
+            </div>
+
+            <hr class="panel-divider" />
+
+            <h2 class="panel-title"><abbr title="Expected Time To Valuable Drop — estimated average time until a desirable item drops, given target gear, MF, and run routine">ETTVD</abbr>: Time To Valuable Drop</h2>
+            <div v-if="targetEttvd" class="ettvd-main ettvd-target">{{ fmtEttvd(targetEttvd.total) }}</div>
+            <div v-else class="ettvd-main ettvd-empty">—</div>
+            <div v-if="targetEttvd" class="ettvd-breakdown">
+              <div class="breakdown-row breakdown-sub">
+                <span>Uniques / Sets</span>
+                <span>{{ fmtEttvd(targetEttvd.items) }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Good Rune</span>
+                <span>{{ fmtEttvd(targetEttvd.rune) }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Any Skiller GC</span>
+                <span>{{ fmtEttvd(targetEttvd.skiller) }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Valuable SC</span>
+                <span>{{ fmtEttvd(targetEttvd.valueSc) }}</span>
+              </div>
+            </div>
+          </section>
+
         </div>
 
         <aside class="side-panel">
@@ -587,49 +815,6 @@ createApp({
                 <span>Valuable SC <span class="info-icon" title="Expected time between a max-roll +5 all res, +7% MF, or +20 life Small Charm drop">i</span></span>
                 <span>{{ fmtEttvd(ettvd.valueSc) }}</span>
               </div>
-            </div>
-          </section>
-
-          <!-- Stat Summary -->
-          <section class="summary-block">
-            <h2 class="panel-title">Stats</h2>
-            <div class="summary-pills">
-              <span class="pill pill-fcr" title="Faster Cast Rate — reduces casting animation length">
-                FCR {{ totalFCR }}%
-                <span class="fcr-badge" :class="fcrBadgeClass" :title="fcrTooltip">{{ fcrBreakpoint.frames }}f</span>
-              </span>
-              <span v-if="totalMF"         class="pill pill-mf"    title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ totalMF }}%</span>
-              <span v-if="totalAllSkills"  class="pill pill-skill" title="+All Skills — adds to all character skill levels">+{{ totalAllSkills }} All Skills</span>
-              <span v-if="totalColdSkills" class="pill pill-cold"  title="+Cold Skills — adds to cold skill levels only">+{{ totalColdSkills }} Cold Skills</span>
-              <span class="pill pill-cold" title="Cold Mastery — reduces enemy cold resistance; effective level includes +All Skills and +Cold Skills from gear">Cold Mastery Lv {{ effectiveColdMastery }}</span>
-            </div>
-            <div class="cm-input-row">
-              <label class="cm-label">
-                Cold Mastery base pts (0–20)
-                <input type="number" min="0" max="20" v-model.number="state.coldMasteryBase" class="custom-num" />
-                <span class="cm-breakdown">(+{{ totalAllSkills + totalColdSkills }} from gear)</span>
-              </label>
-            </div>
-          </section>
-
-          <!-- Combat -->
-          <section class="summary-block">
-            <h2 class="panel-title">
-              Combat
-              <span class="info-icon" :title="combatAssumptions">i</span>
-            </h2>
-            <div class="summary-pills">
-              <span class="pill pill-total" title="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)">
-                Total ~{{ Math.round(totalDps).toLocaleString() }} DPS
-              </span>
-            </div>
-            <div class="summary-pills">
-              <span class="pill pill-skill" title="Blizzard damage per second (approximate, single-target boss)">
-                Blizzard ~{{ Math.round(blizzDps).toLocaleString() }} DPS
-              </span>
-              <span class="pill pill-cold" title="Effective Ice Blast DPS accounting for hit rate and current FCR">
-                Ice Blast ~{{ Math.round(iceBlastDps).toLocaleString() }} DPS
-              </span>
             </div>
           </section>
 
