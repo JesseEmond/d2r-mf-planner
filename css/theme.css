@@ -291,6 +291,92 @@ body {
 }
 
 
+/* Panel divider (hr inside a card) */
+.panel-divider {
+  border: none;
+  border-top: 1px solid var(--color-border);
+  margin: 0.75rem 0;
+}
+
+/* Section divider between current and target gear cards */
+.section-divider {
+  border: none;
+  border-top: 2px solid var(--color-border);
+  margin: 0.25rem 0;
+}
+
+/* Target gear card — amber border to distinguish from current */
+.target-panel {
+  border-color: var(--color-rune);
+}
+
+/* Target ETTVD value */
+.ettvd-target {
+  color: var(--color-rune);
+}
+
+/* Target preset row */
+.target-preset-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.75rem;
+}
+.target-preset-label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8rem;
+  color: #aaa;
+}
+.target-preset-select {
+  flex: 0 0 auto;
+  width: auto;
+}
+
+/* Target slot list */
+.target-slot-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 0.5rem;
+}
+.target-slot-group + .target-slot-group {
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.5rem;
+}
+.target-slot-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+}
+.target-slot-name {
+  font-size: 0.82rem;
+  color: #d0d0d0;
+  flex: 0 0 200px;
+}
+.target-slot-empty {
+  color: #555;
+  font-style: italic;
+}
+
+/* Read-only CM display */
+.cm-readonly {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  padding: 2px 4px;
+  font-size: 0.78rem;
+  color: #888;
+  text-align: center;
+}
+
 [title] { cursor: help; }
 abbr[title] { text-decoration: underline dashed; text-decoration-color: #555; }
 
