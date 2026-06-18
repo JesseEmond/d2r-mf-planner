@@ -122,6 +122,10 @@ function computeCombatAssumptions(combat) {
   ].join('\n');
 }
 
+function fmtMonsterId(id) {
+  return id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 export function computeRunStats(combat, runConfigData, monsterDbData, runBosses) {
   const { bp, effCM, blizzDmg, ibDmg, ibs } = combat;
   const stats = {};
@@ -138,20 +142,30 @@ export function computeRunStats(combat, runConfigData, monsterDbData, runBosses)
       killSecs = (monCombat.hp / effDps) * amount;
     }
 
-    const lines = [`Travel: ~${run.teleports ?? 0} teleports × ${bp.frames} frames/cast ÷ ${D2_FPS} FPS = ${travelSecs.toFixed(1)}s`];
+    const travelDetail = `~${run.teleports ?? 0} teleports × ${bp.frames} frames/cast ÷ ${D2_FPS} FPS = ${travelSecs.toFixed(1)}s`;
+
+    let killDetail = null;
     if (monCombat.hp) {
       const monResist = monCombat.cold_resist ?? 0;
       const cmRed     = cmResistReduction(effCM);
       const effRes    = Math.max(-100, monResist - cmRed);
       const mult      = coldDmgMultiplier(monResist, effCM);
-      lines.push(
+      killDetail = [
         `HP: ${monCombat.hp.toLocaleString()}`,
-        `Monster cold resist: ${monResist}% − Cold Mastery lv ${effCM} (−${cmRed}%) → eff. resist: ${effRes}% → ${mult.toFixed(2)}× damage multiplier`,
-      );
+        `Cold resist: ${monResist}% − Cold Mastery lv ${effCM} (−${cmRed}%) → eff. resist: ${effRes}% → ${mult.toFixed(2)}× damage multiplier`,
+      ].join('\n');
     }
 
+    const monsterLines = (run.monsters ?? []).map(m =>
+      `${fmtMonsterId(m.monster_id ?? m.id)} ×${m.amount ?? 1}`
+    );
+    const assumptions = [
+      `~${run.teleports ?? 0} teleports to reach`,
+      monsterLines.length ? `Kills: ${monsterLines.join(', ')}` : null,
+    ].filter(Boolean).join('\n');
+
     stats[run.id] = { travelSecs, killSecs, totalSecs: travelSecs + killSecs,
-      hasKillData: killSecs > 0, assumptions: lines.join('\n') };
+      hasKillData: killSecs > 0, assumptions, travelDetail, killDetail };
   }
   return stats;
 }
@@ -353,11 +367,22 @@ function makeBuild(getSlotStats) {
     computeEttvd(runStats.value, runConfig.value, state.run.bosses, totalDropProbs.value)
   );
 
+  const runTimeSummary = computed(() => {
+    let travel = 0, kill = 0;
+    for (const [id, s] of Object.entries(runStats.value)) {
+      if (!state.run.bosses[id]) continue;
+      travel += s.travelSecs;
+      kill   += s.killSecs;
+    }
+    const total = travel + kill;
+    return total > 0 ? { travel, kill, total } : null;
+  });
+
   return {
     totalFCR, totalMF, totalAllSkills, totalColdSkills,
     effectiveColdMastery, fcrBreakpoint, fcrTooltip, fcrBadgeClass,
     blizzDps, iceBlastDps, totalDps, combatAssumptions,
-    runStats, runDropProbs, totalDropProbs, ettvd,
+    runStats, runDropProbs, totalDropProbs, ettvd, runTimeSummary,
   };
 }
 
@@ -520,6 +545,7 @@ createApp({
       runDropProbs:         currentBuild.runDropProbs,
       totalDropProbs:       currentBuild.totalDropProbs,
       ettvd:                currentBuild.ettvd,
+      runTimeSummary:       currentBuild.runTimeSummary,
 
       // Target build — 'target' prefix keeps template names distinct
       targetTotalFCR:             targetBuild.totalFCR,
@@ -840,6 +866,17 @@ createApp({
               >i</span>
             </div>
 
+            <div class="breakdown-run-label">Per run cycle</div>
+            <div class="breakdown-row breakdown-total">
+              <span>Total</span><span>{{ runTimeSummary ? runTimeSummary.total.toFixed(1) + 's' : '---' }}</span>
+            </div>
+            <div class="breakdown-row breakdown-sub">
+              <span>Travel</span><span>{{ runTimeSummary ? runTimeSummary.travel.toFixed(1) + 's' : '---' }}</span>
+            </div>
+            <div class="breakdown-row breakdown-sub">
+              <span>Kill</span><span>{{ runTimeSummary ? runTimeSummary.kill.toFixed(1) + 's' : '---' }}</span>
+            </div>
+
             <div class="fold-section">
               <button class="fold-header" @click="state.ui.folds.breakdown = !state.ui.folds.breakdown">
                 <span class="fold-arrow">{{ state.ui.folds.breakdown ? '▶' : '▼' }}</span>
@@ -851,10 +888,12 @@ createApp({
                     <template v-if="state.run.bosses[run.id] && runStats[run.id]?.hasKillData">
                       <div class="breakdown-run-label">{{ run.label }}</div>
                       <div class="breakdown-row">
-                        <span>Travel</span><span>{{ runStats[run.id].travelSecs.toFixed(1) }}s</span>
+                        <span>Travel <span class="info-icon" :title="runStats[run.id].travelDetail">i</span></span>
+                        <span>{{ runStats[run.id].travelSecs.toFixed(1) }}s</span>
                       </div>
                       <div class="breakdown-row">
-                        <span>Kill</span><span>{{ runStats[run.id].killSecs.toFixed(1) }}s</span>
+                        <span>Kill <span class="info-icon" :title="runStats[run.id].killDetail">i</span></span>
+                        <span>{{ runStats[run.id].killSecs.toFixed(1) }}s</span>
                       </div>
                       <div class="breakdown-row breakdown-total">
                         <span>Total</span><span>{{ runStats[run.id].totalSecs.toFixed(1) }}s</span>
