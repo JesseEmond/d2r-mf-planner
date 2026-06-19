@@ -58,7 +58,9 @@ export function computeFcrBreakpoint(fcr) {
 function computeFcrTooltip(fcr) {
   const idx = FCR_BREAKPOINTS.findIndex(bp => fcr >= bp.minFCR);
   const cur = FCR_BREAKPOINTS[idx];
+  const excess = fcr - cur.minFCR;
   let tip = `${cur.frames} frames per cast`;
+  tip += excess === 0 ? ` · exactly at breakpoint (${cur.minFCR}% FCR)` : ` · ${excess}% FCR above breakpoint (${cur.minFCR}% needed)`;
   if (idx > 0) {
     const next = FCR_BREAKPOINTS[idx - 1];
     tip += ` · next breakpoint: ${next.minFCR}% FCR for ${next.frames}f (+${next.minFCR - fcr} needed)`;
@@ -231,7 +233,7 @@ function makeGear() {
 
 const DEFAULT_COLD_MASTERY = 20;
 const DEFAULT_FOLDS = { breakdown: true, dropOddsBoss: true };
-const DEFAULT_TARGET_PRESET_ID = 'TEMP_GEAR';
+const DEFAULT_TARGET_PRESET_ID = 'Standard';
 
 function makeDefaultState() {
   return {

@@ -4,9 +4,13 @@
     "Spirit"
   ],
   "unique_items": [
-    "Harlequin Crest",
+    "Chance Guards",
+    "Fathom",
     "Griffon's Eye",
+    "Harlequin Crest",
     "Mara's Kaleidoscope",
+    "Nightwing's Veil",
+    "Ormus' Robes",
     "The Eye of Etlich",
     "The Oculus",
     "Wizardspike",
@@ -31,20 +35,46 @@
     "Trang-Oul's Claws"
   ],
   "custom_items": {
-    "Magic FCR Ring": {"slot": "ring", "fcr": 10, "mf": 0, "allSkills": 0, "coldSkills": 0}
+    "Magic FCR Ring": {"slot": "ring",  "fcr": 10, "mf": 0,  "allSkills": 0, "coldSkills": 0},
+    "Rare MF Ring":   {"slot": "ring",  "fcr": 10, "mf": 25, "allSkills": 0, "coldSkills": 0},
+    "Rare MF Boots":  {"slot": "boots", "fcr": 0,  "mf": 25, "allSkills": 0, "coldSkills": 0}
   },
   "presets": {
-    "TEMP_GEAR": {
-      "head":   "Griffon's Eye",
+    "Standard": {
+      "head":   "Nightwing's Veil",
       "amulet": "Mara's Kaleidoscope",
-      "weapon": "Heart of the Oak",
+      "weapon": "Fathom",
       "shield": "Spirit",
-      "armor":  "Skin of the Vipermagi",
-      "gloves": "Magefist",
+      "armor":  "Ormus' Robes",
+      "gloves": "Trang-Oul's Claws",
       "belt":   "Arachnid Mesh",
-      "boots":  "Wartraveler",
+      "boots":  "Rare MF Boots",
       "ring1":  "The Stone of Jordan",
       "ring2":  "The Stone of Jordan"
+    },
+    "Magic Find": {
+      "head":   "Harlequin Crest",
+      "amulet": "Tal Rasha's Adjudication",
+      "weapon": "The Oculus",
+      "shield": "Spirit",
+      "armor":  "Tal Rasha's Howling Wind",
+      "gloves": "Chance Guards",
+      "belt":   "Tal Rasha's Fire-Spun Cloth",
+      "boots":  "Wartraveler",
+      "ring1":  "Rare MF Ring",
+      "ring2":  "Rare MF Ring"
+    },
+    "Set Build": {
+      "head":   "Tal Rasha's Horadric Crest",
+      "amulet": "Tal Rasha's Adjudication",
+      "weapon": "Tal Rasha's Lidless Eye",
+      "shield": "Spirit",
+      "armor":  "Tal Rasha's Howling Wind",
+      "gloves": "Chance Guards",
+      "belt":   "Tal Rasha's Fire-Spun Cloth",
+      "boots":  "Wartraveler",
+      "ring1":  "Rare MF Ring",
+      "ring2":  "Rare MF Ring"
     }
   }
 }
