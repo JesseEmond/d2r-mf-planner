@@ -29,6 +29,7 @@ const PRESET_ITEMS = ref({});
 const TARGET_GEAR_PRESETS = ref([]);
 const SET_LEVEL_BONUSES = ref({});
 const SET_SIZES = ref({});
+const SOCKET_ITEMS = ref([]);
 
 // ── Stats ──────────────────────────────────────────────────────────────────
 // Computed stat aggregates. Raw items (DB) and custom fields in Vue state
@@ -258,7 +259,7 @@ export function computeEttvd(runStatsData, runConfigData, runBosses, totalDropPr
 // ── State helpers ──────────────────────────────────────────────────────────
 
 function makeSlot() {
-  return { preset: null, custom: { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 } };
+  return { preset: null, sockets: [], custom: { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 } };
 }
 
 function makeCharmEntry() {
@@ -292,7 +293,7 @@ function encodeState(state) {
   for (const { id } of GEAR_SLOTS) {
     if (id === 'charms') continue;
     const slot = state.gear[id];
-    if (slot.preset !== null) {
+    if (slot.preset !== null || (slot.sockets ?? []).some(s => s.preset)) {
       const entry = { p: slot.preset };
       if (slot.preset === 'custom') {
         const c = slot.custom;
@@ -304,6 +305,8 @@ function encodeState(state) {
         if (c.coldDmgPct)      entry.cdp = c.coldDmgPct;
         if (c.enemyColdResPct) entry.ecr = c.enemyColdResPct;
       }
+      const sk = (slot.sockets ?? []).filter(s => s.preset).map(s => s.preset);
+      if (sk.length) entry.sk = sk;
       gear[id] = entry;
     }
   }
@@ -353,6 +356,9 @@ function decodeState(b64, state) {
             state.gear[id].custom = { name: e.n ?? '', fcr: e.f ?? 0, mf: e.m ?? 0,
               allSkills: e.a ?? 0, coldSkills: e.cs ?? 0, coldDmgPct: e.cdp ?? 0, enemyColdResPct: e.ecr ?? 0 };
           }
+          if (e.sk) {
+            state.gear[id].sockets = e.sk.map(p => ({ preset: p }));
+          }
         }
       }
     }
@@ -391,18 +397,39 @@ function findSetItemByName(name) {
   return null;
 }
 
-function slotStats(slot) {
-  if (!slot.preset) return Stats.zero();
-  if (slot.preset === 'custom') {
+function socketItemStats(sock, slotId) {
+  if (!sock.preset) return Stats.zero();
+  const item = SOCKET_ITEMS.value.find(si => si.id === sock.preset);
+  if (!item) return Stats.zero();
+  if (item.slot_stats) {
+    const ss = item.slot_stats[slotId] ?? item.slot_stats['default'] ?? {};
+    return Stats.from(ss);
+  }
+  return Stats.from(item);
+}
+
+function slotStats(slot, slotId = '') {
+  let base = null;
+  if (!slot.preset) {
+    // no item
+  } else if (slot.preset === 'custom') {
     const setMatch = findSetItemByName(slot.custom.name?.trim());
-    if (setMatch) return { ...slot.custom, set_name: setMatch.set_name, set_bonuses: setMatch.set_bonuses };
-    return slot.custom;
+    base = setMatch
+      ? { ...slot.custom, set_name: setMatch.set_name, set_bonuses: setMatch.set_bonuses }
+      : slot.custom;
+  } else {
+    for (const presets of Object.values(PRESET_ITEMS.value)) {
+      const item = presets.find(p => p.id === slot.preset);
+      if (item) { base = item; break; }
+    }
   }
-  for (const presets of Object.values(PRESET_ITEMS.value)) {
-    const item = presets.find(p => p.id === slot.preset);
-    if (item) return item;
-  }
-  return Stats.zero();
+
+  const sockStats = (slot.sockets ?? []).reduce(
+    (t, s) => t.add(socketItemStats(s, slotId)), Stats.zero()
+  );
+
+  if (!base) return sockStats;
+  return { ...base, ...Stats.from(base).add(sockStats) };
 }
 
 function singleCharmStats(charm) {
@@ -543,8 +570,21 @@ function makeBuild(getSlotStats) {
 // ── Build instances ────────────────────────────────────────────────────────
 
 const currentBuild = makeBuild((slotId) =>
-  slotId === 'charms' ? charmSlotStats(state.gear.charms) : slotStats(state.gear[slotId])
+  slotId === 'charms' ? charmSlotStats(state.gear.charms) : slotStats(state.gear[slotId], slotId)
 );
+
+const usedUniqueSocketIds = computed(() => {
+  const used = new Set();
+  for (const { id } of GEAR_SLOTS) {
+    if (id === 'charms') continue;
+    for (const sock of (state.gear[id].sockets ?? [])) {
+      if (!sock.preset) continue;
+      const item = SOCKET_ITEMS.value.find(si => si.id === sock.preset);
+      if (item?.unique) used.add(sock.preset);
+    }
+  }
+  return used;
+});
 
 // ── Target gear UI helpers ─────────────────────────────────────────────────
 
@@ -644,10 +684,12 @@ const SetBonusBlock = defineComponent({
 
 const GearSlot = defineComponent({
   props: {
-    slotId:     { type: String, required: true },
-    slotLabel:  { type: String, required: true },
-    presets:    { type: Array,  required: true },
-    modelValue: { type: Object, required: true },
+    slotId:      { type: String, required: true },
+    slotLabel:   { type: String, required: true },
+    presets:     { type: Array,  required: true },
+    modelValue:  { type: Object, required: true },
+    socketItems:          { type: Array,  default: () => [] },
+    usedUniqueSocketIds:  { type: Object, default: () => new Set() },
   },
   emits: ['update:modelValue'],
   components: { StatPills },
@@ -656,8 +698,14 @@ const GearSlot = defineComponent({
 
     function update(patch) {
       const next = { ...props.modelValue, ...patch };
-      if (patch.preset && patch.preset !== 'custom') {
-        next.custom = { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
+      if ('preset' in patch) {
+        if (!patch.preset) {
+          next.sockets = [];
+        } else if (patch.preset !== 'custom') {
+          const newItem = (props.presets ?? []).find(p => p.id === patch.preset);
+          if (!newItem?.max_sockets) next.sockets = [];
+          next.custom = { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
+        }
       }
       emit('update:modelValue', next);
     }
@@ -684,11 +732,55 @@ const GearSlot = defineComponent({
       }
       basisId.value = '';
     }
+
+    const currentMaxSockets = computed(() => {
+      if (!props.modelValue.preset) return 0;
+      if (props.modelValue.preset === 'custom') return 1;
+      const item = (props.presets ?? []).find(p => p.id === props.modelValue.preset);
+      return item?.max_sockets ?? 0;
+    });
+
+    function resolveSocketStats(sock) {
+      if (!sock.preset) return Stats.zero();
+      const item = (props.socketItems ?? []).find(si => si.id === sock.preset);
+      if (!item) return Stats.zero();
+      if (item.slot_stats) {
+        const ss = item.slot_stats[props.slotId] ?? item.slot_stats['default'] ?? {};
+        return Stats.from(ss);
+      }
+      return Stats.from(item);
+    }
+
+    function addSocket() {
+      const sockets = [...(props.modelValue.sockets ?? []), { preset: null }];
+      emit('update:modelValue', { ...props.modelValue, sockets });
+    }
+    function removeSocket(idx) {
+      const sockets = [...(props.modelValue.sockets ?? [])];
+      sockets.splice(idx, 1);
+      emit('update:modelValue', { ...props.modelValue, sockets });
+    }
+    function updateSocket(idx, presetId) {
+      const sockets = (props.modelValue.sockets ?? []).map((s, i) =>
+        i === idx ? { preset: presetId || null } : s
+      );
+      emit('update:modelValue', { ...props.modelValue, sockets });
+    }
+
     function stats() {
       const slot = props.modelValue;
-      if (!slot.preset || slot.preset === 'custom') return slot.custom;
-      return (props.presets ?? []).find(p => p.id === slot.preset) ?? Stats.zero();
+      let base;
+      if (!slot.preset || slot.preset === 'custom') {
+        base = slot.custom;
+      } else {
+        base = (props.presets ?? []).find(p => p.id === slot.preset) ?? Stats.zero();
+      }
+      const sockStats = (slot.sockets ?? []).reduce(
+        (t, s) => t.add(resolveSocketStats(s)), Stats.zero()
+      );
+      return Stats.from(base).add(sockStats);
     }
+
     const realPresets = computed(() => (props.presets ?? []).filter(p => p.id !== 'custom'));
     const matchedSetItem = computed(() => {
       if (props.modelValue.preset !== 'custom') return null;
@@ -696,7 +788,8 @@ const GearSlot = defineComponent({
       if (!name) return null;
       return (props.presets ?? []).find(p => p.set_name && p.name === name) ?? null;
     });
-    return { update, updateCustom, applyBasis, stats, basisId, realPresets, matchedSetItem };
+    return { update, updateCustom, applyBasis, stats, basisId, realPresets, matchedSetItem,
+             currentMaxSockets, resolveSocketStats, addSocket, removeSocket, updateSocket };
   },
   template: `
     <div class="gear-slot">
@@ -719,17 +812,43 @@ const GearSlot = defineComponent({
           <option value="">Start from...</option>
           <option v-for="p in realPresets" :key="p.id" :value="p.id">{{ p.name }}</option>
         </select>
-        <input type="text"   placeholder="Name"       :value="modelValue.custom.name"       @input="updateCustom({ name: $event.target.value })"              class="custom-text" />
-        <label>FCR    <input type="number" min="0" :value="modelValue.custom.fcr"        @input="updateCustom({ fcr:        +$event.target.value })" class="custom-num" /></label>
-        <label>MF     <input type="number" min="0" :value="modelValue.custom.mf"         @input="updateCustom({ mf:         +$event.target.value })" class="custom-num" /></label>
-        <label>+All   <input type="number" min="0" :value="modelValue.custom.allSkills"  @input="updateCustom({ allSkills:  +$event.target.value })" class="custom-num" /></label>
-        <label>+Cold  <input type="number" min="0" :value="modelValue.custom.coldSkills" @input="updateCustom({ coldSkills: +$event.target.value })" class="custom-num" /></label>
-        <label>Cold%  <input type="number" min="0" :value="modelValue.custom.coldDmgPct" @input="updateCustom({ coldDmgPct: +$event.target.value })" class="custom-num" /></label>
-        <label>ECR%   <input type="number" min="0" :value="modelValue.custom.enemyColdResPct" @input="updateCustom({ enemyColdResPct: +$event.target.value })" class="custom-num" title="Enemy Cold Resistance -X%" /></label>
+        <input type="text" placeholder="Name" :value="modelValue.custom.name" @input="updateCustom({ name: $event.target.value })" class="custom-text" />
+        <div class="custom-inputs-stats">
+          <label>FCR    <input type="number" min="0" :value="modelValue.custom.fcr"             @input="updateCustom({ fcr:             +$event.target.value })" class="custom-num" /></label>
+          <label>MF     <input type="number" min="0" :value="modelValue.custom.mf"              @input="updateCustom({ mf:              +$event.target.value })" class="custom-num" /></label>
+          <label>+All   <input type="number" min="0" :value="modelValue.custom.allSkills"       @input="updateCustom({ allSkills:       +$event.target.value })" class="custom-num" /></label>
+          <label>+Cold  <input type="number" min="0" :value="modelValue.custom.coldSkills"      @input="updateCustom({ coldSkills:      +$event.target.value })" class="custom-num" /></label>
+          <label>Cold%  <input type="number" min="0" :value="modelValue.custom.coldDmgPct"      @input="updateCustom({ coldDmgPct:      +$event.target.value })" class="custom-num" /></label>
+          <label>ECR%   <input type="number" min="0" :value="modelValue.custom.enemyColdResPct" @input="updateCustom({ enemyColdResPct: +$event.target.value })" class="custom-num" title="Enemy Cold Resistance -X%" /></label>
+        </div>
       </div>
 
       <div v-if="modelValue.preset === 'custom' && matchedSetItem" class="custom-stat-pills">
         <span class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
+      </div>
+
+      <div v-if="modelValue.preset && currentMaxSockets > 0" class="socket-section">
+        <div v-if="(modelValue.sockets ?? []).length" class="socket-list">
+          <div v-for="(sock, idx) in (modelValue.sockets ?? [])" :key="idx" class="socket-row">
+            <span class="socket-label">(socket)</span>
+            <select
+              :value="sock.preset ?? ''"
+              @change="updateSocket(idx, $event.target.value)"
+              class="slot-select socket-select"
+            >
+              <option value="">— gem/rune —</option>
+              <option v-for="si in socketItems" :key="si.id" :value="si.id"
+                :disabled="si.unique && usedUniqueSocketIds.has(si.id) && sock.preset !== si.id"
+              >{{ si.name }}</option>
+            </select>
+            <button @click="removeSocket(idx)" class="socket-remove" title="Remove socketed item">&times;</button>
+          </div>
+        </div>
+        <button
+          v-if="(modelValue.sockets ?? []).length < currentMaxSockets"
+          @click="addSocket"
+          class="socket-add"
+        >+ Socket</button>
       </div>
     </div>
   `,
@@ -911,6 +1030,7 @@ createApp({
         }
         SET_LEVEL_BONUSES.value = db.gear.set_level_bonuses ?? {};
         SET_SIZES.value = db.gear.set_sizes ?? {};
+        SOCKET_ITEMS.value = db.gear.socket_items ?? [];
         TARGET_GEAR_PRESETS.value = Object.entries(db.gear.presets).map(
           ([id, preset]) => ({ id, name: id, slots: preset, charms: preset.charms ?? [] })
         );
@@ -952,6 +1072,8 @@ createApp({
       stateError,
       GEAR_SLOTS,
       PRESET_ITEMS,
+      SOCKET_ITEMS,
+      usedUniqueSocketIds,
       GROUP_A,
       GROUP_B,
       runConfig,
@@ -1030,6 +1152,8 @@ createApp({
                 :slot-id="id"
                 :slot-label="GEAR_SLOTS.find(s => s.id === id).label"
                 :presets="PRESET_ITEMS[id] ?? []"
+                :socket-items="SOCKET_ITEMS"
+                :used-unique-socket-ids="usedUniqueSocketIds"
                 v-model="state.gear[id]"
               />
             </div>
@@ -1039,6 +1163,8 @@ createApp({
                 :slot-id="id"
                 :slot-label="GEAR_SLOTS.find(s => s.id === id).label"
                 :presets="PRESET_ITEMS[id] ?? []"
+                :socket-items="SOCKET_ITEMS"
+                :used-unique-socket-ids="usedUniqueSocketIds"
                 v-model="state.gear[id]"
               />
             </div>
