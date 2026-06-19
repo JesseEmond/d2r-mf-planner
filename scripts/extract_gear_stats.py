@@ -361,7 +361,7 @@ def extract() -> dict:
                 )
 
     return {"items_by_slot": items_by_slot, "presets": presets,
-            "set_level_bonuses": set_level_bonuses}
+            "set_level_bonuses": set_level_bonuses, "set_sizes": set_sizes}
 
 
 if __name__ == "__main__":
