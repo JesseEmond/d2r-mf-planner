@@ -164,6 +164,7 @@ body {
 .pill-skill     { background: #2a1e40; color: #c8a0ff; }
 .pill-cold      { background: #142030; color: #80d0ff; }
 .pill-cold-pct  { background: #0d2035; color: #50c8ff; border: 1px solid #1a4060; }
+.pill-ecr       { background: #102010; color: #60e080; border: 1px solid #1a4a1a; }
 .pill-total     { background: #2a2210; color: var(--color-unique); }
 .pill-set-match    { background: #0d1f0d; color: var(--color-set);    border: 1px solid #1a4a1a; font-style: italic; }
 .pill-unique-match { background: #1f1a0d; color: var(--color-unique); border: 1px solid #4a3a10; font-style: italic; }

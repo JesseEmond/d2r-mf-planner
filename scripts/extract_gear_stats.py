@@ -39,11 +39,12 @@ BODY_LOC_TO_SLOT = {
 
 CHARM_CODES = {"cm1", "cm2", "cm3", "cs2"}
 
-FCR_PROPS        = {"cast1", "cast2", "cast3"}
-MF_PROPS         = {"mag%"}
-ALL_SKILLS_PROPS = {"allskills", "sor"}
-COLD_SKILL_PROPS = {"coldskill"}
-COLD_PCT_PROPS   = {"extra-cold"}
+FCR_PROPS              = {"cast1", "cast2", "cast3"}
+MF_PROPS               = {"mag%"}
+ALL_SKILLS_PROPS       = {"allskills", "sor"}
+COLD_SKILL_PROPS       = {"coldskill"}
+COLD_PCT_PROPS         = {"extra-cold"}
+ENEMY_COLD_RES_PROPS   = {"pierce-cold"}
 
 
 def _load_tsv(path: Path) -> list[dict]:
@@ -129,7 +130,7 @@ def _itype_to_slot(itype: str, type_index: dict[str, dict]) -> str | None:
 
 
 def _extract_stats(row: dict, prop_col: str = "prop", max_col: str = "max", count: int = 12) -> dict:
-    fcr = mf = all_skills = cold_skills = cold_dmg_pct = 0
+    fcr = mf = all_skills = cold_skills = cold_dmg_pct = enemy_cold_res_pct = 0
     for i in range(1, count + 1):
         prop = row.get(f"{prop_col}{i}", "").strip()
         try:
@@ -146,7 +147,10 @@ def _extract_stats(row: dict, prop_col: str = "prop", max_col: str = "max", coun
             cold_skills += val
         elif prop in COLD_PCT_PROPS:
             cold_dmg_pct += val
-    return {"fcr": fcr, "mf": mf, "allSkills": all_skills, "coldSkills": cold_skills, "coldDmgPct": cold_dmg_pct}
+        elif prop in ENEMY_COLD_RES_PROPS:
+            enemy_cold_res_pct += val
+    return {"fcr": fcr, "mf": mf, "allSkills": all_skills, "coldSkills": cold_skills,
+            "coldDmgPct": cold_dmg_pct, "enemyColdResPct": enemy_cold_res_pct}
 
 
 def _extract_set_level_bonuses(sets_rows: list[dict], set_sizes: dict[str, int]) -> dict[str, list[dict]]:
@@ -163,7 +167,7 @@ def _extract_set_level_bonuses(sets_rows: list[dict], set_sizes: dict[str, int])
 
         # Partial bonuses: PCode2..PCode5 → N pieces
         for n in range(2, 6):
-            stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0, "coldDmgPct": 0}
+            stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0, "coldDmgPct": 0, "enemyColdResPct": 0}
             for ab in ("a", "b"):
                 prop = row.get(f"PCode{n}{ab}", "").strip()
                 try:
@@ -180,13 +184,15 @@ def _extract_set_level_bonuses(sets_rows: list[dict], set_sizes: dict[str, int])
                     stats["coldSkills"] += val
                 elif prop in COLD_PCT_PROPS:
                     stats["coldDmgPct"] += val
+                elif prop in ENEMY_COLD_RES_PROPS:
+                    stats["enemyColdResPct"] += val
             if any(v > 0 for v in stats.values()):
                 bonuses.append({"pieces": n, **stats})
 
         # Full-set bonus: FCode1..FCode8 → all pieces
         total = set_sizes.get(name, 0)
         if total > 0:
-            stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0, "coldDmgPct": 0}
+            stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0, "coldDmgPct": 0, "enemyColdResPct": 0}
             for i in range(1, 9):
                 prop = row.get(f"FCode{i}", "").strip()
                 try:
@@ -203,6 +209,8 @@ def _extract_set_level_bonuses(sets_rows: list[dict], set_sizes: dict[str, int])
                     stats["coldSkills"] += val
                 elif prop in COLD_PCT_PROPS:
                     stats["coldDmgPct"] += val
+                elif prop in ENEMY_COLD_RES_PROPS:
+                    stats["enemyColdResPct"] += val
             if any(v > 0 for v in stats.values()):
                 bonuses.append({"pieces": total, **stats})
 
@@ -216,7 +224,7 @@ def _extract_set_bonuses(row: dict) -> list[dict]:
     bonuses = []
     for i in range(1, 6):
         pieces = i + 1
-        stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0, "coldDmgPct": 0}
+        stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0, "coldDmgPct": 0, "enemyColdResPct": 0}
         for ab in ("a", "b"):
             prop = row.get(f"aprop{i}{ab}", "").strip()
             try:
@@ -233,6 +241,8 @@ def _extract_set_bonuses(row: dict) -> list[dict]:
                 stats["coldSkills"] += val
             elif prop in COLD_PCT_PROPS:
                 stats["coldDmgPct"] += val
+            elif prop in ENEMY_COLD_RES_PROPS:
+                stats["enemyColdResPct"] += val
         if any(v > 0 for v in stats.values()):
             bonuses.append({"pieces": pieces, **stats})
     return bonuses
@@ -357,11 +367,12 @@ def extract() -> dict:
         if not slot:
             raise KeyError(f"Custom item '{item_id}' is missing required 'slot' field")
         stats = {
-            "fcr":        entry.get("fcr", 0),
-            "mf":         entry.get("mf", 0),
-            "allSkills":  entry.get("allSkills", 0),
-            "coldSkills": entry.get("coldSkills", 0),
-            "coldDmgPct": entry.get("coldDmgPct", 0),
+            "fcr":              entry.get("fcr", 0),
+            "mf":               entry.get("mf", 0),
+            "allSkills":        entry.get("allSkills", 0),
+            "coldSkills":       entry.get("coldSkills", 0),
+            "coldDmgPct":       entry.get("coldDmgPct", 0),
+            "enemyColdResPct":  entry.get("enemyColdResPct", 0),
         }
         item = {"id": item_id, "name": item_id, **stats}
         target_slots = ["ring1", "ring2"] if slot == "ring" else [slot]
@@ -387,11 +398,12 @@ def extract() -> dict:
 
     for item_id, entry in custom_charms.items():
         stats = {
-            "fcr":        entry.get("fcr", 0),
-            "mf":         entry.get("mf", 0),
-            "allSkills":  entry.get("allSkills", 0),
-            "coldSkills": entry.get("coldSkills", 0),
-            "coldDmgPct": entry.get("coldDmgPct", 0),
+            "fcr":             entry.get("fcr", 0),
+            "mf":              entry.get("mf", 0),
+            "allSkills":       entry.get("allSkills", 0),
+            "coldSkills":      entry.get("coldSkills", 0),
+            "coldDmgPct":      entry.get("coldDmgPct", 0),
+            "enemyColdResPct": entry.get("enemyColdResPct", 0),
         }
         item: dict = {"id": item_id, "name": item_id, "unique": entry.get("unique", False), **stats}
         if entry.get("sunder"):
@@ -417,5 +429,6 @@ if __name__ == "__main__":
         print(f"\n{slot}:")
         for item in items:
             print(f"  {item['name']}: fcr={item['fcr']} mf={item['mf']} "
-                  f"allSkills={item['allSkills']} coldSkills={item['coldSkills']} coldDmgPct={item['coldDmgPct']}")
+                  f"allSkills={item['allSkills']} coldSkills={item['coldSkills']} "
+                  f"coldDmgPct={item['coldDmgPct']} enemyColdResPct={item['enemyColdResPct']}")
     print("\nPresets:", list(result["presets"].keys()))
