@@ -39,6 +39,8 @@ BODY_LOC_TO_SLOT = {
 
 CHARM_CODES = {"cm1", "cm2", "cm3", "cs2"}
 
+SOCKETABLE_SLOTS = {"head", "armor", "weapon", "shield"}
+
 FCR_PROPS              = {"cast1", "cast2", "cast3"}
 MF_PROPS               = {"mag%"}
 ALL_SKILLS_PROPS       = {"allskills", "sor"}
@@ -112,6 +114,21 @@ def _build_code_to_slot(type_index: dict[str, dict]) -> dict[str, str]:
                 code_to_slot[code] = slot
 
     return code_to_slot
+
+
+def _build_code_to_max_sockets() -> dict[str, int]:
+    """Map item base code → maximum number of sockets from armor/misc/weapons data."""
+    code_to_max: dict[str, int] = {}
+    for src in ("armor", "misc", "weapons"):
+        for row in _load_tsv(RAW / f"{src}.txt"):
+            code = row.get("code", "").strip()
+            sockets = row.get("gemsockets", "").strip()
+            if code and sockets:
+                try:
+                    code_to_max[code] = int(sockets)
+                except ValueError:
+                    pass
+    return code_to_max
 
 
 def _build_name_lookup() -> dict[str, str]:
@@ -268,6 +285,36 @@ def _extract_set_bonuses(row: dict, item_name: str = "unknown") -> list[dict]:
     return bonuses
 
 
+def _make_socket_item(item_id: str, entry: dict) -> dict:
+    """Build a socket item entry for db.json from a custom_socket_items config entry."""
+    slot_stats_cfg = entry.get("slot_stats")
+    base_stats = {
+        "fcr":             entry.get("fcr", 0),
+        "mf":              entry.get("mf", 0),
+        "allSkills":       entry.get("allSkills", 0),
+        "coldSkills":      entry.get("coldSkills", 0),
+        "coldDmgPct":      entry.get("coldDmgPct", 0),
+        "enemyColdResPct": entry.get("enemyColdResPct", 0),
+    }
+    result: dict = {"id": item_id, "name": item_id}
+    if entry.get("unique"):
+        result["unique"] = True
+    if slot_stats_cfg:
+        slot_stats: dict[str, dict] = {}
+        for slot_key, s in slot_stats_cfg.items():
+            slot_stats[slot_key] = {
+                "fcr":             s.get("fcr", 0),
+                "mf":              s.get("mf", 0),
+                "allSkills":       s.get("allSkills", 0),
+                "coldSkills":      s.get("coldSkills", 0),
+                "coldDmgPct":      s.get("coldDmgPct", 0),
+                "enemyColdResPct": s.get("enemyColdResPct", 0),
+            }
+        result["slot_stats"] = slot_stats
+        return result
+    return {**result, **base_stats}
+
+
 def extract() -> dict:
     config = json.loads(CONFIG.read_text())
     unique_item_names: list[str] = config.get("unique_items", [])
@@ -276,10 +323,12 @@ def extract() -> dict:
     custom_items: dict = config.get("custom_items", {})
     unique_charm_names: list[str] = config.get("unique_charms", [])
     custom_charms: dict = config.get("custom_charms", {})
+    custom_socket_items: dict = config.get("custom_socket_items", {})
     presets: dict = config.get("presets", {})
 
     type_index = _build_item_type_index()
     code_to_slot = _build_code_to_slot(type_index)
+    code_to_max_sockets = _build_code_to_max_sockets()
     name_to_display = _build_name_lookup()
 
     unique_rows: dict[str, dict] = {}
@@ -328,7 +377,9 @@ def extract() -> dict:
             raise KeyError(f"No display name found for '{internal_name}' in item-names.json")
 
         stats = _extract_stats(row, item_name=internal_name)
-        item = {"id": internal_name, "name": display_name, **stats}
+        raw_max = code_to_max_sockets.get(code, 0) if slot in SOCKETABLE_SLOTS else 0
+        max_sockets = min(raw_max, 1)
+        item = {"id": internal_name, "name": display_name, "max_sockets": max_sockets, **stats}
 
         target_slots = ["ring1", "ring2"] if slot == "ring" else [slot]
         for s in target_slots:
@@ -354,7 +405,7 @@ def extract() -> dict:
             raise KeyError(f"No slot mapping found for runeword '{rw_name}'")
 
         stats = _extract_stats(row, prop_col="T1Code", max_col="T1Max", count=7, item_name=rw_name)
-        item = {"id": rw_name, "name": rw_name, **stats}
+        item = {"id": rw_name, "name": rw_name, "max_sockets": 0, **stats}
         for s in slots:
             items_by_slot.setdefault(s, []).append(item)
 
@@ -375,8 +426,10 @@ def extract() -> dict:
         set_name = row.get("set", "").strip()
         stats = _extract_stats(row, item_name=internal_name)
         set_bonuses = _extract_set_bonuses(row, item_name=internal_name)
+        raw_max = code_to_max_sockets.get(code, 0) if slot in SOCKETABLE_SLOTS else 0
+        max_sockets = min(raw_max, 1)
         item: dict = {"id": internal_name, "name": display_name, "set_name": set_name,
-                      **stats}
+                      "max_sockets": max_sockets, **stats}
         if set_bonuses:
             item["set_bonuses"] = set_bonuses
 
@@ -396,7 +449,8 @@ def extract() -> dict:
             "coldDmgPct":       entry.get("coldDmgPct", 0),
             "enemyColdResPct":  entry.get("enemyColdResPct", 0),
         }
-        item = {"id": item_id, "name": item_id, **stats}
+        max_sockets = entry.get("max_sockets", 0)
+        item = {"id": item_id, "name": item_id, "max_sockets": max_sockets, **stats}
         target_slots = ["ring1", "ring2"] if slot == "ring" else [slot]
         for s in target_slots:
             items_by_slot.setdefault(s, []).append(item)
@@ -415,7 +469,7 @@ def extract() -> dict:
             raise KeyError(f"No display name found for '{internal_name}' in item-names.json")
 
         stats = _extract_stats(row, item_name=internal_name)
-        item = {"id": internal_name, "name": display_name, "unique": True, **stats}
+        item = {"id": internal_name, "name": display_name, "unique": True, "max_sockets": 0, **stats}
         items_by_slot.setdefault("charms", []).append(item)
 
     for item_id, entry in custom_charms.items():
@@ -427,10 +481,15 @@ def extract() -> dict:
             "coldDmgPct":      entry.get("coldDmgPct", 0),
             "enemyColdResPct": entry.get("enemyColdResPct", 0),
         }
-        item: dict = {"id": item_id, "name": item_id, "unique": entry.get("unique", False), **stats}
+        item: dict = {"id": item_id, "name": item_id, "unique": entry.get("unique", False), "max_sockets": 0, **stats}
         if entry.get("sunder"):
             item["sunder"] = entry["sunder"]
         items_by_slot.setdefault("charms", []).append(item)
+
+    socket_items: list[dict] = [
+        _make_socket_item(item_id, entry)
+        for item_id, entry in custom_socket_items.items()
+    ]
 
     for preset_name, preset_slots in presets.items():
         for slot, item_id in preset_slots.items():
@@ -444,7 +503,8 @@ def extract() -> dict:
                 )
 
     return {"items_by_slot": items_by_slot, "presets": presets,
-            "set_level_bonuses": set_level_bonuses, "set_sizes": set_sizes}
+            "set_level_bonuses": set_level_bonuses, "set_sizes": set_sizes,
+            "socket_items": socket_items}
 
 
 if __name__ == "__main__":

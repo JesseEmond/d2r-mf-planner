@@ -170,6 +170,61 @@ body {
 .pill-unique-match { background: #1f1a0d; color: var(--color-unique); border: 1px solid #4a3a10; font-style: italic; }
 .pill-sunder    { background: #1f1530; color: #d080ff; border: 1px solid #4a2060; }
 
+/* Socket section (inline within gear slot) */
+.socket-section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  flex-basis: 100%;
+  margin-top: 0.1rem;
+}
+.socket-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+.socket-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.socket-label {
+  width: 5.5rem;
+  font-size: 0.75rem;
+  color: var(--color-text-faint);
+  flex-shrink: 0;
+  font-style: italic;
+}
+.socket-select {
+  flex: 0 0 220px;
+}
+.socket-remove {
+  background: none;
+  border: 1px solid #3a2020;
+  color: #885050;
+  border-radius: 3px;
+  padding: 0 6px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.socket-remove:hover { border-color: #c06060; color: #ff8080; }
+.socket-add {
+  background: none;
+  border: 1px dashed var(--color-border);
+  color: #777;
+  border-radius: 3px;
+  padding: 1px 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-family: inherit;
+  align-self: flex-start;
+  margin-left: 5.9rem;
+}
+.socket-add:hover { border-color: var(--color-text-faint); color: var(--color-text-muted); }
+
 /* Charms section (sits below set bonuses, above Stats) */
 .charms-section {
   border-top: 1px solid var(--color-border);
@@ -253,6 +308,13 @@ body {
   font-family: inherit;
 }
 .charm-add:hover { border-color: var(--color-text-faint); color: var(--color-text-muted); }
+.custom-inputs-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  flex-basis: 100%;
+  align-items: center;
+}
 .charm-custom-inputs {
   display: flex;
   flex-wrap: wrap;

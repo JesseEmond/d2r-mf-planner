@@ -1,4 +1,31 @@
 {
+  "custom_socket_items": {
+    "Ist": {
+      "slot_stats": {
+        "weapon": { "mf": 30 },
+        "default": { "mf": 25 }
+      }
+    },
+    "Perfect Topaz": {
+      "slot_stats": {
+        "head":   { "mf": 24 },
+        "armor":  { "mf": 24 },
+        "weapon": {},
+        "shield": {},
+        "default": {}
+      }
+    },
+    "Cold Facet (+5/-5)": {
+      "coldDmgPct": 5,
+      "enemyColdResPct": 5
+    },
+    "Protector's Frost": {
+      "unique": true,
+      "mf": 35,
+      "coldDmgPct": 10,
+      "enemyColdResPct": 10
+    }
+  },
   "unique_charms": [
     "Gheed's Fortune",
     "Annihilus"
