@@ -27,6 +27,7 @@ const CUSTOM_ITEM = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSk
 const PRESET_ITEMS = ref({});
 const TARGET_GEAR_PRESETS = ref([]);
 const SET_LEVEL_BONUSES = ref({});
+const SET_SIZES = ref({});
 
 // ── Pure computation functions ─────────────────────────────────────────────
 // No Vue dependency — the optimizer can call these directly.
@@ -367,7 +368,8 @@ function computeSetBonuses(getSlotStats) {
       }
     }
     fcr += sFcr; mf += sMf; allSkills += sAll; coldSkills += sCold;
-    activeSets.push({ name: setName, pieces: count, fcr: sFcr, mf: sMf, allSkills: sAll, coldSkills: sCold });
+    const total = SET_SIZES.value[setName] ?? count;
+    activeSets.push({ name: setName, pieces: count, total, fcr: sFcr, mf: sMf, allSkills: sAll, coldSkills: sCold });
   }
 
   return { fcr, mf, allSkills, coldSkills, activeSets };
@@ -558,6 +560,7 @@ createApp({
           PRESET_ITEMS.value[id] = [...(itemsBySlot[id] ?? []), CUSTOM_ITEM];
         }
         SET_LEVEL_BONUSES.value = db.gear.set_level_bonuses ?? {};
+        SET_SIZES.value = db.gear.set_sizes ?? {};
         TARGET_GEAR_PRESETS.value = Object.entries(db.gear.presets).map(
           ([id, slots]) => ({ id, name: id, slots })
         );
@@ -676,8 +679,14 @@ createApp({
             </div>
 
             <div v-if="activeSetBonuses.length" class="set-bonuses-block">
+              <div class="set-bonuses-header">Set Bonuses</div>
               <div v-for="sb in activeSetBonuses" :key="sb.name" class="set-bonus-row">
-                <span class="set-bonus-name">{{ sb.name }} ({{ sb.pieces }}pc)</span>
+                <div class="set-bonus-meta">
+                  <span class="set-bonus-name">{{ sb.name }}</span>
+                  <span class="set-pips" :title="sb.pieces + ' of ' + sb.total + ' pieces equipped'">
+                    <span v-for="i in sb.total" :key="i" :class="i <= sb.pieces ? 'pip pip-on' : 'pip pip-off'">{{ i <= sb.pieces ? '●' : '○' }}</span>
+                  </span>
+                </div>
                 <div class="stat-pills set-bonus-pills">
                   <span v-if="sb.fcr"        class="pill pill-fcr"   title="Set bonus FCR">FCR +{{ sb.fcr }}%</span>
                   <span v-if="sb.mf"         class="pill pill-mf"    title="Set bonus MF">MF +{{ sb.mf }}%</span>
@@ -845,8 +854,14 @@ createApp({
             </div>
 
             <div v-if="targetActiveSetBonuses.length" class="set-bonuses-block">
+              <div class="set-bonuses-header">Set Bonuses</div>
               <div v-for="sb in targetActiveSetBonuses" :key="sb.name" class="set-bonus-row">
-                <span class="set-bonus-name">{{ sb.name }} ({{ sb.pieces }}pc)</span>
+                <div class="set-bonus-meta">
+                  <span class="set-bonus-name">{{ sb.name }}</span>
+                  <span class="set-pips" :title="sb.pieces + ' of ' + sb.total + ' pieces equipped'">
+                    <span v-for="i in sb.total" :key="i" :class="i <= sb.pieces ? 'pip pip-on' : 'pip pip-off'">{{ i <= sb.pieces ? '●' : '○' }}</span>
+                  </span>
+                </div>
                 <div class="stat-pills set-bonus-pills">
                   <span v-if="sb.fcr"        class="pill pill-fcr"   title="Set bonus FCR">FCR +{{ sb.fcr }}%</span>
                   <span v-if="sb.mf"         class="pill pill-mf"    title="Set bonus MF">MF +{{ sb.mf }}%</span>
