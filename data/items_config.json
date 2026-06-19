@@ -22,6 +22,14 @@
     "The Stone of Jordan",
     "Nagelring"
   ],
+  "set_items": [
+    "Tal Rasha's Adjudication",
+    "Tal Rasha's Lidless Eye",
+    "Tal Rasha's Fire-Spun Cloth",
+    "Tal Rasha's Howling Wind",
+    "Tal Rasha's Horadric Crest",
+    "Trang-Oul's Claws"
+  ],
   "custom_items": {
     "Magic FCR Ring": {"slot": "ring", "fcr": 10, "mf": 0, "allSkills": 0, "coldSkills": 0}
   },

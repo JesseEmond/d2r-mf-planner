@@ -1639,6 +1639,15 @@
           "mf": 0,
           "allSkills": 1,
           "coldSkills": 0
+        },
+        {
+          "id": "Tal Rasha's Horadric Crest",
+          "name": "Tal Rasha's Horadric Crest",
+          "set_name": "Tal Rasha's Wrappings",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
         }
       ],
       "amulet": [
@@ -1657,6 +1666,24 @@
           "mf": 0,
           "allSkills": 1,
           "coldSkills": 0
+        },
+        {
+          "id": "Tal Rasha's Adjudication",
+          "name": "Tal Rasha's Adjudication",
+          "set_name": "Tal Rasha's Wrappings",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 2,
+          "coldSkills": 0,
+          "set_bonuses": [
+            {
+              "pieces": 4,
+              "fcr": 10,
+              "mf": 0,
+              "allSkills": 0,
+              "coldSkills": 0
+            }
+          ]
         }
       ],
       "weapon": [
@@ -1699,6 +1726,24 @@
           "mf": 0,
           "allSkills": 2,
           "coldSkills": 0
+        },
+        {
+          "id": "Tal Rasha's Lidless Eye",
+          "name": "Tal Rasha's Lidless Eye",
+          "set_name": "Tal Rasha's Wrappings",
+          "fcr": 20,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0,
+          "set_bonuses": [
+            {
+              "pieces": 2,
+              "fcr": 0,
+              "mf": 0,
+              "allSkills": 1,
+              "coldSkills": 0
+            }
+          ]
         }
       ],
       "shield": [
@@ -1727,12 +1772,39 @@
           "mf": 0,
           "allSkills": 1,
           "coldSkills": 0
+        },
+        {
+          "id": "Tal Rasha's Howling Wind",
+          "name": "Tal Rasha's Guardianship",
+          "set_name": "Tal Rasha's Wrappings",
+          "fcr": 0,
+          "mf": 88,
+          "allSkills": 0,
+          "coldSkills": 0,
+          "set_bonuses": [
+            {
+              "pieces": 2,
+              "fcr": 10,
+              "mf": 0,
+              "allSkills": 0,
+              "coldSkills": 0
+            }
+          ]
         }
       ],
       "gloves": [
         {
           "id": "Magefist",
           "name": "Magefist",
+          "fcr": 20,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
+        },
+        {
+          "id": "Trang-Oul's Claws",
+          "name": "Trang-Oul's Claws",
+          "set_name": "Trang-Oul's Avatar",
           "fcr": 20,
           "mf": 0,
           "allSkills": 0,
@@ -1755,6 +1827,24 @@
           "mf": 30,
           "allSkills": 0,
           "coldSkills": 0
+        },
+        {
+          "id": "Tal Rasha's Fire-Spun Cloth",
+          "name": "Tal Rasha's Fine-Spun Cloth",
+          "set_name": "Tal Rasha's Wrappings",
+          "fcr": 0,
+          "mf": 15,
+          "allSkills": 0,
+          "coldSkills": 0,
+          "set_bonuses": [
+            {
+              "pieces": 3,
+              "fcr": 10,
+              "mf": 0,
+              "allSkills": 0,
+              "coldSkills": 0
+            }
+          ]
         }
       ],
       "boots": [
@@ -1849,6 +1939,177 @@
         "ring1": "The Stone of Jordan",
         "ring2": "The Stone of Jordan"
       }
+    },
+    "set_level_bonuses": {
+      "Cathan's Traps": [
+        {
+          "pieces": 5,
+          "fcr": 10,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ],
+      "Angelical Raiment": [
+        {
+          "pieces": 4,
+          "fcr": 0,
+          "mf": 40,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ],
+      "Arcanna's Tricks": [
+        {
+          "pieces": 4,
+          "fcr": 20,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        }
+      ],
+      "Aldur's Watchtower": [
+        {
+          "pieces": 3,
+          "fcr": 0,
+          "mf": 50,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ],
+      "Tal Rasha's Wrappings": [
+        {
+          "pieces": 3,
+          "fcr": 0,
+          "mf": 65,
+          "allSkills": 0,
+          "coldSkills": 0
+        },
+        {
+          "pieces": 5,
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 3,
+          "coldSkills": 0
+        }
+      ],
+      "M'avina's Battle Hymn": [
+        {
+          "pieces": 5,
+          "fcr": 0,
+          "mf": 100,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ],
+      "The Disciple": [
+        {
+          "pieces": 5,
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 2,
+          "coldSkills": 0
+        }
+      ],
+      "Heaven's Brethren": [
+        {
+          "pieces": 4,
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 2,
+          "coldSkills": 0
+        }
+      ],
+      "Orphan's Call": [
+        {
+          "pieces": 4,
+          "fcr": 0,
+          "mf": 80,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ],
+      "Hwanin's Majesty": [
+        {
+          "pieces": 4,
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 2,
+          "coldSkills": 0
+        }
+      ],
+      "Sazabi's Grand Tribute": [
+        {
+          "pieces": 3,
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        }
+      ],
+      "Bul-Kathos' Children": [
+        {
+          "pieces": 2,
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 2,
+          "coldSkills": 0
+        }
+      ],
+      "Cow King's Leathers": [
+        {
+          "pieces": 3,
+          "fcr": 0,
+          "mf": 100,
+          "allSkills": 1,
+          "coldSkills": 0
+        }
+      ],
+      "Naj's Ancient Set": [
+        {
+          "pieces": 3,
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        }
+      ],
+      "McAuley's Folly": [
+        {
+          "pieces": 4,
+          "fcr": 0,
+          "mf": 50,
+          "allSkills": 1,
+          "coldSkills": 0
+        }
+      ],
+      "Warlord's Glory": [
+        {
+          "pieces": 5,
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        }
+      ],
+      "Bane's Garments": [
+        {
+          "pieces": 3,
+          "fcr": 25,
+          "mf": 40,
+          "allSkills": 1,
+          "coldSkills": 0
+        }
+      ],
+      "Horazon's Splendor": [
+        {
+          "pieces": 5,
+          "fcr": 0,
+          "mf": 100,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ]
     }
   }
 }

@@ -141,10 +141,94 @@ def _extract_stats(row: dict, prop_col: str = "prop", max_col: str = "max", coun
     return {"fcr": fcr, "mf": mf, "allSkills": all_skills, "coldSkills": cold_skills}
 
 
+def _extract_set_level_bonuses(sets_rows: list[dict], set_sizes: dict[str, int]) -> dict[str, list[dict]]:
+    """
+    Extract set-level partial + full bonuses from sets.txt.
+    Returns {set_name: [{pieces, fcr, mf, allSkills, coldSkills}, ...]}
+    """
+    result: dict[str, list[dict]] = {}
+    for row in sets_rows:
+        name = row.get("index", "").strip()
+        if not name:
+            continue
+        bonuses: list[dict] = []
+
+        # Partial bonuses: PCode2..PCode5 → N pieces
+        for n in range(2, 6):
+            stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0}
+            for ab in ("a", "b"):
+                prop = row.get(f"PCode{n}{ab}", "").strip()
+                try:
+                    val = int(row.get(f"PMax{n}{ab}", "") or 0)
+                except ValueError:
+                    val = 0
+                if prop in FCR_PROPS:
+                    stats["fcr"] += val
+                elif prop in MF_PROPS:
+                    stats["mf"] += val
+                elif prop in ALL_SKILLS_PROPS:
+                    stats["allSkills"] += val
+                elif prop in COLD_SKILL_PROPS:
+                    stats["coldSkills"] += val
+            if any(v > 0 for v in stats.values()):
+                bonuses.append({"pieces": n, **stats})
+
+        # Full-set bonus: FCode1..FCode8 → all pieces
+        total = set_sizes.get(name, 0)
+        if total > 0:
+            stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0}
+            for i in range(1, 9):
+                prop = row.get(f"FCode{i}", "").strip()
+                try:
+                    val = int(row.get(f"FMax{i}", "") or 0)
+                except ValueError:
+                    val = 0
+                if prop in FCR_PROPS:
+                    stats["fcr"] += val
+                elif prop in MF_PROPS:
+                    stats["mf"] += val
+                elif prop in ALL_SKILLS_PROPS:
+                    stats["allSkills"] += val
+                elif prop in COLD_SKILL_PROPS:
+                    stats["coldSkills"] += val
+            if any(v > 0 for v in stats.values()):
+                bonuses.append({"pieces": total, **stats})
+
+        if bonuses:
+            result[name] = bonuses
+    return result
+
+
+def _extract_set_bonuses(row: dict) -> list[dict]:
+    """Extract partial set bonuses from aprop columns. apropN corresponds to N+1 pieces."""
+    bonuses = []
+    for i in range(1, 6):
+        pieces = i + 1
+        stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0}
+        for ab in ("a", "b"):
+            prop = row.get(f"aprop{i}{ab}", "").strip()
+            try:
+                val = int(row.get(f"amax{i}{ab}", "") or 0)
+            except ValueError:
+                val = 0
+            if prop in FCR_PROPS:
+                stats["fcr"] += val
+            elif prop in MF_PROPS:
+                stats["mf"] += val
+            elif prop in ALL_SKILLS_PROPS:
+                stats["allSkills"] += val
+            elif prop in COLD_SKILL_PROPS:
+                stats["coldSkills"] += val
+        if any(v > 0 for v in stats.values()):
+            bonuses.append({"pieces": pieces, **stats})
+    return bonuses
+
+
 def extract() -> dict:
     config = json.loads(CONFIG.read_text())
     unique_item_names: list[str] = config.get("unique_items", [])
     runeword_names: list[str] = config.get("runewords", [])
+    set_item_names: list[str] = config.get("set_items", [])
     custom_items: dict = config.get("custom_items", {})
     presets: dict = config.get("presets", {})
 
@@ -164,6 +248,20 @@ def extract() -> dict:
             name = row.get("*Rune Name", "").strip()
             if name:
                 runeword_rows[name] = row
+
+    all_set_item_rows = _load_tsv(RAW / "setitems.txt")
+    set_item_rows: dict[str, dict] = {}
+    set_sizes: dict[str, int] = {}
+    for row in all_set_item_rows:
+        idx = row.get("index", "").strip()
+        sname = row.get("set", "").strip()
+        if idx:
+            set_item_rows[idx] = row
+        if sname:
+            set_sizes[sname] = set_sizes.get(sname, 0) + 1
+
+    sets_rows = _load_tsv(RAW / "sets.txt")
+    set_level_bonuses = _extract_set_level_bonuses(sets_rows, set_sizes)
 
     items_by_slot: dict[str, list] = {}
 
@@ -212,6 +310,32 @@ def extract() -> dict:
         for s in slots:
             items_by_slot.setdefault(s, []).append(item)
 
+    for internal_name in set_item_names:
+        row = set_item_rows.get(internal_name)
+        if not row:
+            raise KeyError(f"'{internal_name}' not found in setitems.txt")
+
+        code = row.get("item", "").strip()
+        slot = code_to_slot.get(code)
+        if not slot:
+            raise KeyError(f"No slot mapping for code '{code}' (set item: '{internal_name}')")
+
+        display_name = name_to_display.get(internal_name)
+        if not display_name:
+            raise KeyError(f"No display name found for '{internal_name}' in item-names.json")
+
+        set_name = row.get("set", "").strip()
+        stats = _extract_stats(row)
+        set_bonuses = _extract_set_bonuses(row)
+        item: dict = {"id": internal_name, "name": display_name, "set_name": set_name,
+                      **stats}
+        if set_bonuses:
+            item["set_bonuses"] = set_bonuses
+
+        target_slots = ["ring1", "ring2"] if slot == "ring" else [slot]
+        for s in target_slots:
+            items_by_slot.setdefault(s, []).append(item)
+
     for item_id, entry in custom_items.items():
         slot = entry.get("slot")
         if not slot:
@@ -236,7 +360,8 @@ def extract() -> dict:
                     f"which is not available for that slot"
                 )
 
-    return {"items_by_slot": items_by_slot, "presets": presets}
+    return {"items_by_slot": items_by_slot, "presets": presets,
+            "set_level_bonuses": set_level_bonuses}
 
 
 if __name__ == "__main__":

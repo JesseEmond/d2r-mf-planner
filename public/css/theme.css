@@ -316,6 +316,28 @@ body {
 }
 
 
+/* Set bonus block */
+.set-bonuses-block {
+  margin: 0.5rem 0 0.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.set-bonus-row {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+.set-bonus-name {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+.set-bonus-pills {
+  margin-top: 0;
+}
+
 /* Panel divider (hr inside a card) */
 .panel-divider {
   border: none;

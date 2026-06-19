@@ -26,6 +26,7 @@ const CUSTOM_ITEM = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSk
 
 const PRESET_ITEMS = ref({});
 const TARGET_GEAR_PRESETS = ref([]);
+const SET_LEVEL_BONUSES = ref({});
 
 // ── Pure computation functions ─────────────────────────────────────────────
 // No Vue dependency — the optimizer can call these directly.
@@ -331,8 +332,59 @@ const monsterDb = ref(null);
 // Creates a set of Vue computeds for one gear configuration.
 // getSlotStats(slotId) → { fcr, mf, allSkills, coldSkills }
 
+function computeSetBonuses(getSlotStats) {
+  const sets = {};
+  for (const { id: slotId } of GEAR_SLOTS) {
+    const item = getSlotStats(slotId);
+    if (!item?.set_name) continue;
+    if (!sets[item.set_name]) sets[item.set_name] = { count: 0, items: [] };
+    sets[item.set_name].count++;
+    sets[item.set_name].items.push(item);
+  }
+
+  let fcr = 0, mf = 0, allSkills = 0, coldSkills = 0;
+  const activeSets = [];
+
+  for (const [setName, { count, items }] of Object.entries(sets)) {
+    if (count < 2) continue;
+    let sFcr = 0, sMf = 0, sAll = 0, sCold = 0;
+    for (const item of items) {
+      for (const b of (item.set_bonuses ?? [])) {
+        if (b.pieces <= count) {
+          sFcr  += b.fcr        || 0;
+          sMf   += b.mf         || 0;
+          sAll  += b.allSkills  || 0;
+          sCold += b.coldSkills || 0;
+        }
+      }
+    }
+    for (const b of (SET_LEVEL_BONUSES.value[setName] ?? [])) {
+      if (b.pieces <= count) {
+        sFcr  += b.fcr        || 0;
+        sMf   += b.mf         || 0;
+        sAll  += b.allSkills  || 0;
+        sCold += b.coldSkills || 0;
+      }
+    }
+    fcr += sFcr; mf += sMf; allSkills += sAll; coldSkills += sCold;
+    activeSets.push({ name: setName, pieces: count, fcr: sFcr, mf: sMf, allSkills: sAll, coldSkills: sCold });
+  }
+
+  return { fcr, mf, allSkills, coldSkills, activeSets };
+}
+
 function makeBuild(getSlotStats) {
-  const gearTotals = computed(() => computeGearTotals(getSlotStats));
+  const setBonuses   = computed(() => computeSetBonuses(getSlotStats));
+  const gearTotals   = computed(() => {
+    const base   = computeGearTotals(getSlotStats);
+    const bonus  = setBonuses.value;
+    return {
+      fcr:        base.fcr        + bonus.fcr,
+      mf:         base.mf         + bonus.mf,
+      allSkills:  base.allSkills  + bonus.allSkills,
+      coldSkills: base.coldSkills + bonus.coldSkills,
+    };
+  });
 
   const totalFCR        = computed(() => gearTotals.value.fcr);
   const totalMF         = computed(() => gearTotals.value.mf);
@@ -380,11 +432,14 @@ function makeBuild(getSlotStats) {
     return total > 0 ? { travel, kill, total } : null;
   });
 
+  const activeSetBonuses = computed(() => setBonuses.value.activeSets);
+
   return {
     totalFCR, totalMF, totalAllSkills, totalColdSkills,
     effectiveColdMastery, fcrBreakpoint, fcrTooltip, fcrBadgeClass,
     blizzDps, iceBlastDps, totalDps, combatAssumptions,
     runStats, runDropProbs, totalDropProbs, ettvd, runTimeSummary,
+    activeSetBonuses,
   };
 }
 
@@ -502,6 +557,7 @@ createApp({
         for (const { id } of GEAR_SLOTS) {
           PRESET_ITEMS.value[id] = [...(itemsBySlot[id] ?? []), CUSTOM_ITEM];
         }
+        SET_LEVEL_BONUSES.value = db.gear.set_level_bonuses ?? {};
         TARGET_GEAR_PRESETS.value = Object.entries(db.gear.presets).map(
           ([id, slots]) => ({ id, name: id, slots })
         );
@@ -549,6 +605,7 @@ createApp({
       effSetMF,
 
       // Current build — same names as before so the template is unchanged
+      activeSetBonuses:     currentBuild.activeSetBonuses,
       totalFCR:             currentBuild.totalFCR,
       totalMF:              currentBuild.totalMF,
       totalAllSkills:       currentBuild.totalAllSkills,
@@ -568,6 +625,7 @@ createApp({
       runTimeSummary:       currentBuild.runTimeSummary,
 
       // Target build — 'target' prefix keeps template names distinct
+      targetActiveSetBonuses:     targetBuild.activeSetBonuses,
       targetTotalFCR:             targetBuild.totalFCR,
       targetTotalMF:              targetBuild.totalMF,
       targetTotalAllSkills:       targetBuild.totalAllSkills,
@@ -615,6 +673,18 @@ createApp({
                 :presets="PRESET_ITEMS[id] ?? []"
                 v-model="state.gear[id]"
               />
+            </div>
+
+            <div v-if="activeSetBonuses.length" class="set-bonuses-block">
+              <div v-for="sb in activeSetBonuses" :key="sb.name" class="set-bonus-row">
+                <span class="set-bonus-name">{{ sb.name }} ({{ sb.pieces }}pc)</span>
+                <div class="stat-pills set-bonus-pills">
+                  <span v-if="sb.fcr"        class="pill pill-fcr"   title="Set bonus FCR">FCR +{{ sb.fcr }}%</span>
+                  <span v-if="sb.mf"         class="pill pill-mf"    title="Set bonus MF">MF +{{ sb.mf }}%</span>
+                  <span v-if="sb.allSkills"  class="pill pill-skill" title="Set bonus +All Skills">+{{ sb.allSkills }} All</span>
+                  <span v-if="sb.coldSkills" class="pill pill-cold"  title="Set bonus +Cold Skills">+{{ sb.coldSkills }} Cold</span>
+                </div>
+              </div>
             </div>
 
             <hr class="panel-divider" />
@@ -770,6 +840,18 @@ createApp({
                   <span v-if="targetSlots[id].stats.mf"         class="pill pill-mf"    title="Magic Find">MF +{{ targetSlots[id].stats.mf }}%</span>
                   <span v-if="targetSlots[id].stats.allSkills"  class="pill pill-skill" title="+All Skills">+{{ targetSlots[id].stats.allSkills }} All</span>
                   <span v-if="targetSlots[id].stats.coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ targetSlots[id].stats.coldSkills }} Cold</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="targetActiveSetBonuses.length" class="set-bonuses-block">
+              <div v-for="sb in targetActiveSetBonuses" :key="sb.name" class="set-bonus-row">
+                <span class="set-bonus-name">{{ sb.name }} ({{ sb.pieces }}pc)</span>
+                <div class="stat-pills set-bonus-pills">
+                  <span v-if="sb.fcr"        class="pill pill-fcr"   title="Set bonus FCR">FCR +{{ sb.fcr }}%</span>
+                  <span v-if="sb.mf"         class="pill pill-mf"    title="Set bonus MF">MF +{{ sb.mf }}%</span>
+                  <span v-if="sb.allSkills"  class="pill pill-skill" title="Set bonus +All Skills">+{{ sb.allSkills }} All</span>
+                  <span v-if="sb.coldSkills" class="pill pill-cold"  title="Set bonus +Cold Skills">+{{ sb.coldSkills }} Cold</span>
                 </div>
               </div>
             </div>
