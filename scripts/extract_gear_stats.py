@@ -491,9 +491,10 @@ def extract() -> dict:
         for item_id, entry in custom_socket_items.items()
     ]
 
+    socket_item_ids = {si["id"] for si in socket_items}
     for preset_name, preset_slots in presets.items():
         for slot, item_id in preset_slots.items():
-            if slot == "charms":
+            if slot in ("charms", "sockets"):
                 continue
             slot_item_ids = {item["id"] for item in items_by_slot.get(slot, [])}
             if item_id not in slot_item_ids:
@@ -501,6 +502,13 @@ def extract() -> dict:
                     f"Preset '{preset_name}' slot '{slot}' references item '{item_id}' "
                     f"which is not available for that slot"
                 )
+        for slot, sock_ids in preset_slots.get("sockets", {}).items():
+            for sock_id in sock_ids:
+                if sock_id not in socket_item_ids:
+                    raise KeyError(
+                        f"Preset '{preset_name}' socket slot '{slot}' references socket item "
+                        f"'{sock_id}' which is not defined in custom_socket_items"
+                    )
 
     return {"items_by_slot": items_by_slot, "presets": presets,
             "set_level_bonuses": set_level_bonuses, "set_sizes": set_sizes,
