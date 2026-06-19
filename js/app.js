@@ -571,7 +571,8 @@ const targetPresetCharms = computed(() => {
   const charmItems = PRESET_ITEMS.value['charms'] ?? [];
   return preset.charms.map(({ id, count }) => {
     const item = charmItems.find(p => p.id === id);
-    return { id, name: item?.name ?? id, count: count ?? 1, item };
+    const n = count ?? 1;
+    return { id, name: item?.name ?? id, count: n, item, stats: scaleStats(item ?? {}, n) };
   });
 });
 
@@ -596,6 +597,42 @@ watch(state, () => {
   history.replaceState(null, '', encoded ? `?s=${encoded}` : location.pathname);
 }, { deep: true });
 
+// ── StatPills component ────────────────────────────────────────────────────
+
+const StatPills = defineComponent({
+  props: { stats: { type: Object, required: true } },
+  template: `
+    <div class="stat-pills">
+      <slot />
+      <span v-if="stats.fcr"        class="pill pill-fcr"   title="Faster Cast Rate — reduces casting animation length">FCR +{{ stats.fcr }}%</span>
+      <span v-if="stats.mf"         class="pill pill-mf"    title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ stats.mf }}%</span>
+      <span v-if="stats.allSkills"  class="pill pill-skill" title="+All Skills — adds to all character skill levels">+{{ stats.allSkills }} All</span>
+      <span v-if="stats.coldSkills" class="pill pill-cold"  title="+Cold Skills — adds to cold skill levels only">+{{ stats.coldSkills }} Cold</span>
+    </div>
+  `,
+});
+
+// ── SetBonusBlock component ────────────────────────────────────────────────
+
+const SetBonusBlock = defineComponent({
+  props: { activeSets: { type: Array, required: true } },
+  components: { StatPills },
+  template: `
+    <div v-if="activeSets.length" class="set-bonuses-block">
+      <div class="set-bonuses-header">Set Bonuses</div>
+      <div v-for="sb in activeSets" :key="sb.name" class="set-bonus-row">
+        <div class="set-bonus-meta">
+          <span class="set-bonus-name">{{ sb.name }}</span>
+          <span class="set-pips" :title="sb.pieces + ' of ' + sb.total + ' pieces equipped'">
+            <span v-for="i in sb.total" :key="i" :class="i <= sb.pieces ? 'pip pip-on' : 'pip pip-off'">{{ i <= sb.pieces ? '●' : '○' }}</span>
+          </span>
+        </div>
+        <stat-pills :stats="sb" class="set-bonus-pills" />
+      </div>
+    </div>
+  `,
+});
+
 // ── GearSlot component ─────────────────────────────────────────────────────
 
 const GearSlot = defineComponent({
@@ -606,6 +643,7 @@ const GearSlot = defineComponent({
     modelValue: { type: Object, required: true },
   },
   emits: ['update:modelValue'],
+  components: { StatPills },
   setup(props, { emit }) {
     const basisId = ref('');
 
@@ -663,13 +701,9 @@ const GearSlot = defineComponent({
         <option v-for="p in presets" :key="p.id" :value="p.id">{{ p.name }}</option>
       </select>
 
-      <div v-if="modelValue.preset" class="stat-pills">
+      <stat-pills v-if="modelValue.preset" :stats="stats()">
         <span v-if="matchedSetItem && modelValue.preset !== 'custom'" class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
-        <span v-if="stats().fcr"       class="pill pill-fcr"   title="Faster Cast Rate — reduces casting animation length">FCR +{{ stats().fcr }}%</span>
-        <span v-if="stats().mf"        class="pill pill-mf"    title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ stats().mf }}%</span>
-        <span v-if="stats().allSkills"  class="pill pill-skill" title="+All Skills — adds to all character skill levels">+{{ stats().allSkills }} All</span>
-        <span v-if="stats().coldSkills" class="pill pill-cold"  title="+Cold Skills — adds to cold skill levels only">+{{ stats().coldSkills }} Cold</span>
-      </div>
+      </stat-pills>
 
       <div v-if="modelValue.preset === 'custom'" class="custom-inputs">
         <select v-model="basisId" @change="applyBasis" class="custom-basis-select" title="Copy stats from an existing item as a starting point">
@@ -701,6 +735,7 @@ const CharmsPanel = defineComponent({
     presets:    { type: Array,  required: true },
   },
   emits: ['update:modelValue'],
+  components: { StatPills },
   setup(props, { emit }) {
     function emit_(next) { emit('update:modelValue', next); }
 
@@ -814,13 +849,9 @@ const CharmsPanel = defineComponent({
             <div v-else-if="charm.preset" class="charm-count-spacer">× 1</div>
             <button @click="removeCharm(idx)" class="charm-remove" title="Remove charm">&times;</button>
           </div>
-          <div v-if="charm.preset" class="stat-pills">
+          <stat-pills v-if="charm.preset" :stats="singleCharmStats(charm)">
             <span v-if="sunderLabel(charm)" class="pill pill-sunder" :title="'Sunders ' + sunderLabel(charm) + ' immunity'">Sunders {{ sunderLabel(charm) }}</span>
-            <span v-if="singleCharmStats(charm).fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ singleCharmStats(charm).fcr }}%</span>
-            <span v-if="singleCharmStats(charm).mf"         class="pill pill-mf"    title="Magic Find">MF +{{ singleCharmStats(charm).mf }}%</span>
-            <span v-if="singleCharmStats(charm).allSkills"  class="pill pill-skill" title="+All Skills">+{{ singleCharmStats(charm).allSkills }} All</span>
-            <span v-if="singleCharmStats(charm).coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ singleCharmStats(charm).coldSkills }} Cold</span>
-          </div>
+          </stat-pills>
           <div v-if="charm.preset === 'custom'" class="charm-custom-inputs">
             <select :value="charmBasisIds[idx] ?? ''" @change="charmBasisIds[idx] = $event.target.value; applyCharmBasis(idx)" class="custom-basis-select" title="Copy stats from an existing charm as a starting point">
               <option value="">Start from...</option>
@@ -844,7 +875,7 @@ const CharmsPanel = defineComponent({
 // ── App ────────────────────────────────────────────────────────────────────
 
 createApp({
-  components: { GearSlot, CharmsPanel },
+  components: { GearSlot, CharmsPanel, StatPills, SetBonusBlock },
   setup() {
     onMounted(async () => {
       try {
@@ -993,23 +1024,7 @@ createApp({
               />
             </div>
 
-            <div v-if="activeSetBonuses.length" class="set-bonuses-block">
-              <div class="set-bonuses-header">Set Bonuses</div>
-              <div v-for="sb in activeSetBonuses" :key="sb.name" class="set-bonus-row">
-                <div class="set-bonus-meta">
-                  <span class="set-bonus-name">{{ sb.name }}</span>
-                  <span class="set-pips" :title="sb.pieces + ' of ' + sb.total + ' pieces equipped'">
-                    <span v-for="i in sb.total" :key="i" :class="i <= sb.pieces ? 'pip pip-on' : 'pip pip-off'">{{ i <= sb.pieces ? '●' : '○' }}</span>
-                  </span>
-                </div>
-                <div class="stat-pills set-bonus-pills">
-                  <span v-if="sb.fcr"        class="pill pill-fcr"   title="Set bonus FCR">FCR +{{ sb.fcr }}%</span>
-                  <span v-if="sb.mf"         class="pill pill-mf"    title="Set bonus MF">MF +{{ sb.mf }}%</span>
-                  <span v-if="sb.allSkills"  class="pill pill-skill" title="Set bonus +All Skills">+{{ sb.allSkills }} All</span>
-                  <span v-if="sb.coldSkills" class="pill pill-cold"  title="Set bonus +Cold Skills">+{{ sb.coldSkills }} Cold</span>
-                </div>
-              </div>
-            </div>
+            <set-bonus-block :active-sets="activeSetBonuses" />
 
             <div class="charms-section">
               <charms-panel
@@ -1152,12 +1167,7 @@ createApp({
                 <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
                   {{ targetSlots[id].item?.name ?? '—' }}
                 </span>
-                <div class="stat-pills">
-                  <span v-if="targetSlots[id].stats.fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ targetSlots[id].stats.fcr }}%</span>
-                  <span v-if="targetSlots[id].stats.mf"         class="pill pill-mf"    title="Magic Find">MF +{{ targetSlots[id].stats.mf }}%</span>
-                  <span v-if="targetSlots[id].stats.allSkills"  class="pill pill-skill" title="+All Skills">+{{ targetSlots[id].stats.allSkills }} All</span>
-                  <span v-if="targetSlots[id].stats.coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ targetSlots[id].stats.coldSkills }} Cold</span>
-                </div>
+                <stat-pills :stats="targetSlots[id].stats" />
               </div>
             </div>
             <div class="target-slot-group">
@@ -1166,44 +1176,18 @@ createApp({
                 <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
                   {{ targetSlots[id].item?.name ?? '—' }}
                 </span>
-                <div class="stat-pills">
-                  <span v-if="targetSlots[id].stats.fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ targetSlots[id].stats.fcr }}%</span>
-                  <span v-if="targetSlots[id].stats.mf"         class="pill pill-mf"    title="Magic Find">MF +{{ targetSlots[id].stats.mf }}%</span>
-                  <span v-if="targetSlots[id].stats.allSkills"  class="pill pill-skill" title="+All Skills">+{{ targetSlots[id].stats.allSkills }} All</span>
-                  <span v-if="targetSlots[id].stats.coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ targetSlots[id].stats.coldSkills }} Cold</span>
-                </div>
+                <stat-pills :stats="targetSlots[id].stats" />
               </div>
             </div>
 
-            <div v-if="targetActiveSetBonuses.length" class="set-bonuses-block">
-              <div class="set-bonuses-header">Set Bonuses</div>
-              <div v-for="sb in targetActiveSetBonuses" :key="sb.name" class="set-bonus-row">
-                <div class="set-bonus-meta">
-                  <span class="set-bonus-name">{{ sb.name }}</span>
-                  <span class="set-pips" :title="sb.pieces + ' of ' + sb.total + ' pieces equipped'">
-                    <span v-for="i in sb.total" :key="i" :class="i <= sb.pieces ? 'pip pip-on' : 'pip pip-off'">{{ i <= sb.pieces ? '●' : '○' }}</span>
-                  </span>
-                </div>
-                <div class="stat-pills set-bonus-pills">
-                  <span v-if="sb.fcr"        class="pill pill-fcr"   title="Set bonus FCR">FCR +{{ sb.fcr }}%</span>
-                  <span v-if="sb.mf"         class="pill pill-mf"    title="Set bonus MF">MF +{{ sb.mf }}%</span>
-                  <span v-if="sb.allSkills"  class="pill pill-skill" title="Set bonus +All Skills">+{{ sb.allSkills }} All</span>
-                  <span v-if="sb.coldSkills" class="pill pill-cold"  title="Set bonus +Cold Skills">+{{ sb.coldSkills }} Cold</span>
-                </div>
-              </div>
-            </div>
+            <set-bonus-block :active-sets="targetActiveSetBonuses" />
 
             <div v-if="targetPresetCharms.length" class="target-charms-block">
               <div class="target-charms-header">Charms</div>
               <div v-for="c in targetPresetCharms" :key="c.id" class="target-slot-row">
                 <span class="slot-label">{{ c.count > 1 ? c.count + '×' : '' }}</span>
                 <span class="target-slot-name">{{ c.name }}</span>
-                <div class="stat-pills">
-                  <span v-if="c.item?.fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ c.item.fcr * c.count }}%</span>
-                  <span v-if="c.item?.mf"         class="pill pill-mf"    title="Magic Find">MF +{{ c.item.mf * c.count }}%</span>
-                  <span v-if="c.item?.allSkills"  class="pill pill-skill" title="+All Skills">+{{ c.item.allSkills * c.count }} All</span>
-                  <span v-if="c.item?.coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ c.item.coldSkills * c.count }} Cold</span>
-                </div>
+                <stat-pills :stats="c.stats" />
               </div>
             </div>
 
