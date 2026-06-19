@@ -1061,9 +1061,10 @@ createApp({
     }
 
     function fmtEttvd(secs) {
-      if (secs < 3600) return `${Math.round(secs / 60)} min`;
-      const h = Math.floor(secs / 3600);
-      const m = Math.round((secs % 3600) / 60);
+      const totalMins = Math.round(secs / 60);
+      if (totalMins < 60) return `${totalMins} min`;
+      const h = Math.floor(totalMins / 60);
+      const m = totalMins % 60;
       return m > 0 ? `${h}h ${m}min` : `${h}h`;
     }
 
