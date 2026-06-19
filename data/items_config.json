@@ -1,4 +1,14 @@
 {
+  "unique_charms": [
+    "Gheed's Fortune",
+    "Annihilus"
+  ],
+  "custom_charms": {
+    "Sorc Torch":          {"fcr": 0, "mf": 0,  "allSkills": 3, "coldSkills": 0, "unique": true},
+    "+1 Cold Sorc Skiller":{"fcr": 0, "mf": 0,  "allSkills": 0, "coldSkills": 1, "unique": false},
+    "Cold Rupture (MF)":   {"fcr": 0, "mf": 7,  "allSkills": 0, "coldSkills": 0, "unique": true, "sunder": "cold"},
+    "7% MF SC":            {"fcr": 0, "mf": 7,  "allSkills": 0, "coldSkills": 0, "unique": false}
+  },
   "runewords": [
     "Heart of the Oak",
     "Spirit"

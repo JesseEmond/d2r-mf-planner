@@ -22,7 +22,8 @@ const ICE_BLAST_HARD_PTS     = 20;
 
 const DEFAULT_BOSSES = { andy: true };
 
-const CUSTOM_ITEM = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+const CUSTOM_ITEM  = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+const CUSTOM_CHARM = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, unique: false };
 
 const PRESET_ITEMS = ref({});
 const TARGET_GEAR_PRESETS = ref([]);
@@ -225,9 +226,15 @@ function makeSlot() {
   return { preset: null, custom: { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 } };
 }
 
+function makeCharmEntry() {
+  return { preset: null, count: 1, custom: { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 } };
+}
+
 function makeGear() {
   const gear = {};
-  for (const { id } of GEAR_SLOTS) gear[id] = makeSlot();
+  for (const { id } of GEAR_SLOTS) {
+    gear[id] = id === 'charms' ? [] : makeSlot();
+  }
   return gear;
 }
 
@@ -248,6 +255,7 @@ function makeDefaultState() {
 function encodeState(state) {
   const gear = {};
   for (const { id } of GEAR_SLOTS) {
+    if (id === 'charms') continue;
     const slot = state.gear[id];
     if (slot.preset !== null) {
       const entry = { p: slot.preset };
@@ -262,8 +270,25 @@ function encodeState(state) {
       gear[id] = entry;
     }
   }
+  const charmEntries = state.gear.charms
+    .filter(c => c.preset !== null)
+    .map(c => {
+      const entry = { p: c.preset };
+      if (c.preset === 'custom') {
+        const cu = c.custom;
+        if (cu.name)       entry.n  = cu.name;
+        if (cu.fcr)        entry.f  = cu.fcr;
+        if (cu.mf)         entry.m  = cu.mf;
+        if (cu.allSkills)  entry.a  = cu.allSkills;
+        if (cu.coldSkills) entry.cs = cu.coldSkills;
+      } else if ((c.count ?? 1) > 1) {
+        entry.qty = c.count;
+      }
+      return entry;
+    });
   const out = {};
   if (Object.keys(gear).length) out.gear = gear;
+  if (charmEntries.length) out.ch = charmEntries;
   if (state.coldMasteryBase !== DEFAULT_COLD_MASTERY) out.cm = state.coldMasteryBase;
   const bosses = {};
   for (const [k, v] of Object.entries(state.run.bosses)) {
@@ -281,6 +306,7 @@ function decodeState(b64, state) {
     const out = JSON.parse(atob(b64));
     if (out.gear) {
       for (const { id } of GEAR_SLOTS) {
+        if (id === 'charms') continue;
         if (out.gear[id]) {
           const e = out.gear[id];
           state.gear[id].preset = e.p ?? null;
@@ -290,6 +316,19 @@ function decodeState(b64, state) {
           }
         }
       }
+    }
+    if (out.ch) {
+      state.gear.charms = out.ch.map(e => {
+        const entry = makeCharmEntry();
+        entry.preset = e.p ?? null;
+        if (e.p === 'custom') {
+          entry.custom = { name: e.n ?? '', fcr: e.f ?? 0, mf: e.m ?? 0,
+            allSkills: e.a ?? 0, coldSkills: e.cs ?? 0 };
+        } else if (e.qty) {
+          entry.count = e.qty;
+        }
+        return entry;
+      });
     }
     if (out.cm != null) state.coldMasteryBase = out.cm;
     if (out.bosses) {
@@ -325,6 +364,29 @@ function slotStats(slot) {
     if (item) return item;
   }
   return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+}
+
+function singleCharmStats(charm) {
+  if (!charm.preset) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  if (charm.preset === 'custom') return charm.custom;
+  const item = (PRESET_ITEMS.value['charms'] ?? []).find(p => p.id === charm.preset)
+    ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  const n = item.unique ? 1 : (charm.count ?? 1);
+  if (n === 1) return item;
+  return { fcr: (item.fcr || 0) * n, mf: (item.mf || 0) * n,
+           allSkills: (item.allSkills || 0) * n, coldSkills: (item.coldSkills || 0) * n };
+}
+
+function charmSlotStats(charmsArray) {
+  const t = { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  for (const charm of charmsArray) {
+    const s = singleCharmStats(charm);
+    t.fcr        += s.fcr        || 0;
+    t.mf         += s.mf         || 0;
+    t.allSkills  += s.allSkills  || 0;
+    t.coldSkills += s.coldSkills || 0;
+  }
+  return t;
 }
 
 // ── Reactive state ─────────────────────────────────────────────────────────
@@ -462,7 +524,9 @@ function makeBuild(getSlotStats) {
 
 // ── Build instances ────────────────────────────────────────────────────────
 
-const currentBuild = makeBuild((slotId) => slotStats(state.gear[slotId]));
+const currentBuild = makeBuild((slotId) =>
+  slotId === 'charms' ? charmSlotStats(state.gear.charms) : slotStats(state.gear[slotId])
+);
 
 // ── Target gear UI helpers ─────────────────────────────────────────────────
 
@@ -487,7 +551,10 @@ const targetSlots = computed(() => {
   return out;
 });
 
-const targetBuild = makeBuild((slotId) => getTargetSlotItem(slotId) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 });
+const targetBuild = makeBuild((slotId) => {
+  if (slotId === 'charms') return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  return getTargetSlotItem(slotId) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+});
 
 // ── URL sync ───────────────────────────────────────────────────────────────
 
@@ -591,12 +658,133 @@ const GearSlot = defineComponent({
 });
 
 const GROUP_A = ['head', 'amulet', 'weapon', 'shield', 'armor'];
-const GROUP_B = ['gloves', 'belt', 'boots', 'ring1', 'ring2', 'charms'];
+const GROUP_B = ['gloves', 'belt', 'boots', 'ring1', 'ring2'];
+
+// ── CharmsPanel component ──────────────────────────────────────────────────
+
+const CharmsPanel = defineComponent({
+  props: {
+    modelValue: { type: Array,  required: true },
+    presets:    { type: Array,  required: true },
+  },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    function emit_(next) { emit('update:modelValue', next); }
+
+    function addCharm() {
+      emit_([...props.modelValue, makeCharmEntry()]);
+    }
+
+    function removeCharm(idx) {
+      const next = [...props.modelValue];
+      next.splice(idx, 1);
+      emit_(next);
+    }
+
+    function updateCharm(idx, presetVal) {
+      const next = props.modelValue.map((c, i) => {
+        if (i !== idx) return c;
+        const updated = { ...c, preset: presetVal || null };
+        if (presetVal && presetVal !== 'custom') {
+          updated.custom = { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+        }
+        return updated;
+      });
+      emit_(next);
+    }
+
+    function updateCharmCustom(idx, patch) {
+      emit_(props.modelValue.map((c, i) =>
+        i === idx ? { ...c, custom: { ...c.custom, ...patch } } : c
+      ));
+    }
+
+    function updateCharmCount(idx, val) {
+      emit_(props.modelValue.map((c, i) =>
+        i === idx ? { ...c, count: Math.max(1, val || 1) } : c
+      ));
+    }
+
+    function isUniqueCharm(charm) {
+      if (!charm.preset || charm.preset === 'custom') return false;
+      return (props.presets ?? []).find(p => p.id === charm.preset)?.unique ?? false;
+    }
+
+    function isDisabled(preset, currentIdx) {
+      if (!preset.unique) return false;
+      return props.modelValue.some((c, i) => i !== currentIdx && c.preset === preset.id);
+    }
+
+    function charmStats(charm) {
+      if (!charm.preset || charm.preset === 'custom') return charm.custom;
+      const base = (props.presets ?? []).find(p => p.id === charm.preset)
+        ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+      const n = isUniqueCharm(charm) ? 1 : (charm.count ?? 1);
+      if (n === 1) return base;
+      return { fcr: (base.fcr || 0) * n, mf: (base.mf || 0) * n,
+               allSkills: (base.allSkills || 0) * n, coldSkills: (base.coldSkills || 0) * n };
+    }
+
+    function sunderLabel(charm) {
+      const item = (props.presets ?? []).find(p => p.id === charm.preset);
+      return item?.sunder ? item.sunder : null;
+    }
+
+    return { addCharm, removeCharm, updateCharm, updateCharmCustom, updateCharmCount, isUniqueCharm, isDisabled, charmStats, sunderLabel };
+  },
+  template: `
+    <div class="charms-panel">
+      <div class="charms-panel-header">
+        <span class="slot-label">Charms</span>
+        <button @click="addCharm" class="charm-add">+ Add</button>
+      </div>
+      <div v-if="modelValue.length" class="charms-list">
+        <div v-for="(charm, idx) in modelValue" :key="idx" class="charm-row">
+          <div class="charm-select-group">
+            <select
+              :value="charm.preset ?? ''"
+              @change="updateCharm(idx, $event.target.value)"
+              class="slot-select"
+            >
+              <option value="">— select —</option>
+              <option
+                v-for="p in presets" :key="p.id" :value="p.id"
+                :disabled="isDisabled(p, idx)"
+              >{{ p.name }}</option>
+            </select>
+            <input v-if="charm.preset && charm.preset !== 'custom' && !isUniqueCharm(charm)"
+              type="number" min="1"
+              :value="charm.count ?? 1"
+              @input="updateCharmCount(idx, +$event.target.value)"
+              class="charm-count"
+            />
+            <div v-else-if="charm.preset && charm.preset !== 'custom'" class="charm-count-spacer">× 1</div>
+            <button @click="removeCharm(idx)" class="charm-remove" title="Remove charm">&times;</button>
+          </div>
+          <div v-if="charm.preset && charm.preset !== 'custom'" class="stat-pills">
+            <span v-if="sunderLabel(charm)" class="pill pill-sunder" :title="'Sunders ' + sunderLabel(charm) + ' immunity'">Sunders {{ sunderLabel(charm) }}</span>
+            <span v-if="charmStats(charm).fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ charmStats(charm).fcr }}%</span>
+            <span v-if="charmStats(charm).mf"         class="pill pill-mf"    title="Magic Find">MF +{{ charmStats(charm).mf }}%</span>
+            <span v-if="charmStats(charm).allSkills"  class="pill pill-skill" title="+All Skills">+{{ charmStats(charm).allSkills }} All</span>
+            <span v-if="charmStats(charm).coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ charmStats(charm).coldSkills }} Cold</span>
+          </div>
+          <div v-if="charm.preset === 'custom'" class="charm-custom-inputs">
+            <input type="text" placeholder="Name" :value="charm.custom.name" @input="updateCharmCustom(idx, { name: $event.target.value })" class="custom-text" />
+            <label>FCR  <input type="number" min="0" :value="charm.custom.fcr"        @input="updateCharmCustom(idx, { fcr:        +$event.target.value })" class="custom-num" /></label>
+            <label>MF   <input type="number" min="0" :value="charm.custom.mf"         @input="updateCharmCustom(idx, { mf:         +$event.target.value })" class="custom-num" /></label>
+            <label>+All <input type="number" min="0" :value="charm.custom.allSkills"  @input="updateCharmCustom(idx, { allSkills:  +$event.target.value })" class="custom-num" /></label>
+            <label>+Cold<input type="number" min="0" :value="charm.custom.coldSkills" @input="updateCharmCustom(idx, { coldSkills: +$event.target.value })" class="custom-num" /></label>
+          </div>
+        </div>
+      </div>
+    </div>
+  `,
+});
 
 // ── App ────────────────────────────────────────────────────────────────────
 
 createApp({
-  components: { GearSlot },
+  components: { GearSlot, CharmsPanel },
   setup() {
     onMounted(async () => {
       try {
@@ -609,14 +797,24 @@ createApp({
         monsterDb.value = db;
         const itemsBySlot = db.gear.items_by_slot;
         for (const { id } of GEAR_SLOTS) {
-          PRESET_ITEMS.value[id] = [...(itemsBySlot[id] ?? []), CUSTOM_ITEM];
+          if (id === 'charms') {
+            PRESET_ITEMS.value[id] = [...(itemsBySlot[id] ?? []), CUSTOM_CHARM];
+          } else {
+            PRESET_ITEMS.value[id] = [...(itemsBySlot[id] ?? []), CUSTOM_ITEM];
+          }
         }
         SET_LEVEL_BONUSES.value = db.gear.set_level_bonuses ?? {};
         SET_SIZES.value = db.gear.set_sizes ?? {};
         TARGET_GEAR_PRESETS.value = Object.entries(db.gear.presets).map(
           ([id, slots]) => ({ id, name: id, slots })
         );
+        const charmPresetIds = new Set((PRESET_ITEMS.value['charms'] ?? []).map(p => p.id));
         const hasUnknownPreset = GEAR_SLOTS.some(({ id }) => {
+          if (id === 'charms') {
+            return state.gear.charms.some(c =>
+              c.preset && c.preset !== 'custom' && !charmPresetIds.has(c.preset)
+            );
+          }
           const preset = state.gear[id].preset;
           return preset && preset !== 'custom' &&
             !PRESET_ITEMS.value[id].some(p => p.id === preset);
@@ -746,6 +944,13 @@ createApp({
                   <span v-if="sb.coldSkills" class="pill pill-cold"  title="Set bonus +Cold Skills">+{{ sb.coldSkills }} Cold</span>
                 </div>
               </div>
+            </div>
+
+            <div class="charms-section">
+              <charms-panel
+                :presets="PRESET_ITEMS['charms'] ?? []"
+                v-model="state.gear.charms"
+              />
             </div>
 
             <hr class="panel-divider" />

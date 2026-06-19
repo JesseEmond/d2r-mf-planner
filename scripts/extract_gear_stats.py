@@ -37,6 +37,8 @@ BODY_LOC_TO_SLOT = {
     "lrin": "ring",
 }
 
+CHARM_CODES = {"cm1", "cm2", "cm3", "cs2"}
+
 FCR_PROPS        = {"cast1", "cast2", "cast3"}
 MF_PROPS         = {"mag%"}
 ALL_SKILLS_PROPS = {"allskills", "sor"}
@@ -80,6 +82,9 @@ def _bodyloc_to_slot(bl1: str, itype: str, type_index: dict[str, dict]) -> str |
 def _build_code_to_slot(type_index: dict[str, dict]) -> dict[str, str]:
     """Map item base code → app slot name via armor.txt / misc.txt / weapons.txt."""
     code_to_slot: dict[str, str] = {}
+
+    for code in CHARM_CODES:
+        code_to_slot[code] = "charms"
 
     for src in ("armor", "misc", "weapons"):
         for row in _load_tsv(RAW / f"{src}.txt"):
@@ -230,6 +235,8 @@ def extract() -> dict:
     runeword_names: list[str] = config.get("runewords", [])
     set_item_names: list[str] = config.get("set_items", [])
     custom_items: dict = config.get("custom_items", {})
+    unique_charm_names: list[str] = config.get("unique_charms", [])
+    custom_charms: dict = config.get("custom_charms", {})
     presets: dict = config.get("presets", {})
 
     type_index = _build_item_type_index()
@@ -350,6 +357,35 @@ def extract() -> dict:
         target_slots = ["ring1", "ring2"] if slot == "ring" else [slot]
         for s in target_slots:
             items_by_slot.setdefault(s, []).append(item)
+
+    for internal_name in unique_charm_names:
+        row = unique_rows.get(internal_name)
+        if not row:
+            raise KeyError(f"'{internal_name}' not found in uniqueitems.txt")
+
+        code = row.get("code", "").strip()
+        if code not in CHARM_CODES:
+            raise KeyError(f"Item '{internal_name}' has code '{code}' which is not a charm code")
+
+        display_name = name_to_display.get(internal_name)
+        if not display_name:
+            raise KeyError(f"No display name found for '{internal_name}' in item-names.json")
+
+        stats = _extract_stats(row)
+        item = {"id": internal_name, "name": display_name, "unique": True, **stats}
+        items_by_slot.setdefault("charms", []).append(item)
+
+    for item_id, entry in custom_charms.items():
+        stats = {
+            "fcr":       entry.get("fcr", 0),
+            "mf":        entry.get("mf", 0),
+            "allSkills": entry.get("allSkills", 0),
+            "coldSkills": entry.get("coldSkills", 0),
+        }
+        item: dict = {"id": item_id, "name": item_id, "unique": entry.get("unique", False), **stats}
+        if entry.get("sunder"):
+            item["sunder"] = entry["sunder"]
+        items_by_slot.setdefault("charms", []).append(item)
 
     for preset_name, preset_slots in presets.items():
         for slot, item_id in preset_slots.items():
