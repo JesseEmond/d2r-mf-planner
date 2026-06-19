@@ -50,24 +50,3 @@ def test_andy_combat_in_db():
     assert combat['cold_resist'] == 66
 
 
-# ---------------------------------------------------------------------------
-# Standalone runner (no pytest required)
-# ---------------------------------------------------------------------------
-
-if __name__ == '__main__':
-    tests = [
-        test_andy_hp_matches_wiki,
-        test_andy_cold_resist,
-        test_andy_combat_in_db,
-    ]
-    passed = failed = 0
-    for t in tests:
-        try:
-            t()
-            print(f'  PASS  {t.__name__}')
-            passed += 1
-        except AssertionError as e:
-            print(f'  FAIL  {t.__name__}: {e}')
-            failed += 1
-    print(f'\n{passed} passed, {failed} failed')
-    raise SystemExit(0 if failed == 0 else 1)

@@ -46,6 +46,17 @@ COLD_SKILL_PROPS       = {"coldskill"}
 COLD_PCT_PROPS         = {"extra-cold"}
 ENEMY_COLD_RES_PROPS   = {"pierce-cold"}
 
+_TRACKED_PROPS = FCR_PROPS | MF_PROPS | ALL_SKILLS_PROPS | COLD_SKILL_PROPS | COLD_PCT_PROPS | ENEMY_COLD_RES_PROPS
+
+
+def _assert_no_perlevel(prop: str, context: str) -> None:
+    if not prop or not prop.endswith("/lvl"):
+        return
+    if prop[:-4] in _TRACKED_PROPS:
+        raise NotImplementedError(
+            f"Per-level property '{prop}' on '{context}' is not supported yet"
+        )
+
 
 def _load_tsv(path: Path) -> list[dict]:
     with open(path, encoding="utf-8-sig", newline="") as f:
@@ -129,10 +140,12 @@ def _itype_to_slot(itype: str, type_index: dict[str, dict]) -> str | None:
     return None
 
 
-def _extract_stats(row: dict, prop_col: str = "prop", max_col: str = "max", count: int = 12) -> dict:
+def _extract_stats(row: dict, prop_col: str = "prop", max_col: str = "max", count: int = 12,
+                   item_name: str = "unknown") -> dict:
     fcr = mf = all_skills = cold_skills = cold_dmg_pct = enemy_cold_res_pct = 0
     for i in range(1, count + 1):
         prop = row.get(f"{prop_col}{i}", "").strip()
+        _assert_no_perlevel(prop, item_name)
         try:
             val = int(row.get(f"{max_col}{i}", "") or 0)
         except ValueError:
@@ -153,15 +166,19 @@ def _extract_stats(row: dict, prop_col: str = "prop", max_col: str = "max", coun
             "coldDmgPct": cold_dmg_pct, "enemyColdResPct": enemy_cold_res_pct}
 
 
-def _extract_set_level_bonuses(sets_rows: list[dict], set_sizes: dict[str, int]) -> dict[str, list[dict]]:
+def _extract_set_level_bonuses(sets_rows: list[dict], set_sizes: dict[str, int],
+                               relevant_sets: set[str] | None = None) -> dict[str, list[dict]]:
     """
     Extract set-level partial + full bonuses from sets.txt.
     Returns {set_name: [{pieces, fcr, mf, allSkills, coldSkills}, ...]}
+    Only processes sets in relevant_sets (if provided); per-level guard only fires for those.
     """
     result: dict[str, list[dict]] = {}
     for row in sets_rows:
         name = row.get("index", "").strip()
         if not name:
+            continue
+        if relevant_sets is not None and name not in relevant_sets:
             continue
         bonuses: list[dict] = []
 
@@ -170,6 +187,7 @@ def _extract_set_level_bonuses(sets_rows: list[dict], set_sizes: dict[str, int])
             stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0, "coldDmgPct": 0, "enemyColdResPct": 0}
             for ab in ("a", "b"):
                 prop = row.get(f"PCode{n}{ab}", "").strip()
+                _assert_no_perlevel(prop, f"{name} (set partial bonus)")
                 try:
                     val = int(row.get(f"PMax{n}{ab}", "") or 0)
                 except ValueError:
@@ -195,6 +213,7 @@ def _extract_set_level_bonuses(sets_rows: list[dict], set_sizes: dict[str, int])
             stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0, "coldDmgPct": 0, "enemyColdResPct": 0}
             for i in range(1, 9):
                 prop = row.get(f"FCode{i}", "").strip()
+                _assert_no_perlevel(prop, f"{name} (set full bonus)")
                 try:
                     val = int(row.get(f"FMax{i}", "") or 0)
                 except ValueError:
@@ -219,7 +238,7 @@ def _extract_set_level_bonuses(sets_rows: list[dict], set_sizes: dict[str, int])
     return result
 
 
-def _extract_set_bonuses(row: dict) -> list[dict]:
+def _extract_set_bonuses(row: dict, item_name: str = "unknown") -> list[dict]:
     """Extract partial set bonuses from aprop columns. apropN corresponds to N+1 pieces."""
     bonuses = []
     for i in range(1, 6):
@@ -227,6 +246,7 @@ def _extract_set_bonuses(row: dict) -> list[dict]:
         stats = {"fcr": 0, "mf": 0, "allSkills": 0, "coldSkills": 0, "coldDmgPct": 0, "enemyColdResPct": 0}
         for ab in ("a", "b"):
             prop = row.get(f"aprop{i}{ab}", "").strip()
+            _assert_no_perlevel(prop, f"{item_name} (item partial bonus)")
             try:
                 val = int(row.get(f"amax{i}{ab}", "") or 0)
             except ValueError:
@@ -287,7 +307,9 @@ def extract() -> dict:
             set_sizes[sname] = set_sizes.get(sname, 0) + 1
 
     sets_rows = _load_tsv(RAW / "sets.txt")
-    set_level_bonuses = _extract_set_level_bonuses(sets_rows, set_sizes)
+    relevant_sets = {set_item_rows[n].get("set", "").strip()
+                     for n in set_item_names if n in set_item_rows}
+    set_level_bonuses = _extract_set_level_bonuses(sets_rows, set_sizes, relevant_sets)
 
     items_by_slot: dict[str, list] = {}
 
@@ -305,7 +327,7 @@ def extract() -> dict:
         if not display_name:
             raise KeyError(f"No display name found for '{internal_name}' in item-names.json")
 
-        stats = _extract_stats(row)
+        stats = _extract_stats(row, item_name=internal_name)
         item = {"id": internal_name, "name": display_name, **stats}
 
         target_slots = ["ring1", "ring2"] if slot == "ring" else [slot]
@@ -331,7 +353,7 @@ def extract() -> dict:
         if not slots:
             raise KeyError(f"No slot mapping found for runeword '{rw_name}'")
 
-        stats = _extract_stats(row, prop_col="T1Code", max_col="T1Max", count=7)
+        stats = _extract_stats(row, prop_col="T1Code", max_col="T1Max", count=7, item_name=rw_name)
         item = {"id": rw_name, "name": rw_name, **stats}
         for s in slots:
             items_by_slot.setdefault(s, []).append(item)
@@ -351,8 +373,8 @@ def extract() -> dict:
             raise KeyError(f"No display name found for '{internal_name}' in item-names.json")
 
         set_name = row.get("set", "").strip()
-        stats = _extract_stats(row)
-        set_bonuses = _extract_set_bonuses(row)
+        stats = _extract_stats(row, item_name=internal_name)
+        set_bonuses = _extract_set_bonuses(row, item_name=internal_name)
         item: dict = {"id": internal_name, "name": display_name, "set_name": set_name,
                       **stats}
         if set_bonuses:
@@ -392,7 +414,7 @@ def extract() -> dict:
         if not display_name:
             raise KeyError(f"No display name found for '{internal_name}' in item-names.json")
 
-        stats = _extract_stats(row)
+        stats = _extract_stats(row, item_name=internal_name)
         item = {"id": internal_name, "name": display_name, "unique": True, **stats}
         items_by_slot.setdefault("charms", []).append(item)
 

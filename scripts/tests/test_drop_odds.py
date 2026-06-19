@@ -20,9 +20,13 @@ Quality formula (D2R, integer math):
 """
 
 import json
+import sys
 from pathlib import Path
 
 DB_PATH = Path(__file__).parent.parent.parent / "public" / "data" / "db.json"
+
+sys.path.insert(0, str(Path(__file__).parent.parent))
+import parse_treasure_classes as ptc
 
 
 def _load_db() -> dict:
@@ -235,18 +239,12 @@ def test_gc_and_sc_base_prob_equal():
 
 def test_skiller_fraction_plausible():
     """About 1-in-10 to 1-in-15 magic GCs are any-class skillers at ilvl 99 (community benchmark)."""
-    import sys
-    sys.path.insert(0, str(DB_PATH.parent.parent.parent / "scripts"))
-    import parse_treasure_classes as ptc
     frac = ptc.get_skiller_gc_fraction(ilvl=99)
     assert 0.03 <= frac <= 0.20, f"skiller_fraction={frac:.4f} outside expected range [0.03, 0.20]"
 
 
 def test_skiller_fraction_zero_below_ilvl50():
     """No skiller prefixes can roll below ilvl 50."""
-    import sys
-    sys.path.insert(0, str(DB_PATH.parent.parent.parent / "scripts"))
-    import parse_treasure_classes as ptc
     frac = ptc.get_skiller_gc_fraction(ilvl=49)
     assert frac == 0.0, f"Expected 0.0 skiller fraction at ilvl 49, got {frac}"
 
@@ -266,40 +264,3 @@ def test_sc_valuable_frac_nonzero_and_less_than_one():
     assert 0 < frac < 1, f"sc_valuable_frac={frac} should be in (0, 1)"
 
 
-# ---------------------------------------------------------------------------
-# Standalone runner (no pytest required)
-# ---------------------------------------------------------------------------
-
-if __name__ == "__main__":
-    tests = [
-        test_db_structure,
-        test_all_base_probs_in_range,
-        test_shako_base_prob,
-        test_shako_quality_params,
-        test_shako_selection_weight,
-        test_shako_drop_rate_0_mf,
-        test_shako_drop_rate_100_mf,
-        test_shako_drop_rate_200_mf,
-        test_shako_drop_rate_300_mf,
-        test_gheed_selection_weight,
-        test_latent_sunders_in_andy_drops,
-        test_latent_sunder_selection_weight,
-        test_latent_sunder_same_base_prob_as_gheed,
-        test_good_rune_prob_nonzero_and_small,
-        test_gc_and_sc_base_prob_equal,
-        test_skiller_fraction_plausible,
-        test_skiller_fraction_zero_below_ilvl50,
-        test_gc_skiller_frac_nonzero_and_less_than_one,
-        test_sc_valuable_frac_nonzero_and_less_than_one,
-    ]
-    passed = failed = 0
-    for t in tests:
-        try:
-            t()
-            print(f"  PASS  {t.__name__}")
-            passed += 1
-        except AssertionError as e:
-            print(f"  FAIL  {t.__name__}: {e}")
-            failed += 1
-    print(f"\n{passed} passed, {failed} failed")
-    raise SystemExit(0 if failed == 0 else 1)
