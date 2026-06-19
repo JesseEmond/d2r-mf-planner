@@ -2126,7 +2126,7 @@
           "allSkills": 0,
           "coldSkills": 0,
           "coldDmgPct": 0,
-          "enemyColdResPct": 0,
+          "enemyColdResPct": 10,
           "sunder": "cold"
         },
         {
