@@ -1623,70 +1623,42 @@
   },
   "gear": {
     "items_by_slot": {
-      "head": [
+      "gloves": [
         {
-          "id": "Harlequin Crest",
-          "name": "Harlequin Crest",
+          "id": "Chance Guards",
+          "name": "Chance Guards",
           "fcr": 0,
-          "mf": 50,
-          "allSkills": 2,
+          "mf": 40,
+          "allSkills": 0,
           "coldSkills": 0
         },
         {
-          "id": "Griffon's Eye",
-          "name": "Griffon's Eye",
-          "fcr": 25,
+          "id": "Magefist",
+          "name": "Magefist",
+          "fcr": 20,
           "mf": 0,
-          "allSkills": 1,
+          "allSkills": 0,
           "coldSkills": 0
         },
         {
-          "id": "Tal Rasha's Horadric Crest",
-          "name": "Tal Rasha's Horadric Crest",
-          "set_name": "Tal Rasha's Wrappings",
-          "fcr": 0,
+          "id": "Trang-Oul's Claws",
+          "name": "Trang-Oul's Claws",
+          "set_name": "Trang-Oul's Avatar",
+          "fcr": 20,
           "mf": 0,
           "allSkills": 0,
           "coldSkills": 0
         }
       ],
-      "amulet": [
-        {
-          "id": "Mara's Kaleidoscope",
-          "name": "Mara's Kaleidoscope",
-          "fcr": 0,
-          "mf": 0,
-          "allSkills": 2,
-          "coldSkills": 0
-        },
-        {
-          "id": "The Eye of Etlich",
-          "name": "The Eye of Etlich",
-          "fcr": 0,
-          "mf": 0,
-          "allSkills": 1,
-          "coldSkills": 0
-        },
-        {
-          "id": "Tal Rasha's Adjudication",
-          "name": "Tal Rasha's Adjudication",
-          "set_name": "Tal Rasha's Wrappings",
-          "fcr": 0,
-          "mf": 0,
-          "allSkills": 2,
-          "coldSkills": 0,
-          "set_bonuses": [
-            {
-              "pieces": 4,
-              "fcr": 10,
-              "mf": 0,
-              "allSkills": 0,
-              "coldSkills": 0
-            }
-          ]
-        }
-      ],
       "weapon": [
+        {
+          "id": "Fathom",
+          "name": "Death's Fathom",
+          "fcr": 20,
+          "mf": 0,
+          "allSkills": 3,
+          "coldSkills": 0
+        },
         {
           "id": "The Oculus",
           "name": "The Oculus",
@@ -1746,25 +1718,86 @@
           ]
         }
       ],
-      "shield": [
+      "head": [
         {
-          "id": "Lidless Wall",
-          "name": "Lidless Wall",
-          "fcr": 20,
+          "id": "Griffon's Eye",
+          "name": "Griffon's Eye",
+          "fcr": 25,
           "mf": 0,
           "allSkills": 1,
           "coldSkills": 0
         },
         {
-          "id": "Spirit",
-          "name": "Spirit",
-          "fcr": 35,
+          "id": "Harlequin Crest",
+          "name": "Harlequin Crest",
+          "fcr": 0,
+          "mf": 50,
+          "allSkills": 2,
+          "coldSkills": 0
+        },
+        {
+          "id": "Nightwing's Veil",
+          "name": "Nightwing's Veil",
+          "fcr": 0,
           "mf": 0,
           "allSkills": 2,
           "coldSkills": 0
+        },
+        {
+          "id": "Tal Rasha's Horadric Crest",
+          "name": "Tal Rasha's Horadric Crest",
+          "set_name": "Tal Rasha's Wrappings",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ],
+      "amulet": [
+        {
+          "id": "Mara's Kaleidoscope",
+          "name": "Mara's Kaleidoscope",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 2,
+          "coldSkills": 0
+        },
+        {
+          "id": "The Eye of Etlich",
+          "name": "The Eye of Etlich",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        },
+        {
+          "id": "Tal Rasha's Adjudication",
+          "name": "Tal Rasha's Adjudication",
+          "set_name": "Tal Rasha's Wrappings",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 2,
+          "coldSkills": 0,
+          "set_bonuses": [
+            {
+              "pieces": 4,
+              "fcr": 10,
+              "mf": 0,
+              "allSkills": 0,
+              "coldSkills": 0
+            }
+          ]
         }
       ],
       "armor": [
+        {
+          "id": "Ormus' Robes",
+          "name": "Ormus' Robes",
+          "fcr": 20,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
+        },
         {
           "id": "Skin of the Vipermagi",
           "name": "Skin of the Vipermagi",
@@ -1792,22 +1825,21 @@
           ]
         }
       ],
-      "gloves": [
+      "shield": [
         {
-          "id": "Magefist",
-          "name": "Magefist",
+          "id": "Lidless Wall",
+          "name": "Lidless Wall",
           "fcr": 20,
           "mf": 0,
-          "allSkills": 0,
+          "allSkills": 1,
           "coldSkills": 0
         },
         {
-          "id": "Trang-Oul's Claws",
-          "name": "Trang-Oul's Claws",
-          "set_name": "Trang-Oul's Avatar",
-          "fcr": 20,
+          "id": "Spirit",
+          "name": "Spirit",
+          "fcr": 35,
           "mf": 0,
-          "allSkills": 0,
+          "allSkills": 2,
           "coldSkills": 0
         }
       ],
@@ -1871,6 +1903,14 @@
           "mf": 0,
           "allSkills": 0,
           "coldSkills": 0
+        },
+        {
+          "id": "Rare MF Boots",
+          "name": "Rare MF Boots",
+          "fcr": 0,
+          "mf": 25,
+          "allSkills": 0,
+          "coldSkills": 0
         }
       ],
       "ring1": [
@@ -1895,6 +1935,14 @@
           "name": "Magic FCR Ring",
           "fcr": 10,
           "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
+        },
+        {
+          "id": "Rare MF Ring",
+          "name": "Rare MF Ring",
+          "fcr": 10,
+          "mf": 25,
           "allSkills": 0,
           "coldSkills": 0
         }
@@ -1923,21 +1971,53 @@
           "mf": 0,
           "allSkills": 0,
           "coldSkills": 0
+        },
+        {
+          "id": "Rare MF Ring",
+          "name": "Rare MF Ring",
+          "fcr": 10,
+          "mf": 25,
+          "allSkills": 0,
+          "coldSkills": 0
         }
       ]
     },
     "presets": {
-      "TEMP_GEAR": {
-        "head": "Griffon's Eye",
+      "Standard": {
+        "head": "Nightwing's Veil",
         "amulet": "Mara's Kaleidoscope",
-        "weapon": "Heart of the Oak",
+        "weapon": "Fathom",
         "shield": "Spirit",
-        "armor": "Skin of the Vipermagi",
-        "gloves": "Magefist",
+        "armor": "Ormus' Robes",
+        "gloves": "Trang-Oul's Claws",
         "belt": "Arachnid Mesh",
-        "boots": "Wartraveler",
+        "boots": "Rare MF Boots",
         "ring1": "The Stone of Jordan",
         "ring2": "The Stone of Jordan"
+      },
+      "Magic Find": {
+        "head": "Harlequin Crest",
+        "amulet": "Tal Rasha's Adjudication",
+        "weapon": "The Oculus",
+        "shield": "Spirit",
+        "armor": "Tal Rasha's Howling Wind",
+        "gloves": "Chance Guards",
+        "belt": "Tal Rasha's Fire-Spun Cloth",
+        "boots": "Wartraveler",
+        "ring1": "Rare MF Ring",
+        "ring2": "Rare MF Ring"
+      },
+      "Set Build": {
+        "head": "Tal Rasha's Horadric Crest",
+        "amulet": "Tal Rasha's Adjudication",
+        "weapon": "Tal Rasha's Lidless Eye",
+        "shield": "Spirit",
+        "armor": "Tal Rasha's Howling Wind",
+        "gloves": "Chance Guards",
+        "belt": "Tal Rasha's Fire-Spun Cloth",
+        "boots": "Wartraveler",
+        "ring1": "Rare MF Ring",
+        "ring2": "Rare MF Ring"
       }
     },
     "set_level_bonuses": {
