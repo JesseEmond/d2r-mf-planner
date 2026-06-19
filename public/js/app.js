@@ -366,15 +366,21 @@ function slotStats(slot) {
   return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
 }
 
+function scaleStats(s, n) {
+  if (!s || n === 1) return s;
+  return { fcr: (s.fcr||0)*n, mf: (s.mf||0)*n, allSkills: (s.allSkills||0)*n, coldSkills: (s.coldSkills||0)*n };
+}
+
 function singleCharmStats(charm) {
   if (!charm.preset) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
-  if (charm.preset === 'custom') return charm.custom;
-  const item = (PRESET_ITEMS.value['charms'] ?? []).find(p => p.id === charm.preset)
-    ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
-  const n = item.unique ? 1 : (charm.count ?? 1);
-  if (n === 1) return item;
-  return { fcr: (item.fcr || 0) * n, mf: (item.mf || 0) * n,
-           allSkills: (item.allSkills || 0) * n, coldSkills: (item.coldSkills || 0) * n };
+  const presets = PRESET_ITEMS.value['charms'] ?? [];
+  if (charm.preset === 'custom') {
+    const name = charm.custom?.name?.trim();
+    const isUnique = !!(name && presets.find(p => p.unique && p.name === name));
+    return scaleStats(charm.custom, isUnique ? 1 : (charm.count ?? 1));
+  }
+  const item = presets.find(p => p.id === charm.preset) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  return scaleStats(item, item.unique ? 1 : (charm.count ?? 1));
 }
 
 function charmSlotStats(charmsArray) {
@@ -726,15 +732,6 @@ const CharmsPanel = defineComponent({
       });
     }
 
-    function charmStats(charm) {
-      if (!charm.preset || charm.preset === 'custom') return charm.custom;
-      const base = (props.presets ?? []).find(p => p.id === charm.preset)
-        ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
-      const n = isUniqueCharm(charm) ? 1 : (charm.count ?? 1);
-      if (n === 1) return base;
-      return { fcr: (base.fcr || 0) * n, mf: (base.mf || 0) * n,
-               allSkills: (base.allSkills || 0) * n, coldSkills: (base.coldSkills || 0) * n };
-    }
 
     function sunderLabel(charm) {
       const item = (props.presets ?? []).find(p => p.id === charm.preset);
@@ -759,7 +756,7 @@ const CharmsPanel = defineComponent({
     }
     const realPresets = computed(() => (props.presets ?? []).filter(p => p.id !== 'custom'));
 
-    return { addCharm, removeCharm, updateCharm, updateCharmCustom, updateCharmCount, isUniqueCharm, isDisabled, charmStats, sunderLabel, charmBasisIds, applyCharmBasis, realPresets, matchedUniquePreset };
+    return { addCharm, removeCharm, updateCharm, updateCharmCustom, updateCharmCount, isUniqueCharm, isDisabled, singleCharmStats, sunderLabel, charmBasisIds, applyCharmBasis, realPresets, matchedUniquePreset };
   },
   template: `
     <div class="charms-panel">
@@ -781,21 +778,21 @@ const CharmsPanel = defineComponent({
                 :disabled="isDisabled(p, idx)"
               >{{ p.name }}</option>
             </select>
-            <input v-if="charm.preset && charm.preset !== 'custom' && !isUniqueCharm(charm)"
+            <input v-if="charm.preset && !isUniqueCharm(charm)"
               type="number" min="1"
               :value="charm.count ?? 1"
               @input="updateCharmCount(idx, +$event.target.value)"
               class="charm-count"
             />
-            <div v-else-if="charm.preset && charm.preset !== 'custom'" class="charm-count-spacer">× 1</div>
+            <div v-else-if="charm.preset" class="charm-count-spacer">× 1</div>
             <button @click="removeCharm(idx)" class="charm-remove" title="Remove charm">&times;</button>
           </div>
-          <div v-if="charm.preset && charm.preset !== 'custom'" class="stat-pills">
+          <div v-if="charm.preset" class="stat-pills">
             <span v-if="sunderLabel(charm)" class="pill pill-sunder" :title="'Sunders ' + sunderLabel(charm) + ' immunity'">Sunders {{ sunderLabel(charm) }}</span>
-            <span v-if="charmStats(charm).fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ charmStats(charm).fcr }}%</span>
-            <span v-if="charmStats(charm).mf"         class="pill pill-mf"    title="Magic Find">MF +{{ charmStats(charm).mf }}%</span>
-            <span v-if="charmStats(charm).allSkills"  class="pill pill-skill" title="+All Skills">+{{ charmStats(charm).allSkills }} All</span>
-            <span v-if="charmStats(charm).coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ charmStats(charm).coldSkills }} Cold</span>
+            <span v-if="singleCharmStats(charm).fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ singleCharmStats(charm).fcr }}%</span>
+            <span v-if="singleCharmStats(charm).mf"         class="pill pill-mf"    title="Magic Find">MF +{{ singleCharmStats(charm).mf }}%</span>
+            <span v-if="singleCharmStats(charm).allSkills"  class="pill pill-skill" title="+All Skills">+{{ singleCharmStats(charm).allSkills }} All</span>
+            <span v-if="singleCharmStats(charm).coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ singleCharmStats(charm).coldSkills }} Cold</span>
           </div>
           <div v-if="charm.preset === 'custom'" class="charm-custom-inputs">
             <select :value="charmBasisIds[idx] ?? ''" @change="charmBasisIds[idx] = $event.target.value; applyCharmBasis(idx)" class="custom-basis-select" title="Copy stats from an existing charm as a starting point">
