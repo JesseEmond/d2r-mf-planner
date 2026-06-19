@@ -142,6 +142,31 @@ body {
   background: var(--color-bg);
 }
 
+.error-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  background: #5c1a1a;
+  border: 1px solid #a03030;
+  color: #f0b0b0;
+  padding: 0.6rem 1rem;
+  font-size: 0.9rem;
+}
+.error-banner-close {
+  background: none;
+  border: none;
+  color: inherit;
+  font-size: 1.2rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 0 0.2rem;
+  flex-shrink: 0;
+}
+.error-banner-close:hover {
+  color: #fff;
+}
+
 /* Left column (gear + drop odds) */
 .left-col {
   display: flex;

@@ -1,5 +1,5 @@
 import { createApp, defineComponent, reactive, computed, watch, ref, onMounted } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-import { GEAR_SLOTS, PRESET_ITEMS } from './gear-db.js';
+import { GEAR_SLOTS } from './gear-db.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -22,24 +22,10 @@ const ICE_BLAST_HARD_PTS     = 20;
 
 const DEFAULT_BOSSES = { andy: true };
 
-const TARGET_GEAR_PRESETS = [
-  {
-    id: 'TEMP_GEAR',
-    name: 'TEMP_GEAR',
-    slots: {
-      head:   'griffons',
-      amulet: 'maras',
-      weapon: 'hoto',
-      shield: 'spirit',
-      armor:  'vipermagi',
-      gloves: 'magefist',
-      belt:   'arachnid',
-      boots:  'war_traveler',
-      ring1:  'soj',
-      ring2:  'soj',
-    },
-  },
-];
+const CUSTOM_ITEM = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+
+const PRESET_ITEMS = ref({});
+const TARGET_GEAR_PRESETS = ref([]);
 
 // ── Pure computation functions ─────────────────────────────────────────────
 // No Vue dependency — the optimizer can call these directly.
@@ -241,6 +227,20 @@ function makeGear() {
   return gear;
 }
 
+const DEFAULT_COLD_MASTERY = 20;
+const DEFAULT_FOLDS = { breakdown: true, dropOddsBoss: true };
+const DEFAULT_TARGET_PRESET_ID = 'TEMP_GEAR';
+
+function makeDefaultState() {
+  return {
+    gear: makeGear(),
+    coldMasteryBase: DEFAULT_COLD_MASTERY,
+    run: { bosses: { ...DEFAULT_BOSSES } },
+    ui: { folds: { ...DEFAULT_FOLDS } },
+    targetPresetId: DEFAULT_TARGET_PRESET_ID,
+  };
+}
+
 function encodeState(state) {
   const gear = {};
   for (const { id } of GEAR_SLOTS) {
@@ -260,7 +260,7 @@ function encodeState(state) {
   }
   const out = {};
   if (Object.keys(gear).length) out.gear = gear;
-  if (state.coldMasteryBase !== 20) out.cm = state.coldMasteryBase;
+  if (state.coldMasteryBase !== DEFAULT_COLD_MASTERY) out.cm = state.coldMasteryBase;
   const bosses = {};
   for (const [k, v] of Object.entries(state.run.bosses)) {
     if (v === (DEFAULT_BOSSES[k] ?? false)) continue;
@@ -294,13 +294,16 @@ function decodeState(b64, state) {
     if (out.uf) {
       for (const key of out.uf) { if (key in state.ui.folds) state.ui.folds[key] = false; }
     }
-  } catch {}
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 function slotStats(slot) {
   if (!slot.preset) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
   if (slot.preset === 'custom') return slot.custom;
-  for (const presets of Object.values(PRESET_ITEMS)) {
+  for (const presets of Object.values(PRESET_ITEMS.value)) {
     const item = presets.find(p => p.id === slot.preset);
     if (item) return item;
   }
@@ -309,16 +312,15 @@ function slotStats(slot) {
 
 // ── Reactive state ─────────────────────────────────────────────────────────
 
-const state = reactive({
-  gear: makeGear(),
-  coldMasteryBase: 20,
-  run: { bosses: { ...DEFAULT_BOSSES } },
-  ui: { folds: { breakdown: true, dropOddsBoss: true } },
-  targetPresetId: 'TEMP_GEAR',
-});
+const state = reactive(makeDefaultState());
+
+const stateError = ref(null);
 
 const params = new URLSearchParams(window.location.search);
-if (params.has('s')) decodeState(params.get('s'), state);
+if (params.has('s') && !decodeState(params.get('s'), state)) {
+  Object.assign(state, makeDefaultState());
+  stateError.value = 'Saved state could not be loaded (it may be from an older version). Starting fresh.';
+}
 
 // ── Shared data refs (populated via onMounted fetch) ───────────────────────
 
@@ -393,7 +395,7 @@ const currentBuild = makeBuild((slotId) => slotStats(state.gear[slotId]));
 // ── Target gear UI helpers ─────────────────────────────────────────────────
 
 const targetPreset = computed(() =>
-  TARGET_GEAR_PRESETS.find(p => p.id === state.targetPresetId) ?? null
+  TARGET_GEAR_PRESETS.value.find(p => p.id === state.targetPresetId) ?? null
 );
 
 function getTargetSlotItem(slotId) {
@@ -401,7 +403,7 @@ function getTargetSlotItem(slotId) {
   if (!preset) return null;
   const itemId = preset.slots[slotId];
   if (!itemId) return null;
-  return (PRESET_ITEMS[slotId] ?? []).find(p => p.id === itemId) ?? null;
+  return (PRESET_ITEMS.value[slotId] ?? []).find(p => p.id === itemId) ?? null;
 }
 
 const targetSlots = computed(() => {
@@ -445,7 +447,7 @@ const GearSlot = defineComponent({
     function stats() {
       const slot = props.modelValue;
       if (!slot.preset || slot.preset === 'custom') return slot.custom;
-      return props.presets.find(p => p.id === slot.preset) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+      return (props.presets ?? []).find(p => p.id === slot.preset) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
     }
     return { update, updateCustom, stats };
   },
@@ -496,8 +498,25 @@ createApp({
         const [rc, db] = await Promise.all([rcRes.json(), dbRes.json()]);
         runConfig.value = rc.runs;
         monsterDb.value = db;
+        const itemsBySlot = db.gear.items_by_slot;
+        for (const { id } of GEAR_SLOTS) {
+          PRESET_ITEMS.value[id] = [...(itemsBySlot[id] ?? []), CUSTOM_ITEM];
+        }
+        TARGET_GEAR_PRESETS.value = Object.entries(db.gear.presets).map(
+          ([id, slots]) => ({ id, name: id, slots })
+        );
+        const hasUnknownPreset = GEAR_SLOTS.some(({ id }) => {
+          const preset = state.gear[id].preset;
+          return preset && preset !== 'custom' &&
+            !PRESET_ITEMS.value[id].some(p => p.id === preset);
+        });
+        if (hasUnknownPreset) {
+          stateError.value = 'Saved state references items from an older version and has been reset.';
+          Object.assign(state, makeDefaultState());
+        }
       } catch (e) {
         console.error('Failed to load data', e);
+        stateError.value = 'Failed to load app data. Please refresh the page.';
       }
     });
 
@@ -515,6 +534,7 @@ createApp({
 
     return {
       state,
+      stateError,
       GEAR_SLOTS,
       PRESET_ITEMS,
       GROUP_A,
@@ -569,6 +589,11 @@ createApp({
         <h1>D2R Blizzard Sorc — <abbr title="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine">ETTVD</abbr> Optimizer</h1>
       </header>
 
+      <div v-if="stateError" class="error-banner" role="alert">
+        {{ stateError }}
+        <button class="error-banner-close" @click="stateError = null" aria-label="Dismiss">&times;</button>
+      </div>
+
       <main class="app-grid">
         <div class="left-col">
           <section class="gear-panel">
@@ -578,7 +603,7 @@ createApp({
                 v-for="id in GROUP_A" :key="id"
                 :slot-id="id"
                 :slot-label="GEAR_SLOTS.find(s => s.id === id).label"
-                :presets="PRESET_ITEMS[id]"
+                :presets="PRESET_ITEMS[id] ?? []"
                 v-model="state.gear[id]"
               />
             </div>
@@ -587,7 +612,7 @@ createApp({
                 v-for="id in GROUP_B" :key="id"
                 :slot-id="id"
                 :slot-label="GEAR_SLOTS.find(s => s.id === id).label"
-                :presets="PRESET_ITEMS[id]"
+                :presets="PRESET_ITEMS[id] ?? []"
                 v-model="state.gear[id]"
               />
             </div>
