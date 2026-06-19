@@ -705,14 +705,25 @@ const CharmsPanel = defineComponent({
       ));
     }
 
+    function matchedUniquePreset(charm) {
+      if (charm.preset !== 'custom') return null;
+      const name = charm.custom?.name?.trim();
+      if (!name) return null;
+      return (props.presets ?? []).find(p => p.unique && p.name === name) ?? null;
+    }
+
     function isUniqueCharm(charm) {
-      if (!charm.preset || charm.preset === 'custom') return false;
+      if (!charm.preset || charm.preset === 'custom') return !!matchedUniquePreset(charm);
       return (props.presets ?? []).find(p => p.id === charm.preset)?.unique ?? false;
     }
 
     function isDisabled(preset, currentIdx) {
       if (!preset.unique) return false;
-      return props.modelValue.some((c, i) => i !== currentIdx && c.preset === preset.id);
+      return props.modelValue.some((c, i) => {
+        if (i === currentIdx) return false;
+        if (c.preset === preset.id) return true;
+        return matchedUniquePreset(c)?.id === preset.id;
+      });
     }
 
     function charmStats(charm) {
@@ -730,7 +741,25 @@ const CharmsPanel = defineComponent({
       return item?.sunder ? item.sunder : null;
     }
 
-    return { addCharm, removeCharm, updateCharm, updateCharmCustom, updateCharmCount, isUniqueCharm, isDisabled, charmStats, sunderLabel };
+    const charmBasisIds = reactive({});
+    function applyCharmBasis(idx) {
+      const id = charmBasisIds[idx];
+      if (!id) return;
+      const item = (props.presets ?? []).find(p => p.id === id);
+      if (item) {
+        updateCharmCustom(idx, {
+          name:       item.name,
+          fcr:        item.fcr        ?? 0,
+          mf:         item.mf         ?? 0,
+          allSkills:  item.allSkills  ?? 0,
+          coldSkills: item.coldSkills ?? 0,
+        });
+      }
+      charmBasisIds[idx] = '';
+    }
+    const realPresets = computed(() => (props.presets ?? []).filter(p => p.id !== 'custom'));
+
+    return { addCharm, removeCharm, updateCharm, updateCharmCustom, updateCharmCount, isUniqueCharm, isDisabled, charmStats, sunderLabel, charmBasisIds, applyCharmBasis, realPresets, matchedUniquePreset };
   },
   template: `
     <div class="charms-panel">
@@ -769,11 +798,18 @@ const CharmsPanel = defineComponent({
             <span v-if="charmStats(charm).coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ charmStats(charm).coldSkills }} Cold</span>
           </div>
           <div v-if="charm.preset === 'custom'" class="charm-custom-inputs">
+            <select :value="charmBasisIds[idx] ?? ''" @change="charmBasisIds[idx] = $event.target.value; applyCharmBasis(idx)" class="custom-basis-select" title="Copy stats from an existing charm as a starting point">
+              <option value="">Start from...</option>
+              <option v-for="p in realPresets" :key="p.id" :value="p.id" :disabled="isDisabled(p, idx)">{{ p.name }}</option>
+            </select>
             <input type="text" placeholder="Name" :value="charm.custom.name" @input="updateCharmCustom(idx, { name: $event.target.value })" class="custom-text" />
             <label>FCR  <input type="number" min="0" :value="charm.custom.fcr"        @input="updateCharmCustom(idx, { fcr:        +$event.target.value })" class="custom-num" /></label>
             <label>MF   <input type="number" min="0" :value="charm.custom.mf"         @input="updateCharmCustom(idx, { mf:         +$event.target.value })" class="custom-num" /></label>
             <label>+All <input type="number" min="0" :value="charm.custom.allSkills"  @input="updateCharmCustom(idx, { allSkills:  +$event.target.value })" class="custom-num" /></label>
             <label>+Cold<input type="number" min="0" :value="charm.custom.coldSkills" @input="updateCharmCustom(idx, { coldSkills: +$event.target.value })" class="custom-num" /></label>
+          </div>
+          <div v-if="charm.preset === 'custom' && matchedUniquePreset(charm)" class="charm-custom-stat-pills">
+            <span class="pill pill-unique-match" title="Name matches a unique charm — treated as unique (only one allowed)">Unique: {{ matchedUniquePreset(charm).name }}</span>
           </div>
         </div>
       </div>
