@@ -1630,7 +1630,8 @@
           "fcr": 0,
           "mf": 40,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Magefist",
@@ -1638,7 +1639,8 @@
           "fcr": 20,
           "mf": 0,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Trang-Oul's Claws",
@@ -1647,7 +1649,8 @@
           "fcr": 20,
           "mf": 0,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "weapon": [
@@ -1657,7 +1660,8 @@
           "fcr": 20,
           "mf": 0,
           "allSkills": 3,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 30
         },
         {
           "id": "The Oculus",
@@ -1665,7 +1669,8 @@
           "fcr": 30,
           "mf": 50,
           "allSkills": 3,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Wizardspike",
@@ -1673,7 +1678,8 @@
           "fcr": 50,
           "mf": 0,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Eschuta's temper",
@@ -1681,7 +1687,8 @@
           "fcr": 40,
           "mf": 0,
           "allSkills": 3,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Heart of the Oak",
@@ -1689,7 +1696,8 @@
           "fcr": 40,
           "mf": 0,
           "allSkills": 3,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Spirit",
@@ -1697,7 +1705,8 @@
           "fcr": 35,
           "mf": 0,
           "allSkills": 2,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Tal Rasha's Lidless Eye",
@@ -1707,13 +1716,23 @@
           "mf": 0,
           "allSkills": 0,
           "coldSkills": 0,
+          "coldDmgPct": 0,
           "set_bonuses": [
             {
               "pieces": 2,
               "fcr": 0,
               "mf": 0,
               "allSkills": 1,
-              "coldSkills": 0
+              "coldSkills": 0,
+              "coldDmgPct": 0
+            },
+            {
+              "pieces": 5,
+              "fcr": 0,
+              "mf": 0,
+              "allSkills": 0,
+              "coldSkills": 0,
+              "coldDmgPct": 15
             }
           ]
         }
@@ -1725,7 +1744,8 @@
           "fcr": 25,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Harlequin Crest",
@@ -1733,7 +1753,8 @@
           "fcr": 0,
           "mf": 50,
           "allSkills": 2,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Nightwing's Veil",
@@ -1741,7 +1762,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 2,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 15
         },
         {
           "id": "Tal Rasha's Horadric Crest",
@@ -1750,7 +1772,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "amulet": [
@@ -1760,7 +1783,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 2,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "The Eye of Etlich",
@@ -1768,7 +1792,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Tal Rasha's Adjudication",
@@ -1778,13 +1803,15 @@
           "mf": 0,
           "allSkills": 2,
           "coldSkills": 0,
+          "coldDmgPct": 0,
           "set_bonuses": [
             {
               "pieces": 4,
               "fcr": 10,
               "mf": 0,
               "allSkills": 0,
-              "coldSkills": 0
+              "coldSkills": 0,
+              "coldDmgPct": 0
             }
           ]
         }
@@ -1796,7 +1823,8 @@
           "fcr": 20,
           "mf": 0,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 15
         },
         {
           "id": "Skin of the Vipermagi",
@@ -1804,7 +1832,8 @@
           "fcr": 30,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Tal Rasha's Howling Wind",
@@ -1814,13 +1843,15 @@
           "mf": 88,
           "allSkills": 0,
           "coldSkills": 0,
+          "coldDmgPct": 0,
           "set_bonuses": [
             {
               "pieces": 2,
               "fcr": 10,
               "mf": 0,
               "allSkills": 0,
-              "coldSkills": 0
+              "coldSkills": 0,
+              "coldDmgPct": 0
             }
           ]
         }
@@ -1832,7 +1863,8 @@
           "fcr": 20,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Spirit",
@@ -1840,7 +1872,8 @@
           "fcr": 35,
           "mf": 0,
           "allSkills": 2,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "belt": [
@@ -1850,7 +1883,8 @@
           "fcr": 20,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Goldwrap",
@@ -1858,7 +1892,8 @@
           "fcr": 0,
           "mf": 30,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Tal Rasha's Fire-Spun Cloth",
@@ -1868,13 +1903,15 @@
           "mf": 15,
           "allSkills": 0,
           "coldSkills": 0,
+          "coldDmgPct": 0,
           "set_bonuses": [
             {
               "pieces": 3,
               "fcr": 10,
               "mf": 0,
               "allSkills": 0,
-              "coldSkills": 0
+              "coldSkills": 0,
+              "coldDmgPct": 0
             }
           ]
         }
@@ -1886,7 +1923,8 @@
           "fcr": 0,
           "mf": 50,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Silkweave",
@@ -1894,7 +1932,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Waterwalk",
@@ -1902,7 +1941,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Rare MF Boots",
@@ -1910,7 +1950,8 @@
           "fcr": 0,
           "mf": 25,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "ring1": [
@@ -1920,7 +1961,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Nagelring",
@@ -1928,7 +1970,8 @@
           "fcr": 0,
           "mf": 30,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Magic FCR Ring",
@@ -1936,7 +1979,8 @@
           "fcr": 10,
           "mf": 0,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Rare MF Ring",
@@ -1944,7 +1988,8 @@
           "fcr": 10,
           "mf": 25,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "ring2": [
@@ -1954,7 +1999,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Nagelring",
@@ -1962,7 +2008,8 @@
           "fcr": 0,
           "mf": 30,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Magic FCR Ring",
@@ -1970,7 +2017,8 @@
           "fcr": 10,
           "mf": 0,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Rare MF Ring",
@@ -1978,7 +2026,8 @@
           "fcr": 10,
           "mf": 25,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "charms": [
@@ -1989,7 +2038,8 @@
           "fcr": 0,
           "mf": 40,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Annihilus",
@@ -1998,7 +2048,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "Sorc Torch",
@@ -2007,7 +2058,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 3,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "id": "+1 Cold Sorc Skiller",
@@ -2016,7 +2068,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 0,
-          "coldSkills": 1
+          "coldSkills": 1,
+          "coldDmgPct": 0
         },
         {
           "id": "Cold Rupture (MF)",
@@ -2026,6 +2079,7 @@
           "mf": 7,
           "allSkills": 0,
           "coldSkills": 0,
+          "coldDmgPct": 0,
           "sunder": "cold"
         },
         {
@@ -2035,7 +2089,8 @@
           "fcr": 0,
           "mf": 7,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ]
     },
@@ -2050,13 +2105,7 @@
         "belt": "Arachnid Mesh",
         "boots": "Rare MF Boots",
         "ring1": "The Stone of Jordan",
-        "ring2": "The Stone of Jordan",
-        "charms": [
-          { "id": "Sorc Torch", "count": 1 },
-          { "id": "Annihilus", "count": 1 },
-          { "id": "Cold Rupture (MF)", "count": 1 },
-          { "id": "+1 Cold Sorc Skiller", "count": 7 }
-        ]
+        "ring2": "The Stone of Jordan"
       },
       "Magic Find": {
         "head": "Harlequin Crest",
@@ -2068,14 +2117,7 @@
         "belt": "Tal Rasha's Fire-Spun Cloth",
         "boots": "Wartraveler",
         "ring1": "Rare MF Ring",
-        "ring2": "Rare MF Ring",
-        "charms": [
-          { "id": "Sorc Torch", "count": 1 },
-          { "id": "Annihilus", "count": 1 },
-          { "id": "Cold Rupture (MF)", "count": 1 },
-          { "id": "Gheed's Fortune", "count": 1 },
-          { "id": "7% MF SC", "count": 24 }
-        ]
+        "ring2": "Rare MF Ring"
       },
       "Set Build": {
         "head": "Tal Rasha's Horadric Crest",
@@ -2087,15 +2129,7 @@
         "belt": "Tal Rasha's Fire-Spun Cloth",
         "boots": "Wartraveler",
         "ring1": "Rare MF Ring",
-        "ring2": "Rare MF Ring",
-        "charms": [
-          { "id": "Sorc Torch", "count": 1 },
-          { "id": "Annihilus", "count": 1 },
-          { "id": "Cold Rupture (MF)", "count": 1 },
-          { "id": "Gheed's Fortune", "count": 1 },
-          { "id": "+1 Cold Sorc Skiller", "count": 6 },
-          { "id": "7% MF SC", "count": 6 }
-        ]
+        "ring2": "Rare MF Ring"
       }
     },
     "set_level_bonuses": {
@@ -2105,7 +2139,8 @@
           "fcr": 10,
           "mf": 0,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Angelical Raiment": [
@@ -2114,7 +2149,8 @@
           "fcr": 0,
           "mf": 40,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Arcanna's Tricks": [
@@ -2123,7 +2159,8 @@
           "fcr": 20,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Aldur's Watchtower": [
@@ -2132,7 +2169,8 @@
           "fcr": 0,
           "mf": 50,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Tal Rasha's Wrappings": [
@@ -2141,14 +2179,16 @@
           "fcr": 0,
           "mf": 65,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         },
         {
           "pieces": 5,
           "fcr": 0,
           "mf": 0,
           "allSkills": 3,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "M'avina's Battle Hymn": [
@@ -2157,7 +2197,8 @@
           "fcr": 0,
           "mf": 100,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "The Disciple": [
@@ -2166,7 +2207,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 2,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Heaven's Brethren": [
@@ -2175,7 +2217,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 2,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Orphan's Call": [
@@ -2184,7 +2227,8 @@
           "fcr": 0,
           "mf": 80,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Hwanin's Majesty": [
@@ -2193,7 +2237,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 2,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Sazabi's Grand Tribute": [
@@ -2202,7 +2247,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Bul-Kathos' Children": [
@@ -2211,7 +2257,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 2,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Cow King's Leathers": [
@@ -2220,7 +2267,8 @@
           "fcr": 0,
           "mf": 100,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Naj's Ancient Set": [
@@ -2229,7 +2277,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "McAuley's Folly": [
@@ -2238,7 +2287,8 @@
           "fcr": 0,
           "mf": 50,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Warlord's Glory": [
@@ -2247,7 +2297,8 @@
           "fcr": 0,
           "mf": 0,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Bane's Garments": [
@@ -2256,7 +2307,8 @@
           "fcr": 25,
           "mf": 40,
           "allSkills": 1,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ],
       "Horazon's Splendor": [
@@ -2265,7 +2317,8 @@
           "fcr": 0,
           "mf": 100,
           "allSkills": 0,
-          "coldSkills": 0
+          "coldSkills": 0,
+          "coldDmgPct": 0
         }
       ]
     },

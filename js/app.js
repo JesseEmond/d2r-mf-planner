@@ -22,8 +22,8 @@ const ICE_BLAST_HARD_PTS     = 20;
 
 const DEFAULT_BOSSES = { andy: true };
 
-const CUSTOM_ITEM  = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
-const CUSTOM_CHARM = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, unique: false };
+const CUSTOM_ITEM  = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0 };
+const CUSTOM_CHARM = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, unique: false };
 
 const PRESET_ITEMS = ref({});
 const TARGET_GEAR_PRESETS = ref([]);
@@ -79,34 +79,36 @@ function computeFcrBadgeClass(fcr) {
 }
 
 export function computeGearTotals(getSlotStats) {
-  const t = { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  const t = { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0 };
   for (const { id } of GEAR_SLOTS) {
     const s = getSlotStats(id);
     t.fcr        += s.fcr        || 0;
     t.mf         += s.mf         || 0;
     t.allSkills  += s.allSkills  || 0;
     t.coldSkills += s.coldSkills || 0;
+    t.coldDmgPct += s.coldDmgPct || 0;
   }
   return t;
 }
 
 export function computeCombat(totals, effCM) {
-  const bp        = computeFcrBreakpoint(totals.fcr);
-  const blizzSlvl = BLIZZARD_HARD_PTS + totals.allSkills + totals.coldSkills;
-  const ibSlvl    = ICE_BLAST_HARD_PTS + totals.allSkills + totals.coldSkills;
-  const ibs       = iceBlastsPerWindow(bp.frames);
-  const blizzDmg  = blizzDmgFormula(blizzSlvl);
-  const ibDmg     = iceBlastDmgFormula(ibSlvl);
-  const blizzDps  = blizzDmg / BLIZZARD_COOLDOWN_SECS;
-  const ibDps     = ibs * ibDmg / BLIZZARD_COOLDOWN_SECS;
-  return { effCM, bp, blizzDps, iceBlastDps: ibDps, totalDps: blizzDps + ibDps, blizzDmg, ibDmg, ibs };
+  const bp            = computeFcrBreakpoint(totals.fcr);
+  const blizzSlvl     = BLIZZARD_HARD_PTS + totals.allSkills + totals.coldSkills;
+  const iceBlastSlvl    = ICE_BLAST_HARD_PTS + totals.allSkills + totals.coldSkills;
+  const iceBlastCasts   = iceBlastsPerWindow(bp.frames);
+  const coldDmgMult     = 1 + (totals.coldDmgPct || 0) / 100;
+  const blizzDmg        = blizzDmgFormula(blizzSlvl) * coldDmgMult;
+  const iceBlastDmg     = iceBlastDmgFormula(iceBlastSlvl) * coldDmgMult;
+  const blizzDps        = blizzDmg / BLIZZARD_COOLDOWN_SECS;
+  const iceBlastDps     = iceBlastCasts * iceBlastDmg / BLIZZARD_COOLDOWN_SECS;
+  return { effCM, bp, blizzDps, iceBlastDps, totalDps: blizzDps + iceBlastDps, blizzDmg, iceBlastDmg, iceBlastCasts };
 }
 
 function computeCombatAssumptions(combat) {
-  const { bp, ibs } = combat;
+  const { bp, iceBlastCasts } = combat;
   return [
     `Blizzard: 1 cast / ${BLIZZARD_COOLDOWN_SECS}s cooldown, ~${BLIZZARD_BOLTS_VS_BOSS} bolts hitting boss per cast`,
-    `Ice Blast: ${ibs.toFixed(1)} effective casts per window at ${ICE_BLAST_HIT_RATE * 100}% hit rate (${bp.frames} frames/cast)`,
+    `Ice Blast: ${iceBlastCasts.toFixed(1)} effective casts per window at ${ICE_BLAST_HIT_RATE * 100}% hit rate (${bp.frames} frames/cast)`,
     `Skill levels assume ${BLIZZARD_HARD_PTS} hard points in each spell; scale with +All/+Cold Skills from gear`,
     `Boss HP = avg(minHP, maxHP) × L-HP[level] ÷ 100 (from monlvl.txt)`,
     `Damage values are approximate`,
@@ -118,7 +120,7 @@ function fmtMonsterId(id) {
 }
 
 export function computeRunStats(combat, runConfigData, monsterDbData, runBosses) {
-  const { bp, effCM, blizzDmg, ibDmg, ibs } = combat;
+  const { bp, effCM, blizzDmg, iceBlastDmg, iceBlastCasts } = combat;
   const stats = {};
   for (const run of runConfigData) {
     if (!run.available) continue;
@@ -128,7 +130,7 @@ export function computeRunStats(combat, runConfigData, monsterDbData, runBosses)
 
     if (runBosses[run.id] && monCombat.hp) {
       const mult   = coldDmgMultiplier(monCombat.cold_resist ?? 0, effCM);
-      const effDps = (blizzDmg / BLIZZARD_COOLDOWN_SECS + ibs * ibDmg / BLIZZARD_COOLDOWN_SECS) * mult;
+      const effDps = (blizzDmg / BLIZZARD_COOLDOWN_SECS + iceBlastCasts * iceBlastDmg / BLIZZARD_COOLDOWN_SECS) * mult;
       const amount = (run.monsters ?? []).reduce((s, m) => s + (m.amount ?? 1), 0) || 1;
       killSecs = (monCombat.hp / effDps) * amount;
     }
@@ -223,11 +225,11 @@ export function computeEttvd(runStatsData, runConfigData, runBosses, totalDropPr
 // ── State helpers ──────────────────────────────────────────────────────────
 
 function makeSlot() {
-  return { preset: null, custom: { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 } };
+  return { preset: null, custom: { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0 } };
 }
 
 function makeCharmEntry() {
-  return { preset: null, count: 1, custom: { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 } };
+  return { preset: null, count: 1, custom: { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0 } };
 }
 
 function makeGear() {
@@ -261,11 +263,12 @@ function encodeState(state) {
       const entry = { p: slot.preset };
       if (slot.preset === 'custom') {
         const c = slot.custom;
-        if (c.name)       entry.n  = c.name;
-        if (c.fcr)        entry.f  = c.fcr;
-        if (c.mf)         entry.m  = c.mf;
-        if (c.allSkills)  entry.a  = c.allSkills;
-        if (c.coldSkills) entry.cs = c.coldSkills;
+        if (c.name)       entry.n   = c.name;
+        if (c.fcr)        entry.f   = c.fcr;
+        if (c.mf)         entry.m   = c.mf;
+        if (c.allSkills)  entry.a   = c.allSkills;
+        if (c.coldSkills) entry.cs  = c.coldSkills;
+        if (c.coldDmgPct) entry.cdp = c.coldDmgPct;
       }
       gear[id] = entry;
     }
@@ -276,11 +279,12 @@ function encodeState(state) {
       const entry = { p: c.preset };
       if (c.preset === 'custom') {
         const cu = c.custom;
-        if (cu.name)       entry.n  = cu.name;
-        if (cu.fcr)        entry.f  = cu.fcr;
-        if (cu.mf)         entry.m  = cu.mf;
-        if (cu.allSkills)  entry.a  = cu.allSkills;
-        if (cu.coldSkills) entry.cs = cu.coldSkills;
+        if (cu.name)       entry.n   = cu.name;
+        if (cu.fcr)        entry.f   = cu.fcr;
+        if (cu.mf)         entry.m   = cu.mf;
+        if (cu.allSkills)  entry.a   = cu.allSkills;
+        if (cu.coldSkills) entry.cs  = cu.coldSkills;
+        if (cu.coldDmgPct) entry.cdp = cu.coldDmgPct;
       } else if ((c.count ?? 1) > 1) {
         entry.qty = c.count;
       }
@@ -312,7 +316,7 @@ function decodeState(b64, state) {
           state.gear[id].preset = e.p ?? null;
           if (e.p === 'custom') {
             state.gear[id].custom = { name: e.n ?? '', fcr: e.f ?? 0, mf: e.m ?? 0,
-              allSkills: e.a ?? 0, coldSkills: e.cs ?? 0 };
+              allSkills: e.a ?? 0, coldSkills: e.cs ?? 0, coldDmgPct: e.cdp ?? 0 };
           }
         }
       }
@@ -323,7 +327,7 @@ function decodeState(b64, state) {
         entry.preset = e.p ?? null;
         if (e.p === 'custom') {
           entry.custom = { name: e.n ?? '', fcr: e.f ?? 0, mf: e.m ?? 0,
-            allSkills: e.a ?? 0, coldSkills: e.cs ?? 0 };
+            allSkills: e.a ?? 0, coldSkills: e.cs ?? 0, coldDmgPct: e.cdp ?? 0 };
         } else if (e.qty) {
           entry.count = e.qty;
         }
@@ -353,7 +357,7 @@ function findSetItemByName(name) {
 }
 
 function slotStats(slot) {
-  if (!slot.preset) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  if (!slot.preset) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0 };
   if (slot.preset === 'custom') {
     const setMatch = findSetItemByName(slot.custom.name?.trim());
     if (setMatch) return { ...slot.custom, set_name: setMatch.set_name, set_bonuses: setMatch.set_bonuses };
@@ -363,34 +367,35 @@ function slotStats(slot) {
     const item = presets.find(p => p.id === slot.preset);
     if (item) return item;
   }
-  return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0 };
 }
 
 function scaleStats(s, n) {
   if (!s || n === 1) return s;
-  return { fcr: (s.fcr||0)*n, mf: (s.mf||0)*n, allSkills: (s.allSkills||0)*n, coldSkills: (s.coldSkills||0)*n };
+  return { fcr: (s.fcr||0)*n, mf: (s.mf||0)*n, allSkills: (s.allSkills||0)*n, coldSkills: (s.coldSkills||0)*n, coldDmgPct: (s.coldDmgPct||0)*n };
 }
 
 function singleCharmStats(charm) {
-  if (!charm.preset) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  if (!charm.preset) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0 };
   const presets = PRESET_ITEMS.value['charms'] ?? [];
   if (charm.preset === 'custom') {
     const name = charm.custom?.name?.trim();
     const isUnique = !!(name && presets.find(p => p.unique && p.name === name));
     return scaleStats(charm.custom, isUnique ? 1 : (charm.count ?? 1));
   }
-  const item = presets.find(p => p.id === charm.preset) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  const item = presets.find(p => p.id === charm.preset) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0 };
   return scaleStats(item, item.unique ? 1 : (charm.count ?? 1));
 }
 
 function charmSlotStats(charmsArray) {
-  const t = { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  const t = { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0 };
   for (const charm of charmsArray) {
     const s = singleCharmStats(charm);
     t.fcr        += s.fcr        || 0;
     t.mf         += s.mf         || 0;
     t.allSkills  += s.allSkills  || 0;
     t.coldSkills += s.coldSkills || 0;
+    t.coldDmgPct += s.coldDmgPct || 0;
   }
   return t;
 }
@@ -426,12 +431,12 @@ function computeSetBonuses(getSlotStats) {
     sets[item.set_name].items.push(item);
   }
 
-  let fcr = 0, mf = 0, allSkills = 0, coldSkills = 0;
+  let fcr = 0, mf = 0, allSkills = 0, coldSkills = 0, coldDmgPct = 0;
   const activeSets = [];
 
   for (const [setName, { count, items }] of Object.entries(sets)) {
     if (count < 2) continue;
-    let sFcr = 0, sMf = 0, sAll = 0, sCold = 0;
+    let sFcr = 0, sMf = 0, sAll = 0, sCold = 0, sCdp = 0;
     for (const item of items) {
       for (const b of (item.set_bonuses ?? [])) {
         if (b.pieces <= count) {
@@ -439,6 +444,7 @@ function computeSetBonuses(getSlotStats) {
           sMf   += b.mf         || 0;
           sAll  += b.allSkills  || 0;
           sCold += b.coldSkills || 0;
+          sCdp  += b.coldDmgPct || 0;
         }
       }
     }
@@ -448,14 +454,15 @@ function computeSetBonuses(getSlotStats) {
         sMf   += b.mf         || 0;
         sAll  += b.allSkills  || 0;
         sCold += b.coldSkills || 0;
+        sCdp  += b.coldDmgPct || 0;
       }
     }
-    fcr += sFcr; mf += sMf; allSkills += sAll; coldSkills += sCold;
+    fcr += sFcr; mf += sMf; allSkills += sAll; coldSkills += sCold; coldDmgPct += sCdp;
     const total = SET_SIZES.value[setName] ?? count;
-    activeSets.push({ name: setName, pieces: count, total, fcr: sFcr, mf: sMf, allSkills: sAll, coldSkills: sCold });
+    activeSets.push({ name: setName, pieces: count, total, fcr: sFcr, mf: sMf, allSkills: sAll, coldSkills: sCold, coldDmgPct: sCdp });
   }
 
-  return { fcr, mf, allSkills, coldSkills, activeSets };
+  return { fcr, mf, allSkills, coldSkills, coldDmgPct, activeSets };
 }
 
 function makeBuild(getSlotStats) {
@@ -468,6 +475,7 @@ function makeBuild(getSlotStats) {
       mf:         base.mf         + bonus.mf,
       allSkills:  base.allSkills  + bonus.allSkills,
       coldSkills: base.coldSkills + bonus.coldSkills,
+      coldDmgPct: base.coldDmgPct + bonus.coldDmgPct,
     };
   });
 
@@ -475,6 +483,7 @@ function makeBuild(getSlotStats) {
   const totalMF         = computed(() => gearTotals.value.mf);
   const totalAllSkills  = computed(() => gearTotals.value.allSkills);
   const totalColdSkills = computed(() => gearTotals.value.coldSkills);
+  const totalColdDmgPct = computed(() => gearTotals.value.coldDmgPct);
   const effectiveColdMastery = computed(() =>
     state.coldMasteryBase + totalAllSkills.value + totalColdSkills.value
   );
@@ -520,7 +529,7 @@ function makeBuild(getSlotStats) {
   const activeSetBonuses = computed(() => setBonuses.value.activeSets);
 
   return {
-    totalFCR, totalMF, totalAllSkills, totalColdSkills,
+    totalFCR, totalMF, totalAllSkills, totalColdSkills, totalColdDmgPct,
     effectiveColdMastery, fcrBreakpoint, fcrTooltip, fcrBadgeClass,
     blizzDps, iceBlastDps, totalDps, combatAssumptions,
     runStats, runDropProbs, totalDropProbs, ettvd, runTimeSummary,
@@ -604,10 +613,11 @@ const StatPills = defineComponent({
   template: `
     <div class="stat-pills">
       <slot />
-      <span v-if="stats.fcr"        class="pill pill-fcr"   title="Faster Cast Rate — reduces casting animation length">FCR +{{ stats.fcr }}%</span>
-      <span v-if="stats.mf"         class="pill pill-mf"    title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ stats.mf }}%</span>
-      <span v-if="stats.allSkills"  class="pill pill-skill" title="+All Skills — adds to all character skill levels">+{{ stats.allSkills }} All</span>
-      <span v-if="stats.coldSkills" class="pill pill-cold"  title="+Cold Skills — adds to cold skill levels only">+{{ stats.coldSkills }} Cold</span>
+      <span v-if="stats.fcr"        class="pill pill-fcr"      title="Faster Cast Rate — reduces casting animation length">FCR +{{ stats.fcr }}%</span>
+      <span v-if="stats.mf"         class="pill pill-mf"       title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ stats.mf }}%</span>
+      <span v-if="stats.allSkills"  class="pill pill-skill"    title="+All Skills — adds to all character skill levels">+{{ stats.allSkills }} All</span>
+      <span v-if="stats.coldSkills" class="pill pill-cold"     title="+Cold Skills — adds to cold skill levels only">+{{ stats.coldSkills }} Cold</span>
+      <span v-if="stats.coldDmgPct" class="pill pill-cold-pct" title="+% Cold Skill Damage — multiplies cold spell damage output">Cold +{{ stats.coldDmgPct }}%</span>
     </div>
   `,
 });
@@ -666,11 +676,12 @@ const GearSlot = defineComponent({
       const item = (props.presets ?? []).find(p => p.id === id);
       if (item) {
         updateCustom({
-          name:       item.name,
-          fcr:        item.fcr        ?? 0,
-          mf:         item.mf         ?? 0,
-          allSkills:  item.allSkills  ?? 0,
-          coldSkills: item.coldSkills ?? 0,
+          name:        item.name,
+          fcr:         item.fcr         ?? 0,
+          mf:          item.mf          ?? 0,
+          allSkills:   item.allSkills   ?? 0,
+          coldSkills:  item.coldSkills  ?? 0,
+          coldDmgPct:  item.coldDmgPct  ?? 0,
         });
       }
       basisId.value = '';
@@ -711,10 +722,11 @@ const GearSlot = defineComponent({
           <option v-for="p in realPresets" :key="p.id" :value="p.id">{{ p.name }}</option>
         </select>
         <input type="text"   placeholder="Name"       :value="modelValue.custom.name"       @input="updateCustom({ name: $event.target.value })"              class="custom-text" />
-        <label>FCR <input   type="number" min="0" :value="modelValue.custom.fcr"        @input="updateCustom({ fcr: +$event.target.value })"       class="custom-num" /></label>
-        <label>MF  <input   type="number" min="0" :value="modelValue.custom.mf"         @input="updateCustom({ mf: +$event.target.value })"        class="custom-num" /></label>
-        <label>+All <input  type="number" min="0" :value="modelValue.custom.allSkills"  @input="updateCustom({ allSkills: +$event.target.value })"  class="custom-num" /></label>
-        <label>+Cold <input type="number" min="0" :value="modelValue.custom.coldSkills" @input="updateCustom({ coldSkills: +$event.target.value })" class="custom-num" /></label>
+        <label>FCR    <input type="number" min="0" :value="modelValue.custom.fcr"        @input="updateCustom({ fcr:        +$event.target.value })" class="custom-num" /></label>
+        <label>MF     <input type="number" min="0" :value="modelValue.custom.mf"         @input="updateCustom({ mf:         +$event.target.value })" class="custom-num" /></label>
+        <label>+All   <input type="number" min="0" :value="modelValue.custom.allSkills"  @input="updateCustom({ allSkills:  +$event.target.value })" class="custom-num" /></label>
+        <label>+Cold  <input type="number" min="0" :value="modelValue.custom.coldSkills" @input="updateCustom({ coldSkills: +$event.target.value })" class="custom-num" /></label>
+        <label>Cold%  <input type="number" min="0" :value="modelValue.custom.coldDmgPct" @input="updateCustom({ coldDmgPct: +$event.target.value })" class="custom-num" /></label>
       </div>
 
       <div v-if="modelValue.preset === 'custom' && matchedSetItem" class="custom-stat-pills">
@@ -807,11 +819,12 @@ const CharmsPanel = defineComponent({
       const item = (props.presets ?? []).find(p => p.id === id);
       if (item) {
         updateCharmCustom(idx, {
-          name:       item.name,
-          fcr:        item.fcr        ?? 0,
-          mf:         item.mf         ?? 0,
-          allSkills:  item.allSkills  ?? 0,
-          coldSkills: item.coldSkills ?? 0,
+          name:        item.name,
+          fcr:         item.fcr         ?? 0,
+          mf:          item.mf          ?? 0,
+          allSkills:   item.allSkills   ?? 0,
+          coldSkills:  item.coldSkills  ?? 0,
+          coldDmgPct:  item.coldDmgPct  ?? 0,
         });
       }
       charmBasisIds[idx] = '';
@@ -858,10 +871,11 @@ const CharmsPanel = defineComponent({
               <option v-for="p in realPresets" :key="p.id" :value="p.id" :disabled="isDisabled(p, idx)">{{ p.name }}</option>
             </select>
             <input type="text" placeholder="Name" :value="charm.custom.name" @input="updateCharmCustom(idx, { name: $event.target.value })" class="custom-text" />
-            <label>FCR  <input type="number" min="0" :value="charm.custom.fcr"        @input="updateCharmCustom(idx, { fcr:        +$event.target.value })" class="custom-num" /></label>
-            <label>MF   <input type="number" min="0" :value="charm.custom.mf"         @input="updateCharmCustom(idx, { mf:         +$event.target.value })" class="custom-num" /></label>
-            <label>+All <input type="number" min="0" :value="charm.custom.allSkills"  @input="updateCharmCustom(idx, { allSkills:  +$event.target.value })" class="custom-num" /></label>
-            <label>+Cold<input type="number" min="0" :value="charm.custom.coldSkills" @input="updateCharmCustom(idx, { coldSkills: +$event.target.value })" class="custom-num" /></label>
+            <label>FCR   <input type="number" min="0" :value="charm.custom.fcr"        @input="updateCharmCustom(idx, { fcr:        +$event.target.value })" class="custom-num" /></label>
+            <label>MF    <input type="number" min="0" :value="charm.custom.mf"         @input="updateCharmCustom(idx, { mf:         +$event.target.value })" class="custom-num" /></label>
+            <label>+All  <input type="number" min="0" :value="charm.custom.allSkills"  @input="updateCharmCustom(idx, { allSkills:  +$event.target.value })" class="custom-num" /></label>
+            <label>+Cold <input type="number" min="0" :value="charm.custom.coldSkills" @input="updateCharmCustom(idx, { coldSkills: +$event.target.value })" class="custom-num" /></label>
+            <label>Cold% <input type="number" min="0" :value="charm.custom.coldDmgPct" @input="updateCharmCustom(idx, { coldDmgPct: +$event.target.value })" class="custom-num" /></label>
           </div>
           <div v-if="charm.preset === 'custom' && matchedUniquePreset(charm)" class="charm-custom-stat-pills">
             <span class="pill pill-unique-match" title="Name matches a unique charm — treated as unique (only one allowed)">Unique: {{ matchedUniquePreset(charm).name }}</span>
@@ -954,6 +968,7 @@ createApp({
       totalMF:              currentBuild.totalMF,
       totalAllSkills:       currentBuild.totalAllSkills,
       totalColdSkills:      currentBuild.totalColdSkills,
+      totalColdDmgPct:      currentBuild.totalColdDmgPct,
       effectiveColdMastery: currentBuild.effectiveColdMastery,
       fcrBreakpoint:        currentBuild.fcrBreakpoint,
       fcrBadgeClass:        currentBuild.fcrBadgeClass,
@@ -974,6 +989,7 @@ createApp({
       targetTotalMF:              targetBuild.totalMF,
       targetTotalAllSkills:       targetBuild.totalAllSkills,
       targetTotalColdSkills:      targetBuild.totalColdSkills,
+      targetTotalColdDmgPct:      targetBuild.totalColdDmgPct,
       targetEffectiveColdMastery: targetBuild.effectiveColdMastery,
       targetFcrBreakpoint:        targetBuild.fcrBreakpoint,
       targetFcrBadgeClass:        targetBuild.fcrBadgeClass,
@@ -1041,9 +1057,10 @@ createApp({
                 FCR {{ totalFCR }}%
                 <span class="fcr-badge" :class="fcrBadgeClass" :title="fcrTooltip">{{ fcrBreakpoint.frames }}f</span>
               </span>
-              <span v-if="totalMF"         class="pill pill-mf"    title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ totalMF }}%</span>
-              <span v-if="totalAllSkills"  class="pill pill-skill" title="+All Skills — adds to all character skill levels">+{{ totalAllSkills }} All Skills</span>
-              <span v-if="totalColdSkills" class="pill pill-cold"  title="+Cold Skills — adds to cold skill levels only">+{{ totalColdSkills }} Cold Skills</span>
+              <span v-if="totalMF"         class="pill pill-mf"       title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ totalMF }}%</span>
+              <span v-if="totalAllSkills"  class="pill pill-skill"    title="+All Skills — adds to all character skill levels">+{{ totalAllSkills }} All Skills</span>
+              <span v-if="totalColdSkills" class="pill pill-cold"     title="+Cold Skills — adds to cold skill levels only">+{{ totalColdSkills }} Cold Skills</span>
+              <span v-if="totalColdDmgPct" class="pill pill-cold-pct" title="+% Cold Skill Damage — multiplies cold spell damage output">Cold +{{ totalColdDmgPct }}%</span>
               <span class="pill pill-cold" title="Cold Mastery — reduces enemy cold resistance; effective level includes +All Skills and +Cold Skills from gear">Cold Mastery Lv {{ effectiveColdMastery }}</span>
             </div>
             <div class="cm-input-row">
@@ -1199,9 +1216,10 @@ createApp({
                 FCR {{ targetTotalFCR }}%
                 <span class="fcr-badge" :class="targetFcrBadgeClass" :title="targetFcrTooltip">{{ targetFcrBreakpoint.frames }}f</span>
               </span>
-              <span v-if="targetTotalMF"         class="pill pill-mf"    title="Magic Find">MF +{{ targetTotalMF }}%</span>
-              <span v-if="targetTotalAllSkills"  class="pill pill-skill" title="+All Skills">+{{ targetTotalAllSkills }} All Skills</span>
-              <span v-if="targetTotalColdSkills" class="pill pill-cold"  title="+Cold Skills">+{{ targetTotalColdSkills }} Cold Skills</span>
+              <span v-if="targetTotalMF"         class="pill pill-mf"       title="Magic Find">MF +{{ targetTotalMF }}%</span>
+              <span v-if="targetTotalAllSkills"  class="pill pill-skill"    title="+All Skills">+{{ targetTotalAllSkills }} All Skills</span>
+              <span v-if="targetTotalColdSkills" class="pill pill-cold"     title="+Cold Skills">+{{ targetTotalColdSkills }} Cold Skills</span>
+              <span v-if="targetTotalColdDmgPct" class="pill pill-cold-pct" title="+% Cold Skill Damage">Cold +{{ targetTotalColdDmgPct }}%</span>
               <span class="pill pill-cold" title="Cold Mastery effective level includes +All Skills and +Cold Skills from target gear">Cold Mastery Lv {{ targetEffectiveColdMastery }}</span>
             </div>
             <div class="cm-input-row">
