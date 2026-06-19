@@ -508,7 +508,11 @@ const GearSlot = defineComponent({
     const basisId = ref('');
 
     function update(patch) {
-      emit('update:modelValue', { ...props.modelValue, ...patch });
+      const next = { ...props.modelValue, ...patch };
+      if (patch.preset && patch.preset !== 'custom') {
+        next.custom = { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+      }
+      emit('update:modelValue', next);
     }
     function updateCustom(patch) {
       emit('update:modelValue', {
@@ -557,6 +561,14 @@ const GearSlot = defineComponent({
         <option v-for="p in presets" :key="p.id" :value="p.id">{{ p.name }}</option>
       </select>
 
+      <div v-if="modelValue.preset" class="stat-pills">
+        <span v-if="matchedSetItem && modelValue.preset !== 'custom'" class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
+        <span v-if="stats().fcr"       class="pill pill-fcr"   title="Faster Cast Rate — reduces casting animation length">FCR +{{ stats().fcr }}%</span>
+        <span v-if="stats().mf"        class="pill pill-mf"    title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ stats().mf }}%</span>
+        <span v-if="stats().allSkills"  class="pill pill-skill" title="+All Skills — adds to all character skill levels">+{{ stats().allSkills }} All</span>
+        <span v-if="stats().coldSkills" class="pill pill-cold"  title="+Cold Skills — adds to cold skill levels only">+{{ stats().coldSkills }} Cold</span>
+      </div>
+
       <div v-if="modelValue.preset === 'custom'" class="custom-inputs">
         <select v-model="basisId" @change="applyBasis" class="custom-basis-select" title="Copy stats from an existing item as a starting point">
           <option value="">Start from...</option>
@@ -569,12 +581,8 @@ const GearSlot = defineComponent({
         <label>+Cold <input type="number" min="0" :value="modelValue.custom.coldSkills" @input="updateCustom({ coldSkills: +$event.target.value })" class="custom-num" /></label>
       </div>
 
-      <div v-if="modelValue.preset" class="stat-pills">
-        <span v-if="matchedSetItem" class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
-        <span v-if="stats().fcr"       class="pill pill-fcr"   title="Faster Cast Rate — reduces casting animation length">FCR +{{ stats().fcr }}%</span>
-        <span v-if="stats().mf"        class="pill pill-mf"    title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ stats().mf }}%</span>
-        <span v-if="stats().allSkills"  class="pill pill-skill" title="+All Skills — adds to all character skill levels">+{{ stats().allSkills }} All</span>
-        <span v-if="stats().coldSkills" class="pill pill-cold"  title="+Cold Skills — adds to cold skill levels only">+{{ stats().coldSkills }} Cold</span>
+      <div v-if="modelValue.preset === 'custom' && matchedSetItem" class="custom-stat-pills">
+        <span class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
       </div>
     </div>
   `,

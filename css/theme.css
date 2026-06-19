@@ -134,6 +134,13 @@ body {
   gap: 0.3rem;
   flex-wrap: wrap;
 }
+.custom-stat-pills {
+  display: flex;
+  gap: 0.3rem;
+  flex-wrap: wrap;
+  flex-basis: 100%;
+  padding-left: 5.9rem;
+}
 .pill {
   font-size: 0.7rem;
   padding: 1px 5px;
