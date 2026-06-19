@@ -154,6 +154,99 @@ body {
 .pill-cold      { background: #142030; color: #80d0ff; }
 .pill-total     { background: #2a2210; color: var(--color-unique); }
 .pill-set-match { background: #0d1f0d; color: var(--color-set); border: 1px solid #1a4a1a; font-style: italic; }
+.pill-sunder    { background: #1f1530; color: #d080ff; border: 1px solid #4a2060; }
+
+/* Charms section (sits below set bonuses, above Stats) */
+.charms-section {
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.75rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Charms panel */
+.charms-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.charms-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.charms-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+.charm-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  padding-left: 5.9rem;
+}
+.charm-select-group {
+  flex: 0 0 316px;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.charm-select-group .slot-select {
+  flex: 1;
+  min-width: 0;
+}
+.charm-count {
+  width: 48px;
+  flex-shrink: 0;
+  background: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: #d0d0d0;
+  border-radius: 3px;
+  padding: 1px 4px;
+  font-size: 0.85rem;
+  font-family: inherit;
+  text-align: center;
+}
+.charm-count-spacer {
+  width: 48px;
+  flex-shrink: 0;
+  font-size: 0.85rem;
+  color: #555;
+  text-align: center;
+}
+.charm-remove {
+  background: none;
+  border: 1px solid #3a2020;
+  color: #885050;
+  border-radius: 3px;
+  padding: 0 6px;
+  font-size: 0.9rem;
+  line-height: 1.5;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+.charm-remove:hover { border-color: #c06060; color: #ff8080; }
+.charm-add {
+  background: none;
+  border: 1px dashed var(--color-border);
+  color: #777;
+  border-radius: 3px;
+  padding: 1px 8px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  font-family: inherit;
+}
+.charm-add:hover { border-color: #555; color: #aaa; }
+.charm-custom-inputs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  flex-basis: 100%;
+  align-items: center;
+  font-size: 0.78rem;
+}
 
 /* Sticky header */
 .sticky-header {

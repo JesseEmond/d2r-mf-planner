@@ -1980,6 +1980,63 @@
           "allSkills": 0,
           "coldSkills": 0
         }
+      ],
+      "charms": [
+        {
+          "id": "Gheed's Fortune",
+          "name": "Gheed's Fortune",
+          "unique": true,
+          "fcr": 0,
+          "mf": 40,
+          "allSkills": 0,
+          "coldSkills": 0
+        },
+        {
+          "id": "Annihilus",
+          "name": "Annihilus",
+          "unique": true,
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        },
+        {
+          "id": "Sorc Torch",
+          "name": "Sorc Torch",
+          "unique": true,
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 3,
+          "coldSkills": 0
+        },
+        {
+          "id": "+1 Cold Sorc Skiller",
+          "name": "+1 Cold Sorc Skiller",
+          "unique": false,
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 1
+        },
+        {
+          "id": "Cold Rupture (MF)",
+          "name": "Cold Rupture (MF)",
+          "unique": true,
+          "fcr": 0,
+          "mf": 7,
+          "allSkills": 0,
+          "coldSkills": 0,
+          "sunder": "cold"
+        },
+        {
+          "id": "7% MF SC",
+          "name": "7% MF SC",
+          "unique": false,
+          "fcr": 0,
+          "mf": 7,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
       ]
     },
     "presets": {
