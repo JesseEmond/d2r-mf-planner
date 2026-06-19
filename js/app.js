@@ -30,6 +30,44 @@ const TARGET_GEAR_PRESETS = ref([]);
 const SET_LEVEL_BONUSES = ref({});
 const SET_SIZES = ref({});
 
+// ── Stats ──────────────────────────────────────────────────────────────────
+// Computed stat aggregates. Raw items (DB) and custom fields in Vue state
+// stay as plain objects; Stats is only for values returned by accumulation
+// functions.
+
+class Stats {
+  constructor({ fcr=0, mf=0, allSkills=0, coldSkills=0, coldDmgPct=0, enemyColdResPct=0 } = {}) {
+    this.fcr             = fcr;
+    this.mf              = mf;
+    this.allSkills       = allSkills;
+    this.coldSkills      = coldSkills;
+    this.coldDmgPct      = coldDmgPct;
+    this.enemyColdResPct = enemyColdResPct;
+  }
+  add(other) {
+    return new Stats({
+      fcr:             this.fcr             + (other?.fcr             ?? 0),
+      mf:              this.mf              + (other?.mf              ?? 0),
+      allSkills:       this.allSkills       + (other?.allSkills       ?? 0),
+      coldSkills:      this.coldSkills      + (other?.coldSkills      ?? 0),
+      coldDmgPct:      this.coldDmgPct      + (other?.coldDmgPct      ?? 0),
+      enemyColdResPct: this.enemyColdResPct + (other?.enemyColdResPct ?? 0),
+    });
+  }
+  scale(n) {
+    return new Stats({
+      fcr:             this.fcr             * n,
+      mf:              this.mf              * n,
+      allSkills:       this.allSkills       * n,
+      coldSkills:      this.coldSkills      * n,
+      coldDmgPct:      this.coldDmgPct      * n,
+      enemyColdResPct: this.enemyColdResPct * n,
+    });
+  }
+  static zero() { return new Stats(); }
+  static from(obj) { return new Stats(obj ?? {}); }
+}
+
 // ── Pure computation functions ─────────────────────────────────────────────
 // No Vue dependency — the optimizer can call these directly.
 
@@ -79,16 +117,8 @@ function computeFcrBadgeClass(fcr) {
 }
 
 export function computeGearTotals(getSlotStats) {
-  const t = { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
-  for (const { id } of GEAR_SLOTS) {
-    const s = getSlotStats(id);
-    t.fcr             += s.fcr             || 0;
-    t.mf              += s.mf              || 0;
-    t.allSkills       += s.allSkills       || 0;
-    t.coldSkills      += s.coldSkills      || 0;
-    t.coldDmgPct      += s.coldDmgPct      || 0;
-    t.enemyColdResPct += s.enemyColdResPct || 0;
-  }
+  let t = Stats.zero();
+  for (const { id } of GEAR_SLOTS) t = t.add(getSlotStats(id));
   return t;
 }
 
@@ -362,7 +392,7 @@ function findSetItemByName(name) {
 }
 
 function slotStats(slot) {
-  if (!slot.preset) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
+  if (!slot.preset) return Stats.zero();
   if (slot.preset === 'custom') {
     const setMatch = findSetItemByName(slot.custom.name?.trim());
     if (setMatch) return { ...slot.custom, set_name: setMatch.set_name, set_bonuses: setMatch.set_bonuses };
@@ -372,38 +402,24 @@ function slotStats(slot) {
     const item = presets.find(p => p.id === slot.preset);
     if (item) return item;
   }
-  return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
-}
-
-function scaleStats(s, n) {
-  if (!s || n === 1) return s;
-  return { fcr: (s.fcr||0)*n, mf: (s.mf||0)*n, allSkills: (s.allSkills||0)*n, coldSkills: (s.coldSkills||0)*n, coldDmgPct: (s.coldDmgPct||0)*n, enemyColdResPct: (s.enemyColdResPct||0)*n };
+  return Stats.zero();
 }
 
 function singleCharmStats(charm) {
-  if (!charm.preset) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
+  if (!charm.preset) return Stats.zero();
   const presets = PRESET_ITEMS.value['charms'] ?? [];
   if (charm.preset === 'custom') {
     const name = charm.custom?.name?.trim();
     const isUnique = !!(name && presets.find(p => p.unique && p.name === name));
-    return scaleStats(charm.custom, isUnique ? 1 : (charm.count ?? 1));
+    return Stats.from(charm.custom).scale(isUnique ? 1 : (charm.count ?? 1));
   }
-  const item = presets.find(p => p.id === charm.preset) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
-  return scaleStats(item, item.unique ? 1 : (charm.count ?? 1));
+  const item = presets.find(p => p.id === charm.preset);
+  if (!item) return Stats.zero();
+  return Stats.from(item).scale(item.unique ? 1 : (charm.count ?? 1));
 }
 
 function charmSlotStats(charmsArray) {
-  const t = { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
-  for (const charm of charmsArray) {
-    const s = singleCharmStats(charm);
-    t.fcr             += s.fcr             || 0;
-    t.mf              += s.mf              || 0;
-    t.allSkills       += s.allSkills       || 0;
-    t.coldSkills      += s.coldSkills      || 0;
-    t.coldDmgPct      += s.coldDmgPct      || 0;
-    t.enemyColdResPct += s.enemyColdResPct || 0;
-  }
-  return t;
+  return charmsArray.reduce((t, charm) => t.add(singleCharmStats(charm)), Stats.zero());
 }
 
 // ── Reactive state ─────────────────────────────────────────────────────────
@@ -437,56 +453,33 @@ function computeSetBonuses(getSlotStats) {
     sets[item.set_name].items.push(item);
   }
 
-  let fcr = 0, mf = 0, allSkills = 0, coldSkills = 0, coldDmgPct = 0, enemyColdResPct = 0;
+  let statsTotal = Stats.zero();
   const activeSets = [];
 
   for (const [setName, { count, items }] of Object.entries(sets)) {
     if (count < 2) continue;
-    let sFcr = 0, sMf = 0, sAll = 0, sCold = 0, sCdp = 0, sEcr = 0;
+    let setStats = Stats.zero();
     for (const item of items) {
       for (const b of (item.set_bonuses ?? [])) {
-        if (b.pieces <= count) {
-          sFcr  += b.fcr             || 0;
-          sMf   += b.mf              || 0;
-          sAll  += b.allSkills       || 0;
-          sCold += b.coldSkills      || 0;
-          sCdp  += b.coldDmgPct      || 0;
-          sEcr  += b.enemyColdResPct || 0;
-        }
+        if (b.pieces <= count) setStats = setStats.add(b);
       }
     }
     for (const b of (SET_LEVEL_BONUSES.value[setName] ?? [])) {
-      if (b.pieces <= count) {
-        sFcr  += b.fcr             || 0;
-        sMf   += b.mf              || 0;
-        sAll  += b.allSkills       || 0;
-        sCold += b.coldSkills      || 0;
-        sCdp  += b.coldDmgPct      || 0;
-        sEcr  += b.enemyColdResPct || 0;
-      }
+      if (b.pieces <= count) setStats = setStats.add(b);
     }
-    fcr += sFcr; mf += sMf; allSkills += sAll; coldSkills += sCold; coldDmgPct += sCdp; enemyColdResPct += sEcr;
+    statsTotal = statsTotal.add(setStats);
     const total = SET_SIZES.value[setName] ?? count;
-    activeSets.push({ name: setName, pieces: count, total, fcr: sFcr, mf: sMf, allSkills: sAll, coldSkills: sCold, coldDmgPct: sCdp, enemyColdResPct: sEcr });
+    activeSets.push({ name: setName, pieces: count, total, stats: setStats });
   }
 
-  return { fcr, mf, allSkills, coldSkills, coldDmgPct, enemyColdResPct, activeSets };
+  return { stats: statsTotal, activeSets };
 }
 
 function makeBuild(getSlotStats) {
   const setBonuses   = computed(() => computeSetBonuses(getSlotStats));
-  const gearTotals   = computed(() => {
-    const base   = computeGearTotals(getSlotStats);
-    const bonus  = setBonuses.value;
-    return {
-      fcr:             base.fcr             + bonus.fcr,
-      mf:              base.mf              + bonus.mf,
-      allSkills:       base.allSkills       + bonus.allSkills,
-      coldSkills:      base.coldSkills      + bonus.coldSkills,
-      coldDmgPct:      base.coldDmgPct      + bonus.coldDmgPct,
-      enemyColdResPct: base.enemyColdResPct + bonus.enemyColdResPct,
-    };
-  });
+  const gearTotals   = computed(() =>
+    computeGearTotals(getSlotStats).add(setBonuses.value.stats)
+  );
 
   const totalFCR             = computed(() => gearTotals.value.fcr);
   const totalMF              = computed(() => gearTotals.value.mf);
@@ -569,21 +562,12 @@ function getTargetSlotItem(slotId) {
 
 function getTargetCharmStats() {
   const preset = targetPreset.value;
-  if (!preset || !preset.charms?.length) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
+  if (!preset || !preset.charms?.length) return Stats.zero();
   const charmItems = PRESET_ITEMS.value['charms'] ?? [];
-  let fcr = 0, mf = 0, allSkills = 0, coldSkills = 0, coldDmgPct = 0, enemyColdResPct = 0;
-  for (const { id, count } of preset.charms) {
+  return preset.charms.reduce((t, { id, count }) => {
     const item = charmItems.find(p => p.id === id);
-    if (!item) continue;
-    const n = count ?? 1;
-    fcr             += (item.fcr             ?? 0) * n;
-    mf              += (item.mf              ?? 0) * n;
-    allSkills       += (item.allSkills       ?? 0) * n;
-    coldSkills      += (item.coldSkills      ?? 0) * n;
-    coldDmgPct      += (item.coldDmgPct      ?? 0) * n;
-    enemyColdResPct += (item.enemyColdResPct ?? 0) * n;
-  }
-  return { fcr, mf, allSkills, coldSkills, coldDmgPct, enemyColdResPct };
+    return item ? t.add(Stats.from(item).scale(count ?? 1)) : t;
+  }, Stats.zero());
 }
 
 const targetPresetCharms = computed(() => {
@@ -593,7 +577,7 @@ const targetPresetCharms = computed(() => {
   return preset.charms.map(({ id, count }) => {
     const item = charmItems.find(p => p.id === id);
     const n = count ?? 1;
-    return { id, name: item?.name ?? id, count: n, item, stats: scaleStats(item ?? {}, n) };
+    return { id, name: item?.name ?? id, count: n, item, stats: Stats.from(item).scale(n) };
   });
 });
 
@@ -601,14 +585,14 @@ const targetSlots = computed(() => {
   const out = {};
   for (const { id } of GEAR_SLOTS) {
     const item = getTargetSlotItem(id);
-    out[id] = { item, stats: item ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 } };
+    out[id] = { item, stats: item ?? Stats.zero() };
   }
   return out;
 });
 
 const targetBuild = makeBuild((slotId) => {
   if (slotId === 'charms') return getTargetCharmStats();
-  return getTargetSlotItem(slotId) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
+  return getTargetSlotItem(slotId) ?? Stats.zero();
 });
 
 // ── URL sync ───────────────────────────────────────────────────────────────
@@ -650,7 +634,7 @@ const SetBonusBlock = defineComponent({
             <span v-for="i in sb.total" :key="i" :class="i <= sb.pieces ? 'pip pip-on' : 'pip pip-off'">{{ i <= sb.pieces ? '●' : '○' }}</span>
           </span>
         </div>
-        <stat-pills :stats="sb" class="set-bonus-pills" />
+        <stat-pills :stats="sb.stats" class="set-bonus-pills" />
       </div>
     </div>
   `,
@@ -703,7 +687,7 @@ const GearSlot = defineComponent({
     function stats() {
       const slot = props.modelValue;
       if (!slot.preset || slot.preset === 'custom') return slot.custom;
-      return (props.presets ?? []).find(p => p.id === slot.preset) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
+      return (props.presets ?? []).find(p => p.id === slot.preset) ?? Stats.zero();
     }
     const realPresets = computed(() => (props.presets ?? []).filter(p => p.id !== 'custom'));
     const matchedSetItem = computed(() => {
