@@ -302,9 +302,22 @@ function decodeState(b64, state) {
   }
 }
 
+function findSetItemByName(name) {
+  if (!name) return null;
+  for (const presets of Object.values(PRESET_ITEMS.value)) {
+    const matched = presets.find(p => p.set_name && p.name === name);
+    if (matched) return matched;
+  }
+  return null;
+}
+
 function slotStats(slot) {
   if (!slot.preset) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
-  if (slot.preset === 'custom') return slot.custom;
+  if (slot.preset === 'custom') {
+    const setMatch = findSetItemByName(slot.custom.name?.trim());
+    if (setMatch) return { ...slot.custom, set_name: setMatch.set_name, set_bonuses: setMatch.set_bonuses };
+    return slot.custom;
+  }
   for (const presets of Object.values(PRESET_ITEMS.value)) {
     const item = presets.find(p => p.id === slot.preset);
     if (item) return item;
@@ -492,6 +505,8 @@ const GearSlot = defineComponent({
   },
   emits: ['update:modelValue'],
   setup(props, { emit }) {
+    const basisId = ref('');
+
     function update(patch) {
       emit('update:modelValue', { ...props.modelValue, ...patch });
     }
@@ -501,12 +516,34 @@ const GearSlot = defineComponent({
         custom: { ...props.modelValue.custom, ...patch },
       });
     }
+    function applyBasis() {
+      const id = basisId.value;
+      if (!id) return;
+      const item = (props.presets ?? []).find(p => p.id === id);
+      if (item) {
+        updateCustom({
+          name:       item.name,
+          fcr:        item.fcr        ?? 0,
+          mf:         item.mf         ?? 0,
+          allSkills:  item.allSkills  ?? 0,
+          coldSkills: item.coldSkills ?? 0,
+        });
+      }
+      basisId.value = '';
+    }
     function stats() {
       const slot = props.modelValue;
       if (!slot.preset || slot.preset === 'custom') return slot.custom;
       return (props.presets ?? []).find(p => p.id === slot.preset) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
     }
-    return { update, updateCustom, stats };
+    const realPresets = computed(() => (props.presets ?? []).filter(p => p.id !== 'custom'));
+    const matchedSetItem = computed(() => {
+      if (props.modelValue.preset !== 'custom') return null;
+      const name = props.modelValue.custom.name?.trim();
+      if (!name) return null;
+      return (props.presets ?? []).find(p => p.set_name && p.name === name) ?? null;
+    });
+    return { update, updateCustom, applyBasis, stats, basisId, realPresets, matchedSetItem };
   },
   template: `
     <div class="gear-slot">
@@ -521,6 +558,10 @@ const GearSlot = defineComponent({
       </select>
 
       <div v-if="modelValue.preset === 'custom'" class="custom-inputs">
+        <select v-model="basisId" @change="applyBasis" class="custom-basis-select" title="Copy stats from an existing item as a starting point">
+          <option value="">Start from...</option>
+          <option v-for="p in realPresets" :key="p.id" :value="p.id">{{ p.name }}</option>
+        </select>
         <input type="text"   placeholder="Name"       :value="modelValue.custom.name"       @input="updateCustom({ name: $event.target.value })"              class="custom-text" />
         <label>FCR <input   type="number" min="0" :value="modelValue.custom.fcr"        @input="updateCustom({ fcr: +$event.target.value })"       class="custom-num" /></label>
         <label>MF  <input   type="number" min="0" :value="modelValue.custom.mf"         @input="updateCustom({ mf: +$event.target.value })"        class="custom-num" /></label>
@@ -529,6 +570,7 @@ const GearSlot = defineComponent({
       </div>
 
       <div v-if="modelValue.preset" class="stat-pills">
+        <span v-if="matchedSetItem" class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
         <span v-if="stats().fcr"       class="pill pill-fcr"   title="Faster Cast Rate — reduces casting animation length">FCR +{{ stats().fcr }}%</span>
         <span v-if="stats().mf"        class="pill pill-mf"    title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ stats().mf }}%</span>
         <span v-if="stats().allSkills"  class="pill pill-skill" title="+All Skills — adds to all character skill levels">+{{ stats().allSkills }} All</span>
