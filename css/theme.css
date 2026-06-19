@@ -634,6 +634,13 @@ body {
   color: var(--color-text-faint);
   font-style: italic;
 }
+.target-socket-label {
+  color: var(--color-text-faint);
+  font-style: italic;
+}
+.target-socket-name {
+  font-style: italic;
+}
 
 /* Read-only CM display */
 .cm-readonly {

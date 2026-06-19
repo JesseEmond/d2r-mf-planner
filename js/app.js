@@ -600,6 +600,19 @@ function getTargetSlotItem(slotId) {
   return (PRESET_ITEMS.value[slotId] ?? []).find(p => p.id === itemId) ?? null;
 }
 
+function getTargetSlotSockets(slotId) {
+  const preset = targetPreset.value;
+  if (!preset) return [];
+  const sockIds = preset.sockets[slotId] ?? [];
+  return sockIds.map(id => SOCKET_ITEMS.value.find(si => si.id === id)).filter(Boolean);
+}
+
+function getTargetSlotSocketStats(slotId) {
+  return getTargetSlotSockets(slotId).reduce(
+    (t, si) => t.add(socketItemStats({ preset: si.id }, slotId)), Stats.zero()
+  );
+}
+
 function getTargetCharmStats() {
   const preset = targetPreset.value;
   if (!preset || !preset.charms?.length) return Stats.zero();
@@ -625,14 +638,16 @@ const targetSlots = computed(() => {
   const out = {};
   for (const { id } of GEAR_SLOTS) {
     const item = getTargetSlotItem(id);
-    out[id] = { item, stats: item ?? Stats.zero() };
+    const sockets = getTargetSlotSockets(id);
+    const sockStats = getTargetSlotSocketStats(id);
+    out[id] = { item, sockets, stats: Stats.from(item).add(sockStats) };
   }
   return out;
 });
 
 const targetBuild = makeBuild((slotId) => {
   if (slotId === 'charms') return getTargetCharmStats();
-  return getTargetSlotItem(slotId) ?? Stats.zero();
+  return Stats.from(getTargetSlotItem(slotId)).add(getTargetSlotSocketStats(slotId));
 });
 
 // ── URL sync ───────────────────────────────────────────────────────────────
@@ -1032,7 +1047,7 @@ createApp({
         SET_SIZES.value = db.gear.set_sizes ?? {};
         SOCKET_ITEMS.value = db.gear.socket_items ?? [];
         TARGET_GEAR_PRESETS.value = Object.entries(db.gear.presets).map(
-          ([id, preset]) => ({ id, name: id, slots: preset, charms: preset.charms ?? [] })
+          ([id, preset]) => ({ id, name: id, slots: preset, sockets: preset.sockets ?? {}, charms: preset.charms ?? [] })
         );
         const charmPresetIds = new Set((PRESET_ITEMS.value['charms'] ?? []).map(p => p.id));
         const hasUnknownPreset = GEAR_SLOTS.some(({ id }) => {
@@ -1310,22 +1325,34 @@ createApp({
             </div>
 
             <div class="target-slot-group">
-              <div v-for="id in GROUP_A" :key="id" class="target-slot-row">
-                <span class="slot-label">{{ GEAR_SLOTS.find(s => s.id === id).label }}</span>
-                <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
-                  {{ targetSlots[id].item?.name ?? '—' }}
-                </span>
-                <stat-pills :stats="targetSlots[id].stats" />
-              </div>
+              <template v-for="id in GROUP_A" :key="id">
+                <div class="target-slot-row">
+                  <span class="slot-label">{{ GEAR_SLOTS.find(s => s.id === id).label }}</span>
+                  <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
+                    {{ targetSlots[id].item?.name ?? '—' }}
+                  </span>
+                  <stat-pills :stats="targetSlots[id].stats" />
+                </div>
+                <div v-for="si in targetSlots[id].sockets" :key="si.id" class="target-slot-row target-socket-row">
+                  <span class="slot-label target-socket-label">(socket)</span>
+                  <span class="target-slot-name target-socket-name">{{ si.name }}</span>
+                </div>
+              </template>
             </div>
             <div class="target-slot-group">
-              <div v-for="id in GROUP_B" :key="id" class="target-slot-row">
-                <span class="slot-label">{{ GEAR_SLOTS.find(s => s.id === id).label }}</span>
-                <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
-                  {{ targetSlots[id].item?.name ?? '—' }}
-                </span>
-                <stat-pills :stats="targetSlots[id].stats" />
-              </div>
+              <template v-for="id in GROUP_B" :key="id">
+                <div class="target-slot-row">
+                  <span class="slot-label">{{ GEAR_SLOTS.find(s => s.id === id).label }}</span>
+                  <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
+                    {{ targetSlots[id].item?.name ?? '—' }}
+                  </span>
+                  <stat-pills :stats="targetSlots[id].stats" />
+                </div>
+                <div v-for="si in targetSlots[id].sockets" :key="si.id" class="target-slot-row target-socket-row">
+                  <span class="slot-label target-socket-label">(socket)</span>
+                  <span class="target-slot-name target-socket-name">{{ si.name }}</span>
+                </div>
+              </template>
             </div>
 
             <set-bonus-block :active-sets="targetActiveSetBonuses" />

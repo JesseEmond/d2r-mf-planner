@@ -2197,6 +2197,17 @@
         "boots": "Rare MF Boots",
         "ring1": "The Stone of Jordan",
         "ring2": "The Stone of Jordan",
+        "sockets": {
+          "weapon": [
+            "Cold Facet (+5/-5)"
+          ],
+          "head": [
+            "Protector's Frost"
+          ],
+          "armor": [
+            "Cold Facet (+5/-5)"
+          ]
+        },
         "charms": [
           {
             "id": "Sorc Torch",
@@ -2227,6 +2238,17 @@
         "boots": "Wartraveler",
         "ring1": "Rare MF Ring",
         "ring2": "Rare MF Ring",
+        "sockets": {
+          "weapon": [
+            "Ist"
+          ],
+          "head": [
+            "Protector's Frost"
+          ],
+          "armor": [
+            "Ist"
+          ]
+        },
         "charms": [
           {
             "id": "Sorc Torch",
@@ -2261,6 +2283,17 @@
         "boots": "Wartraveler",
         "ring1": "Rare MF Ring",
         "ring2": "Rare MF Ring",
+        "sockets": {
+          "weapon": [
+            "Ist"
+          ],
+          "head": [
+            "Protector's Frost"
+          ],
+          "armor": [
+            "Ist"
+          ]
+        },
         "charms": [
           {
             "id": "Sorc Torch",
