@@ -2153,7 +2153,25 @@
         "belt": "Arachnid Mesh",
         "boots": "Rare MF Boots",
         "ring1": "The Stone of Jordan",
-        "ring2": "The Stone of Jordan"
+        "ring2": "The Stone of Jordan",
+        "charms": [
+          {
+            "id": "Sorc Torch",
+            "count": 1
+          },
+          {
+            "id": "Annihilus",
+            "count": 1
+          },
+          {
+            "id": "Cold Rupture (MF)",
+            "count": 1
+          },
+          {
+            "id": "+1 Cold Sorc Skiller",
+            "count": 7
+          }
+        ]
       },
       "Magic Find": {
         "head": "Harlequin Crest",
@@ -2165,7 +2183,29 @@
         "belt": "Tal Rasha's Fire-Spun Cloth",
         "boots": "Wartraveler",
         "ring1": "Rare MF Ring",
-        "ring2": "Rare MF Ring"
+        "ring2": "Rare MF Ring",
+        "charms": [
+          {
+            "id": "Sorc Torch",
+            "count": 1
+          },
+          {
+            "id": "Annihilus",
+            "count": 1
+          },
+          {
+            "id": "Cold Rupture (MF)",
+            "count": 1
+          },
+          {
+            "id": "Gheed's Fortune",
+            "count": 1
+          },
+          {
+            "id": "7% MF SC",
+            "count": 24
+          }
+        ]
       },
       "Set Build": {
         "head": "Tal Rasha's Horadric Crest",
@@ -2177,7 +2217,33 @@
         "belt": "Tal Rasha's Fire-Spun Cloth",
         "boots": "Wartraveler",
         "ring1": "Rare MF Ring",
-        "ring2": "Rare MF Ring"
+        "ring2": "Rare MF Ring",
+        "charms": [
+          {
+            "id": "Sorc Torch",
+            "count": 1
+          },
+          {
+            "id": "Annihilus",
+            "count": 1
+          },
+          {
+            "id": "Cold Rupture (MF)",
+            "count": 1
+          },
+          {
+            "id": "Gheed's Fortune",
+            "count": 1
+          },
+          {
+            "id": "+1 Cold Sorc Skiller",
+            "count": 6
+          },
+          {
+            "id": "7% MF SC",
+            "count": 6
+          }
+        ]
       }
     },
     "set_level_bonuses": {

@@ -412,6 +412,8 @@ def extract() -> dict:
 
     for preset_name, preset_slots in presets.items():
         for slot, item_id in preset_slots.items():
+            if slot == "charms":
+                continue
             slot_item_ids = {item["id"] for item in items_by_slot.get(slot, [])}
             if item_id not in slot_item_ids:
                 raise KeyError(
