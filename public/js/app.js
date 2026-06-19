@@ -548,6 +548,33 @@ function getTargetSlotItem(slotId) {
   return (PRESET_ITEMS.value[slotId] ?? []).find(p => p.id === itemId) ?? null;
 }
 
+function getTargetCharmStats() {
+  const preset = targetPreset.value;
+  if (!preset || !preset.charms?.length) return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  const charmItems = PRESET_ITEMS.value['charms'] ?? [];
+  let fcr = 0, mf = 0, allSkills = 0, coldSkills = 0;
+  for (const { id, count } of preset.charms) {
+    const item = charmItems.find(p => p.id === id);
+    if (!item) continue;
+    const n = count ?? 1;
+    fcr        += (item.fcr        ?? 0) * n;
+    mf         += (item.mf         ?? 0) * n;
+    allSkills  += (item.allSkills  ?? 0) * n;
+    coldSkills += (item.coldSkills ?? 0) * n;
+  }
+  return { fcr, mf, allSkills, coldSkills };
+}
+
+const targetPresetCharms = computed(() => {
+  const preset = targetPreset.value;
+  if (!preset || !preset.charms?.length) return [];
+  const charmItems = PRESET_ITEMS.value['charms'] ?? [];
+  return preset.charms.map(({ id, count }) => {
+    const item = charmItems.find(p => p.id === id);
+    return { id, name: item?.name ?? id, count: count ?? 1, item };
+  });
+});
+
 const targetSlots = computed(() => {
   const out = {};
   for (const { id } of GEAR_SLOTS) {
@@ -558,7 +585,7 @@ const targetSlots = computed(() => {
 });
 
 const targetBuild = makeBuild((slotId) => {
-  if (slotId === 'charms') return { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
+  if (slotId === 'charms') return getTargetCharmStats();
   return getTargetSlotItem(slotId) ?? { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 };
 });
 
@@ -839,7 +866,7 @@ createApp({
         SET_LEVEL_BONUSES.value = db.gear.set_level_bonuses ?? {};
         SET_SIZES.value = db.gear.set_sizes ?? {};
         TARGET_GEAR_PRESETS.value = Object.entries(db.gear.presets).map(
-          ([id, slots]) => ({ id, name: id, slots })
+          ([id, preset]) => ({ id, name: id, slots: preset, charms: preset.charms ?? [] })
         );
         const charmPresetIds = new Set((PRESET_ITEMS.value['charms'] ?? []).map(p => p.id));
         const hasUnknownPreset = GEAR_SLOTS.some(({ id }) => {
@@ -925,6 +952,7 @@ createApp({
       targetTotalDps:             targetBuild.totalDps,
       targetCombatAssumptions:    targetBuild.combatAssumptions,
       targetEttvd:                targetBuild.ettvd,
+      targetPresetCharms,
     };
   },
   template: `
@@ -1139,6 +1167,20 @@ createApp({
                   <span v-if="targetSlots[id].stats.mf"         class="pill pill-mf"    title="Magic Find">MF +{{ targetSlots[id].stats.mf }}%</span>
                   <span v-if="targetSlots[id].stats.allSkills"  class="pill pill-skill" title="+All Skills">+{{ targetSlots[id].stats.allSkills }} All</span>
                   <span v-if="targetSlots[id].stats.coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ targetSlots[id].stats.coldSkills }} Cold</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="targetPresetCharms.length" class="target-charms-block">
+              <div class="target-charms-header">Charms</div>
+              <div v-for="c in targetPresetCharms" :key="c.id" class="target-slot-row">
+                <span class="slot-label">{{ c.count > 1 ? c.count + '×' : '' }}</span>
+                <span class="target-slot-name">{{ c.name }}</span>
+                <div class="stat-pills">
+                  <span v-if="c.item?.fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ c.item.fcr * c.count }}%</span>
+                  <span v-if="c.item?.mf"         class="pill pill-mf"    title="Magic Find">MF +{{ c.item.mf * c.count }}%</span>
+                  <span v-if="c.item?.allSkills"  class="pill pill-skill" title="+All Skills">+{{ c.item.allSkills * c.count }} All</span>
+                  <span v-if="c.item?.coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ c.item.coldSkills * c.count }} Cold</span>
                 </div>
               </div>
             </div>
