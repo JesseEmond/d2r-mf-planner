@@ -951,6 +951,10 @@ createApp({
       targetIceBlastDps:          targetBuild.iceBlastDps,
       targetTotalDps:             targetBuild.totalDps,
       targetCombatAssumptions:    targetBuild.combatAssumptions,
+      targetRunStats:             targetBuild.runStats,
+      targetRunDropProbs:         targetBuild.runDropProbs,
+      targetTotalDropProbs:       targetBuild.totalDropProbs,
+      targetRunTimeSummary:       targetBuild.runTimeSummary,
       targetEttvd:                targetBuild.ettvd,
       targetPresetCharms,
     };
@@ -1171,20 +1175,6 @@ createApp({
               </div>
             </div>
 
-            <div v-if="targetPresetCharms.length" class="target-charms-block">
-              <div class="target-charms-header">Charms</div>
-              <div v-for="c in targetPresetCharms" :key="c.id" class="target-slot-row">
-                <span class="slot-label">{{ c.count > 1 ? c.count + '×' : '' }}</span>
-                <span class="target-slot-name">{{ c.name }}</span>
-                <div class="stat-pills">
-                  <span v-if="c.item?.fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ c.item.fcr * c.count }}%</span>
-                  <span v-if="c.item?.mf"         class="pill pill-mf"    title="Magic Find">MF +{{ c.item.mf * c.count }}%</span>
-                  <span v-if="c.item?.allSkills"  class="pill pill-skill" title="+All Skills">+{{ c.item.allSkills * c.count }} All</span>
-                  <span v-if="c.item?.coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ c.item.coldSkills * c.count }} Cold</span>
-                </div>
-              </div>
-            </div>
-
             <div v-if="targetActiveSetBonuses.length" class="set-bonuses-block">
               <div class="set-bonuses-header">Set Bonuses</div>
               <div v-for="sb in targetActiveSetBonuses" :key="sb.name" class="set-bonus-row">
@@ -1199,6 +1189,20 @@ createApp({
                   <span v-if="sb.mf"         class="pill pill-mf"    title="Set bonus MF">MF +{{ sb.mf }}%</span>
                   <span v-if="sb.allSkills"  class="pill pill-skill" title="Set bonus +All Skills">+{{ sb.allSkills }} All</span>
                   <span v-if="sb.coldSkills" class="pill pill-cold"  title="Set bonus +Cold Skills">+{{ sb.coldSkills }} Cold</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="targetPresetCharms.length" class="target-charms-block">
+              <div class="target-charms-header">Charms</div>
+              <div v-for="c in targetPresetCharms" :key="c.id" class="target-slot-row">
+                <span class="slot-label">{{ c.count > 1 ? c.count + '×' : '' }}</span>
+                <span class="target-slot-name">{{ c.name }}</span>
+                <div class="stat-pills">
+                  <span v-if="c.item?.fcr"        class="pill pill-fcr"   title="Faster Cast Rate">FCR +{{ c.item.fcr * c.count }}%</span>
+                  <span v-if="c.item?.mf"         class="pill pill-mf"    title="Magic Find">MF +{{ c.item.mf * c.count }}%</span>
+                  <span v-if="c.item?.allSkills"  class="pill pill-skill" title="+All Skills">+{{ c.item.allSkills * c.count }} All</span>
+                  <span v-if="c.item?.coldSkills" class="pill pill-cold"  title="+Cold Skills">+{{ c.item.coldSkills * c.count }} Cold</span>
                 </div>
               </div>
             </div>
@@ -1242,6 +1246,18 @@ createApp({
               <span class="pill pill-cold" title="Effective Ice Blast DPS accounting for hit rate and target FCR">
                 Ice Blast ~{{ Math.round(targetIceBlastDps).toLocaleString() }} DPS
               </span>
+            </div>
+
+            <hr class="panel-divider" />
+
+            <h2 class="panel-title">Target Run Info</h2>
+            <div class="breakdown-row">
+              <span>Any valuable <span class="info-icon" :title="targetTotalDropProbs ? 'Good Unique/Set: ' + fmtOneIn(targetTotalDropProbs.itemProb) + ' · Good Rune: ' + fmtOneIn(targetTotalDropProbs.runeProb) + ' · Skiller GC: ' + fmtOneIn(targetTotalDropProbs.skillerProb) + ' · Valuable SC: ' + fmtOneIn(targetTotalDropProbs.valuableScProb) : 'No drop data'">i</span></span>
+              <span>{{ targetTotalDropProbs ? fmtOneIn(targetTotalDropProbs.total) : '---' }}</span>
+            </div>
+            <div class="breakdown-row">
+              <span>Run time <span class="info-icon" :title="targetRunTimeSummary ? 'Travel: ' + targetRunTimeSummary.travel.toFixed(1) + 's · Kill: ' + targetRunTimeSummary.kill.toFixed(1) + 's' : 'No run data'">i</span></span>
+              <span>{{ targetRunTimeSummary ? targetRunTimeSummary.total.toFixed(1) + 's' : '---' }}</span>
             </div>
 
             <hr class="panel-divider" />
