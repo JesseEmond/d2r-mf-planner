@@ -13,6 +13,7 @@ Writes:
 import json
 from pathlib import Path
 
+import extract_gear_stats
 import parse_treasure_classes as ptc
 
 ROOT = Path(__file__).parent.parent
@@ -34,9 +35,12 @@ def main() -> None:
             if stats["hp"]:
                 entry["combat"] = stats
 
+    gear = extract_gear_stats.extract()
+
     db = {
         "valuables": valuables,
         "monsters": monsters,
+        "gear": gear,
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

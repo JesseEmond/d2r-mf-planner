@@ -1620,5 +1620,235 @@
         "cold_resist": 66
       }
     }
+  },
+  "gear": {
+    "items_by_slot": {
+      "head": [
+        {
+          "id": "Harlequin Crest",
+          "name": "Harlequin Crest",
+          "fcr": 0,
+          "mf": 50,
+          "allSkills": 2,
+          "coldSkills": 0
+        },
+        {
+          "id": "Griffon's Eye",
+          "name": "Griffon's Eye",
+          "fcr": 25,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        }
+      ],
+      "amulet": [
+        {
+          "id": "Mara's Kaleidoscope",
+          "name": "Mara's Kaleidoscope",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 2,
+          "coldSkills": 0
+        },
+        {
+          "id": "The Eye of Etlich",
+          "name": "The Eye of Etlich",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        }
+      ],
+      "weapon": [
+        {
+          "id": "The Oculus",
+          "name": "The Oculus",
+          "fcr": 30,
+          "mf": 50,
+          "allSkills": 3,
+          "coldSkills": 0
+        },
+        {
+          "id": "Wizardspike",
+          "name": "Wizardspike",
+          "fcr": 50,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
+        },
+        {
+          "id": "Eschuta's temper",
+          "name": "Eschuta's Temper",
+          "fcr": 40,
+          "mf": 0,
+          "allSkills": 3,
+          "coldSkills": 0
+        },
+        {
+          "id": "Heart of the Oak",
+          "name": "Heart of the Oak",
+          "fcr": 40,
+          "mf": 0,
+          "allSkills": 3,
+          "coldSkills": 0
+        },
+        {
+          "id": "Spirit",
+          "name": "Spirit",
+          "fcr": 35,
+          "mf": 0,
+          "allSkills": 2,
+          "coldSkills": 0
+        }
+      ],
+      "shield": [
+        {
+          "id": "Lidless Wall",
+          "name": "Lidless Wall",
+          "fcr": 20,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        },
+        {
+          "id": "Spirit",
+          "name": "Spirit",
+          "fcr": 35,
+          "mf": 0,
+          "allSkills": 2,
+          "coldSkills": 0
+        }
+      ],
+      "armor": [
+        {
+          "id": "Skin of the Vipermagi",
+          "name": "Skin of the Vipermagi",
+          "fcr": 30,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        }
+      ],
+      "gloves": [
+        {
+          "id": "Magefist",
+          "name": "Magefist",
+          "fcr": 20,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ],
+      "belt": [
+        {
+          "id": "Arachnid Mesh",
+          "name": "Arachnid Mesh",
+          "fcr": 20,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        },
+        {
+          "id": "Goldwrap",
+          "name": "Goldwrap",
+          "fcr": 0,
+          "mf": 30,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ],
+      "boots": [
+        {
+          "id": "Wartraveler",
+          "name": "War Traveler",
+          "fcr": 0,
+          "mf": 50,
+          "allSkills": 0,
+          "coldSkills": 0
+        },
+        {
+          "id": "Silkweave",
+          "name": "Silkweave",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
+        },
+        {
+          "id": "Waterwalk",
+          "name": "Waterwalk",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ],
+      "ring1": [
+        {
+          "id": "The Stone of Jordan",
+          "name": "The Stone of Jordan",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        },
+        {
+          "id": "Nagelring",
+          "name": "Nagelring",
+          "fcr": 0,
+          "mf": 30,
+          "allSkills": 0,
+          "coldSkills": 0
+        },
+        {
+          "id": "Magic FCR Ring",
+          "name": "Magic FCR Ring",
+          "fcr": 10,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ],
+      "ring2": [
+        {
+          "id": "The Stone of Jordan",
+          "name": "The Stone of Jordan",
+          "fcr": 0,
+          "mf": 0,
+          "allSkills": 1,
+          "coldSkills": 0
+        },
+        {
+          "id": "Nagelring",
+          "name": "Nagelring",
+          "fcr": 0,
+          "mf": 30,
+          "allSkills": 0,
+          "coldSkills": 0
+        },
+        {
+          "id": "Magic FCR Ring",
+          "name": "Magic FCR Ring",
+          "fcr": 10,
+          "mf": 0,
+          "allSkills": 0,
+          "coldSkills": 0
+        }
+      ]
+    },
+    "presets": {
+      "TEMP_GEAR": {
+        "head": "Griffon's Eye",
+        "amulet": "Mara's Kaleidoscope",
+        "weapon": "Heart of the Oak",
+        "shield": "Spirit",
+        "armor": "Skin of the Vipermagi",
+        "gloves": "Magefist",
+        "belt": "Arachnid Mesh",
+        "boots": "Wartraveler",
+        "ring1": "The Stone of Jordan",
+        "ring2": "The Stone of Jordan"
+      }
+    }
   }
 }

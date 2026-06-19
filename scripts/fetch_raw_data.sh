@@ -6,7 +6,7 @@ OUT_DIR="$(dirname "$0")/../data/raw"
 
 mkdir -p "$OUT_DIR"
 
-for file in treasureclassex.txt itemratio.txt weapons.txt armor.txt monstats.txt misc.txt superuniques.txt uniqueitems.txt setitems.txt itemtypes.txt monlvl.txt magicprefix.txt magicsuffix.txt; do
+for file in treasureclassex.txt itemratio.txt weapons.txt armor.txt monstats.txt misc.txt superuniques.txt uniqueitems.txt setitems.txt itemtypes.txt monlvl.txt magicprefix.txt magicsuffix.txt runes.txt; do
     echo "Fetching $file..."
     curl -fsSL "$REPO_RAW/$file" -o "$OUT_DIR/$file"
 done

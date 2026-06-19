@@ -1,158 +1,169 @@
-# Milestone 2: Core UI & State Sync
+# Gear Stats Extraction Pipeline
 
-Stack: Vue 3 via CDN (ES module imports), Tailwind CSS via CDN, zero build.
-All frontend files go under `public/`. Served by GitHub Pages or any static host.
-
----
-
-## Commit 2: `public/index.html` + `public/css/theme.css` — D2-themed scaffold
-
-`index.html`:
-- Vue 3 CDN (`esm-browser` build, latest stable)
-- Tailwind CSS CDN play script
-- `<link rel="stylesheet" href="css/theme.css">`
-- `<div id="app"></div>` mount point
-- `<script type="module" src="js/app.js"></script>`
-
-`theme.css` — CSS custom properties for D2 palette:
-- `--color-unique: #C7B377`
-- `--color-set: #00FF00`
-- `--color-magic: #4850B8`
-- `--color-rune: #FFA800`
-- `--color-bg: #0d0e11`
-- `--color-surface: #1a1c23`
-- `--color-border: #2e3140`
-
-Base `body` styles: dark background, system-ui font stack with "Times New Roman" for flavor.
+Replace hand-coded `gear-db.js` preset items with stats auto-extracted from D2R raw data files,
+served through `db.json`. Implemented in four incremental phases.
 
 ---
 
-## Commit 3: `public/js/gear-db.js` — preset item database
+## Config file: `data/items_config.json`
 
-Exports:
+Minimal source of truth. Uses D2R internal item names (= first column of `uniqueitems.txt` /
+`setitems.txt`) directly as IDs — no short aliases. `presets` are named complete gear builds
+(slot → item), replacing the hardcoded `TARGET_GEAR_PRESETS` in `app.js`. The `custom`
+placeholder item is NOT listed here — JS appends it client-side to each slot's dropdown.
 
-**`GEAR_SLOTS`** — ordered array `{ id, label }`:
-head, amulet, weapon, shield, armor, gloves, belt, boots, ring1, ring2, charms
-
-**`PRESET_ITEMS`** — object keyed by slot id; each entry is an array of
-`{ id, name, fcr, mf, allSkills, coldSkills, notes }`. Use typical/common roll values.
-
-| Slot | id | name | FCR | MF | +All | +Cold |
-|---|---|---|---|---|---|---|
-| head | shako | Harlequin Crest | 0 | 70 | 2 | 0 |
-| head | griffons | Griffon's Eye | 25 | 0 | 1 | 0 |
-| head | lore | Lore (runeword) | 0 | 0 | 1 | 0 |
-| amulet | maras | Mara's Kaleidoscope | 0 | 0 | 2 | 0 |
-| amulet | eye_of_etlich | The Eye of Etlich | 0 | 20 | 1 | 0 |
-| weapon | oculus | The Oculus | 20 | 50 | 3 | 3 |
-| weapon | hoto | Heart of the Oak | 40 | 0 | 3 | 0 |
-| weapon | wizardspike | Wizardspike | 50 | 0 | 0 | 0 |
-| weapon | eschuta | Eschuta's Temper | 20 | 0 | 0 | 3 |
-| shield | spirit | Spirit (monarch) | 35 | 0 | 2 | 0 |
-| shield | lidless | Lidless Wall | 20 | 0 | 1 | 0 |
-| armor | vipermagi | Skin of the Vipermagi | 30 | 30 | 1 | 0 |
-| armor | enigma | Enigma (runeword) | 0 | 45 | 2 | 0 |
-| armor | wealth | Wealth (runeword) | 0 | 100 | 0 | 0 |
-| gloves | magefist | Magefist | 20 | 0 | 0 | 1 |
-| gloves | trang_claws | Trang-Oul's Claws | 20 | 0 | 0 | 0 |
-| belt | arachnid | Arachnid Mesh | 20 | 0 | 1 | 0 |
-| belt | goldwrap | Goldwrap | 0 | 65 | 0 | 0 |
-| belt | tal_belt | Tal Rasha's Fine-Spun Cloth | 20 | 0 | 0 | 0 |
-| boots | war_traveler | War Traveler | 0 | 45 | 0 | 0 |
-| boots | silkweave | Silkweave | 0 | 30 | 0 | 0 |
-| boots | waterwalk | Waterwalk | 0 | 15 | 0 | 0 |
-| ring1/ring2 | soj | Stone of Jordan | 0 | 40 | 1 | 0 |
-| ring1/ring2 | nagel | Nagelring | 0 | 25 | 0 | 0 |
-| ring1/ring2 | rare_fcr | Rare FCR Ring | 10 | 0 | 0 | 0 |
-| charms | (custom only) | | | | | |
-
-Each slot also gets an implicit `{ id: 'custom', name: 'Custom / Other' }` entry
-that activates free-form numeric inputs.
-
----
-
-## Commit 4: `public/js/app.js` — reactive state + URL sync
-
-Uses Vue 3 `createApp` + `reactive` + `computed` + `watch`.
-
-**State schema:**
-```js
+```json
 {
-  gear: {
-    // one entry per slot id; same shape for all 11 slots
-    head: { preset: null, custom: { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0 } },
-    ...
-  },
-  coldMasteryBase: 20,   // skill points invested (0–20)
-  run: {
-    // keys come from run_config.json after fetch; only available runs are togglable
-    bosses: {},
-    overheadSecs: 30
+  "unique_items": [
+    "Harlequin Crest",
+    "Griffon's Eye",
+    "Mara's Kaleidoscope",
+    "The Eye of Etlich",
+    "The Oculus",
+    "Wizardspike",
+    "Eschuta's temper",
+    "Lidless Wall",
+    "Skin of the Vipermagi",
+    "Magefist",
+    "Arachnid Mesh",
+    "Goldwrap",
+    "Wartraveler",
+    "Silkweave",
+    "Waterwalk",
+    "The Stone of Jordan",
+    "Nagelring"
+  ],
+  "presets": {
+    "TEMP_GEAR": {
+      "head":   "Griffon's Eye",
+      "amulet": "Mara's Kaleidoscope",
+      "weapon": "Heart of the Oak",
+      "shield": "Spirit",
+      "armor":  "Skin of the Vipermagi",
+      "gloves": "Magefist",
+      "belt":   "Arachnid Mesh",
+      "boots":  "Wartraveler",
+      "ring1":  "The Stone of Jordan",
+      "ring2":  "The Stone of Jordan"
+    }
   }
 }
 ```
 
-**Computed stats:**
-- `totalFCR`, `totalMF`, `totalAllSkills`, `totalColdSkills` — sums across all slots
-- `effectiveColdMastery` = `coldMasteryBase + totalAllSkills + totalColdSkills`
-- `fcrBreakpoint` — lookup against standard Sorceress table:
-  ```js
-  // { minFCR: 200, frames: 7 }, { minFCR: 105, frames: 8 }, { minFCR: 63, frames: 9 },
-  // { minFCR: 37, frames: 10 }, { minFCR: 20, frames: 11 }, { minFCR: 9, frames: 12 },
-  // { minFCR: 0, frames: 13 }
-  ```
-
-**URL sync:**
-- `encodeState(state)` → compact object (omit nulls/defaults) → JSON → `btoa` → `?s=<base64>`
-- `decodeState(b64)` → `atob` → JSON → deep-merge into reactive state
-- On mount: if `?s=` present, hydrate state
-- `watch(state, ..., { deep: true })` → `history.replaceState` on every change
+Later phases add `runewords`, `set_items`, and `custom_items` sections (see below).
 
 ---
 
-## Commit 5: `public/js/app.js` — GearSlot component
+## Extraction script: `scripts/extract_gear_stats.py` (new)
 
-`GearSlot` Vue component (inline, `defineComponent` + template string).
+Reads `data/items_config.json` and D2R raw files. Outputs a `gear` key in `db.json` with:
+- `items_by_slot`: `{ head: [{id, name, fcr, mf, allSkills, coldSkills}, ...], ... }`
+- `presets`: the named builds from config, passed through as-is
 
-Props: `slotId`, `slotLabel`, `presets`, `modelValue` (the slot state object).
+**Display names** are resolved via `data/raw/item-names.json`: its `Key` field matches the
+`uniqueitems.txt` first column exactly, and `enUS` is the display string
+(e.g. "Wartraveler" → "War Traveler", "Eschuta's temper" → "Eschuta's Temper").
 
-Template:
-- `<select>` listing presets + "Custom / Other"
-- When `preset === 'custom'`: mini-form with inputs for Name (text), FCR, MF, +All Skills, +Cold Skills
-- Emits `update:modelValue` for v-model support
-- Small color-coded stat pills showing this slot's FCR/MF contribution
+**Gear slot** is derived from the item's `code` column in `uniqueitems.txt`, looked up in
+`misc.txt` / `armor.txt` / `weapons.txt`. Rings (`rin`) map to both `ring1` and `ring2`.
 
-Gear panel layout (added to root template):
-- 2-column grid: left = gear slots (grouped Head–Armor | Gloves–Charms), right = stat summary placeholder
+**Stat extraction** reads `prop1..propN` / `max1..maxN` columns and accumulates:
+- `cast1 / cast2 / cast3` → `fcr` (all three encode FCR% directly)
+- `mag%` → `mf` (uses `max` of range — good-roll planning)
+- `allskills / sor` → `allSkills` (`sor` = all sorceress skills; sorc-focused app)
+- `coldSkills` = 0 for all uniques (none in the current list have cold-only bonuses)
 
----
-
-## Commit 6: `public/js/app.js` — RunRoutine + StatSummary panels; full layout
-
-**RunRoutine panel:**
-- Fetches `data/run_config.json` on mount
-- Renders one checkbox per run entry; `available: false` → disabled + "(coming soon)" badge
-- `<input type="number">` for travel/overhead seconds
-
-**StatSummary panel:**
-- Total FCR + breakpoint badge (green if at a breakpoint, amber if within 5 FCR of next)
-- Total MF (raw), +All Skills, +Cold Skills
-- Effective Cold Mastery level
-- `<input type="number">` for Cold Mastery base skill points (0–20)
-
-**Full layout:**
-- Sticky header: "D2R Blizzard Sorc — ETTVD Optimizer" in `--color-unique` gold
-- Two-column grid: [Gear inputs] | [Run Routine + Stat Summary]
-- Footer placeholder: "ETTVD: — (coming soon)" grayed out
+**`scripts/build_db.py`** imports `extract_gear_stats` and merges the result into `db.json`
+under a `gear` key before writing.
 
 ---
 
-## Verification
+## UI changes (same for all phases)
 
-1. `python -m http.server 8080 --directory public` then open `http://localhost:8080`
-2. Run routine: Andy checkbox enabled; all others grayed + "(coming soon)"
-3. Select gear presets → FCR/MF/skills totals update instantly
-4. URL `?s=` param updates on every change
-5. Copy URL, open in new tab → state restores exactly
-6. Select "Custom / Other", enter FCR=30 → total FCR updates
-7. Toggle Andy → URL changes; reload → Andy remains checked
+**`public/js/app.js`**:
+- Remove `PRESET_ITEMS` from `./gear-db.js` import
+- Add `const PRESET_ITEMS = ref({})` at module level
+- In `onMounted` fetch handler: `PRESET_ITEMS.value = db.gear.items_by_slot`
+- Remove hardcoded `TARGET_GEAR_PRESETS`; load named presets from `db.gear.presets` instead
+- `slotStats` (line ~303) and `getTargetSlotItem` (line ~404): change `PRESET_ITEMS[...]`
+  to `PRESET_ITEMS.value[...]`
+- Template usages auto-unwrap the ref — no changes needed there
+- JS appends `{id: 'custom', name: 'Custom / Other', fcr:0, mf:0, allSkills:0, coldSkills:0}`
+  to each slot's list after loading
+
+**`public/js/gear-db.js`**:
+- Remove `PRESET_ITEMS` export; keep only `GEAR_SLOTS` (UI structure, not game data)
+
+---
+
+## Phase 1 — Unique items
+
+Implement `extract_gear_stats.py` for `unique_items` only (all of the above). End-to-end:
+config → Python extraction → `db.json` → UI loads from `db.json`.
+
+Verify: all slot dropdowns populate correctly; named preset loads; stats match raw data.
+
+---
+
+## Phase 2 — Custom / pseudo-items
+
+Add `custom_items` to `items_config.json` with inline stats (no data file lookup):
+
+```json
+"custom_items": {
+  "Rare FCR Ring": {"fcr": 10, "mf": 0, "allSkills": 0, "coldSkills": 0}
+}
+```
+
+D2R internal name used as ID. Script passes stats through without lookup. Slot assignment comes
+from where these IDs are referenced in `presets` (or infer from item name if unambiguous).
+
+---
+
+## Phase 3 — Runewords
+
+**Dependency**: `data/raw/runes.txt` and `data/raw/runeword.txt` must be added from D2R game
+files (not currently present). `runeword.txt` uses the same `prop/min/max` column format.
+
+Config addition:
+```json
+"runewords": [
+  "Lore",
+  "Heart of the Oak",
+  "Spirit",
+  "Enigma",
+  "Wealth"
+]
+```
+
+Script looks each up in `runeword.txt` by name; extracts stats same way. Display names from
+runeword string tables (additional string files may be needed from D2R). Enigma's MF is
+`+0.5%/clvl` — flag it specially in output so UI can display "~45% at clvl 90" rather than
+a flat value.
+
+---
+
+## Phase 4 — Set items + set bonuses
+
+Config addition:
+```json
+"set_items": [
+  "Tal Rasha's Adjudication",
+  "Tal Rasha's Howling Wind",
+  "Tal Rasha's Fire-Spun Cloth",
+  "Trang-Oul's Claws"
+]
+```
+
+Script reads `setitems.txt`:
+- `prop1..prop9` → base item stats (same extraction logic; **exclude** `aprop*` columns)
+- `aprop1a/aprop1b` through `aprop5a/aprop5b` → partial set bonuses:
+  `[{pieces: 2, fcr, mf, allSkills, coldSkills}, {pieces: 3, ...}, ...]`
+
+Output in `db.json` includes both base stats and `set_bonuses` list per set item. UI displays
+set bonus summary at the bottom of the Gear panel when multiple set pieces are equipped
+(planned feature). Check whether `sets.txt` is available for full-set bonuses; may need to
+add it to raw data.
+
+Note: `Tal Rasha's Howling Wind` is the internal `setitems.txt` name for what displays as
+`Tal Rasha's Guardianship`. Display name resolved via `item-names.json` as usual.

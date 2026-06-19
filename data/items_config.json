@@ -1,0 +1,42 @@
+{
+  "runewords": [
+    "Heart of the Oak",
+    "Spirit"
+  ],
+  "unique_items": [
+    "Harlequin Crest",
+    "Griffon's Eye",
+    "Mara's Kaleidoscope",
+    "The Eye of Etlich",
+    "The Oculus",
+    "Wizardspike",
+    "Eschuta's temper",
+    "Lidless Wall",
+    "Skin of the Vipermagi",
+    "Magefist",
+    "Arachnid Mesh",
+    "Goldwrap",
+    "Wartraveler",
+    "Silkweave",
+    "Waterwalk",
+    "The Stone of Jordan",
+    "Nagelring"
+  ],
+  "custom_items": {
+    "Magic FCR Ring": {"slot": "ring", "fcr": 10, "mf": 0, "allSkills": 0, "coldSkills": 0}
+  },
+  "presets": {
+    "TEMP_GEAR": {
+      "head":   "Griffon's Eye",
+      "amulet": "Mara's Kaleidoscope",
+      "weapon": "Heart of the Oak",
+      "shield": "Spirit",
+      "armor":  "Skin of the Vipermagi",
+      "gloves": "Magefist",
+      "belt":   "Arachnid Mesh",
+      "boots":  "Wartraveler",
+      "ring1":  "The Stone of Jordan",
+      "ring2":  "The Stone of Jordan"
+    }
+  }
+}
