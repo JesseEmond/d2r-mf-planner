@@ -25,12 +25,94 @@ body {
 .app-header {
   padding: 1rem 1.5rem 0.5rem;
   border-bottom: 1px solid var(--color-border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 }
 .app-header h1 {
   margin: 0;
   font-size: 1.25rem;
   color: var(--color-unique);
   letter-spacing: 0.05em;
+}
+.reset-btn {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  font-family: inherit;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: border-color 0.15s, color 0.15s;
+}
+.reset-btn:hover {
+  border-color: var(--color-set);
+  color: var(--color-set);
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+.modal-dialog {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  padding: 1.5rem 1.75rem;
+  min-width: 280px;
+  max-width: 360px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+.modal-title {
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+  color: var(--color-unique);
+  letter-spacing: 0.04em;
+}
+.modal-body {
+  margin: 0 0 1.25rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+.modal-btn {
+  padding: 0.35rem 0.9rem;
+  font-size: 0.8rem;
+  font-family: inherit;
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: border-color 0.15s, color 0.15s, background 0.15s;
+}
+.modal-btn-cancel {
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+}
+.modal-btn-cancel:hover {
+  border-color: var(--color-text-muted);
+  color: var(--color-text);
+}
+.modal-btn-confirm {
+  background: transparent;
+  border: 1px solid #7a2020;
+  color: #d97070;
+}
+.modal-btn-confirm:hover {
+  background: #7a2020;
+  color: #fff;
 }
 .app-grid {
   display: grid;
