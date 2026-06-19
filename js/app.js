@@ -1083,9 +1083,20 @@ createApp({
       return m > 0 ? `${h}h ${m}min` : `${h}h`;
     }
 
+    const showResetConfirm = ref(false);
+
+    function resetState() {
+      Object.assign(state, makeDefaultState());
+      stateError.value = null;
+      window.history.replaceState(null, '', window.location.pathname);
+      showResetConfirm.value = false;
+    }
+
     return {
       state,
       stateError,
+      showResetConfirm,
+      resetState,
       GEAR_SLOTS,
       PRESET_ITEMS,
       SOCKET_ITEMS,
@@ -1151,6 +1162,7 @@ createApp({
     <div class="app-root">
       <header class="app-header sticky-header">
         <h1>D2R Blizzard Sorc — <abbr title="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine">ETTVD</abbr> Optimizer</h1>
+        <button class="reset-btn" @click="showResetConfirm = true" title="Reset all gear and settings to defaults">Reset</button>
       </header>
 
       <div v-if="stateError" class="error-banner" role="alert">
@@ -1539,6 +1551,19 @@ createApp({
 
         </aside>
       </main>
+
+      <teleport to="body">
+        <div v-if="showResetConfirm" class="modal-backdrop" @click.self="showResetConfirm = false">
+          <div class="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="reset-title">
+            <h2 id="reset-title" class="modal-title">Reset gear &amp; settings?</h2>
+            <p class="modal-body">All gear selections and settings will be cleared.</p>
+            <div class="modal-actions">
+              <button class="modal-btn modal-btn-cancel" @click="showResetConfirm = false">Cancel</button>
+              <button class="modal-btn modal-btn-confirm" @click="resetState">Reset</button>
+            </div>
+          </div>
+        </div>
+      </teleport>
     </div>
   `,
 }).mount('#app');
