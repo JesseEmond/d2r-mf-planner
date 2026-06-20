@@ -1026,10 +1026,75 @@ const CharmsPanel = defineComponent({
   `,
 });
 
+// ── Shared formatting ──────────────────────────────────────────────────────
+
+function _fmtEttvd(secs) {
+  const totalMins = Math.round(secs / 60);
+  if (totalMins < 60) return `${totalMins} min`;
+  const h = Math.floor(totalMins / 60);
+  const m = totalMins % 60;
+  return m > 0 ? `${h}h ${m}min` : `${h}h`;
+}
+
+// ── TimeToValuableDropSummary component ────────────────────────────────────
+
+const ETTVD_ROWS = [
+  {
+    key: 'items',
+    label: 'Good Unique / Set Item',
+    tooltip: 'Expected time between any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara\'s Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.',
+  },
+  {
+    key: 'rune',
+    label: 'Good Rune',
+    tooltip: 'Expected time between any Pul+ rune drop',
+  },
+  {
+    key: 'skiller',
+    label: 'Any Skiller GC',
+    tooltip: 'Expected time between any class skiller Grand Charm drop',
+  },
+  {
+    key: 'valueSc',
+    label: 'Valuable SC',
+    tooltip: 'Expected time between a max-roll +5 all res, +7% MF, or +20 life Small Charm drop',
+  },
+];
+
+const TimeToValuableDropSummary = defineComponent({
+  props: {
+    ettvd:    { default: null },
+    isTarget: { type: Boolean, default: false },
+  },
+  setup(props) {
+    const fmt = (v) => v ? _fmtEttvd(v) : '---';
+    return { fmt, ETTVD_ROWS };
+  },
+  template: `
+    <section :class="['ettvd-block', 'summary-block', isTarget && 'ettvd-block-target']">
+      <h2 class="panel-title">
+        <abbr :title="isTarget
+          ? 'Expected Time To Valuable Drop — estimated average time until a desirable item drops, given target gear, MF, and run routine'
+          : 'Expected Time To Valuable Drop — estimated average time until a desirable item drops, given your gear, MF, and run routine'"
+        >ETTVD</abbr>: Time To Valuable Drop
+      </h2>
+      <div :class="['ettvd-main', isTarget && 'ettvd-target', !ettvd && 'ettvd-empty']">
+        {{ ettvd ? fmt(ettvd.total) : '---' }}
+      </div>
+      <div class="ettvd-breakdown">
+        <div v-for="row in ETTVD_ROWS" :key="row.key" class="breakdown-row breakdown-sub">
+          <span>{{ row.label }} <span class="info-icon" :title="row.tooltip">i</span></span>
+          <span>{{ ettvd ? fmt(ettvd[row.key]) : '---' }}</span>
+        </div>
+      </div>
+    </section>
+  `,
+});
+
 // ── App ────────────────────────────────────────────────────────────────────
 
 createApp({
-  components: { GearSlot, CharmsPanel, StatPills, SetBonusBlock },
+  components: { GearSlot, CharmsPanel, StatPills, SetBonusBlock, TimeToValuableDropSummary },
   setup() {
     onMounted(async () => {
       try {
@@ -1080,13 +1145,6 @@ createApp({
       return `1/${Math.round(1 / prob).toLocaleString()}`;
     }
 
-    function fmtEttvd(secs) {
-      const totalMins = Math.round(secs / 60);
-      if (totalMins < 60) return `${totalMins} min`;
-      const h = Math.floor(totalMins / 60);
-      const m = totalMins % 60;
-      return m > 0 ? `${h}h ${m}min` : `${h}h`;
-    }
 
     const showResetConfirm = ref(false);
 
@@ -1112,7 +1170,6 @@ createApp({
       TARGET_GEAR_PRESETS,
       targetPreset,
       targetSlots,
-      fmtEttvd,
       fmtOneIn,
       effUniqueMF,
       effSetMF,
@@ -1332,28 +1389,7 @@ createApp({
         <aside class="side-panel">
 
           <!-- ETTVD -->
-          <section class="ettvd-block summary-block">
-            <h2 class="panel-title"><abbr title="Expected Time To Valuable Drop — estimated average time until a desirable item drops, given your gear, MF, and run routine">ETTVD</abbr>: Time To Valuable Drop</h2>
-            <div :class="['ettvd-main', !ettvd && 'ettvd-empty']">{{ ettvd ? fmtEttvd(ettvd.total) : '---' }}</div>
-            <div class="ettvd-breakdown">
-              <div class="breakdown-row breakdown-sub">
-                <span>Good Unique / Set Item <span class="info-icon" title="Expected time between any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
-                <span>{{ ettvd ? fmtEttvd(ettvd.items) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Good Rune <span class="info-icon" title="Expected time between any Pul+ rune drop">i</span></span>
-                <span>{{ ettvd ? fmtEttvd(ettvd.rune) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Any Skiller GC <span class="info-icon" title="Expected time between any class skiller Grand Charm drop">i</span></span>
-                <span>{{ ettvd ? fmtEttvd(ettvd.skiller) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Valuable SC <span class="info-icon" title="Expected time between a max-roll +5 all res, +7% MF, or +20 life Small Charm drop">i</span></span>
-                <span>{{ ettvd ? fmtEttvd(ettvd.valueSc) : '---' }}</span>
-              </div>
-            </div>
-          </section>
+          <time-to-valuable-drop-summary :ettvd="ettvd" />
 
           <!-- Run Routine -->
           <section class="summary-block">
@@ -1541,28 +1577,7 @@ createApp({
         <div class="side-panel">
 
           <!-- Target ETTVD -->
-          <section class="ettvd-block summary-block">
-            <h2 class="panel-title"><abbr title="Expected Time To Valuable Drop — estimated average time until a desirable item drops, given target gear, MF, and run routine">ETTVD</abbr>: Time To Valuable Drop</h2>
-            <div :class="['ettvd-main', 'ettvd-target', !targetEttvd && 'ettvd-empty']">{{ targetEttvd ? fmtEttvd(targetEttvd.total) : '---' }}</div>
-            <div class="ettvd-breakdown">
-              <div class="breakdown-row breakdown-sub">
-                <span>Good Unique / Set Item</span>
-                <span>{{ targetEttvd ? fmtEttvd(targetEttvd.items) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Good Rune</span>
-                <span>{{ targetEttvd ? fmtEttvd(targetEttvd.rune) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Any Skiller GC</span>
-                <span>{{ targetEttvd ? fmtEttvd(targetEttvd.skiller) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Valuable SC</span>
-                <span>{{ targetEttvd ? fmtEttvd(targetEttvd.valueSc) : '---' }}</span>
-              </div>
-            </div>
-          </section>
+          <time-to-valuable-drop-summary :ettvd="targetEttvd" :is-target="true" />
 
         </div>
 
