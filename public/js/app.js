@@ -340,6 +340,7 @@ function encodeState(state) {
   if (Object.keys(bosses).length) out.bosses = bosses;
   const uf = Object.entries(state.ui.folds).filter(([, v]) => !v).map(([k]) => k);
   if (uf.length) out.uf = uf;
+  if (state.targetPresetId !== DEFAULT_TARGET_PRESET_ID) out.tp = state.targetPresetId;
   return Object.keys(out).length ? btoa(JSON.stringify(out)) : null;
 }
 
@@ -382,6 +383,7 @@ function decodeState(b64, state) {
     if (out.uf) {
       for (const key of out.uf) { if (key in state.ui.folds) state.ui.folds[key] = false; }
     }
+    if (out.tp) state.targetPresetId = out.tp;
     return true;
   } catch {
     return false;
@@ -647,7 +649,10 @@ const targetSlots = computed(() => {
 
 const targetBuild = makeBuild((slotId) => {
   if (slotId === 'charms') return getTargetCharmStats();
-  return Stats.from(getTargetSlotItem(slotId)).add(getTargetSlotSocketStats(slotId));
+  const item = getTargetSlotItem(slotId);
+  const sockStats = getTargetSlotSocketStats(slotId);
+  if (!item) return sockStats;
+  return { ...item, ...Stats.from(item).add(sockStats) };
 });
 
 // ── URL sync ───────────────────────────────────────────────────────────────
@@ -1322,7 +1327,103 @@ createApp({
             </div>
           </section>
 
-          <hr class="section-divider" />
+        </div>
+
+        <aside class="side-panel">
+
+          <!-- ETTVD -->
+          <section class="ettvd-block summary-block">
+            <h2 class="panel-title"><abbr title="Expected Time To Valuable Drop — estimated average time until a desirable item drops, given your gear, MF, and run routine">ETTVD</abbr>: Time To Valuable Drop</h2>
+            <div :class="['ettvd-main', !ettvd && 'ettvd-empty']">{{ ettvd ? fmtEttvd(ettvd.total) : '---' }}</div>
+            <div class="ettvd-breakdown">
+              <div class="breakdown-row breakdown-sub">
+                <span>Good Unique / Set Item <span class="info-icon" title="Expected time between any item from the Maxroll Low/Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+                <span>{{ ettvd ? fmtEttvd(ettvd.items) : '---' }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Good Rune <span class="info-icon" title="Expected time between any Pul+ rune drop">i</span></span>
+                <span>{{ ettvd ? fmtEttvd(ettvd.rune) : '---' }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Any Skiller GC <span class="info-icon" title="Expected time between any class skiller Grand Charm drop">i</span></span>
+                <span>{{ ettvd ? fmtEttvd(ettvd.skiller) : '---' }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Valuable SC <span class="info-icon" title="Expected time between a max-roll +5 all res, +7% MF, or +20 life Small Charm drop">i</span></span>
+                <span>{{ ettvd ? fmtEttvd(ettvd.valueSc) : '---' }}</span>
+              </div>
+            </div>
+          </section>
+
+          <!-- Run Routine -->
+          <section class="summary-block">
+            <h2 class="panel-title">Run Routine</h2>
+
+            <div v-if="runConfig.length === 0" class="placeholder">Loading…</div>
+
+            <div v-for="run in runConfig" :key="run.id" class="run-row">
+              <label :class="['run-label', !run.available && 'run-disabled']">
+                <input
+                  type="checkbox"
+                  :disabled="!run.available"
+                  v-model="state.run.bosses[run.id]"
+                  class="run-checkbox"
+                />
+                {{ run.label }}
+                <span v-if="!run.available" class="coming-soon">coming soon</span>
+              </label>
+              <span
+                v-if="run.available && runStats[run.id]"
+                class="info-icon"
+                :title="runStats[run.id].assumptions"
+              >i</span>
+            </div>
+
+            <div class="breakdown-run-label">Per run cycle</div>
+            <div class="breakdown-row breakdown-total">
+              <span>Total</span><span>{{ runTimeSummary ? runTimeSummary.total.toFixed(1) + 's' : '---' }}</span>
+            </div>
+            <div class="breakdown-row breakdown-sub">
+              <span>Travel</span><span>{{ runTimeSummary ? runTimeSummary.travel.toFixed(1) + 's' : '---' }}</span>
+            </div>
+            <div class="breakdown-row breakdown-sub">
+              <span>Kill</span><span>{{ runTimeSummary ? runTimeSummary.kill.toFixed(1) + 's' : '---' }}</span>
+            </div>
+
+            <div class="fold-section">
+              <button class="fold-header" @click="state.ui.folds.breakdown = !state.ui.folds.breakdown">
+                <span class="fold-arrow">{{ state.ui.folds.breakdown ? '▶' : '▼' }}</span>
+                Per-boss breakdown
+              </button>
+              <div v-if="!state.ui.folds.breakdown" class="breakdown-content">
+                <template v-if="Object.values(runStats).some(s => s.hasKillData)">
+                  <template v-for="run in runConfig" :key="run.id">
+                    <template v-if="state.run.bosses[run.id] && runStats[run.id]?.hasKillData">
+                      <div class="breakdown-run-label">{{ run.label }}</div>
+                      <div class="breakdown-row">
+                        <span>Travel <span class="info-icon" :title="runStats[run.id].travelDetail">i</span></span>
+                        <span>{{ runStats[run.id].travelSecs.toFixed(1) }}s</span>
+                      </div>
+                      <div class="breakdown-row">
+                        <span>Kill <span class="info-icon" :title="runStats[run.id].killDetail">i</span></span>
+                        <span>{{ runStats[run.id].killSecs.toFixed(1) }}s</span>
+                      </div>
+                      <div class="breakdown-row breakdown-total">
+                        <span>Total</span><span>{{ runStats[run.id].totalSecs.toFixed(1) }}s</span>
+                      </div>
+                    </template>
+                  </template>
+                </template>
+                <div v-else class="placeholder">Select at least one</div>
+              </div>
+            </div>
+          </section>
+
+        </aside>
+
+        <hr class="section-divider" />
+
+        <div class="left-col">
 
           <!-- Target Gear -->
           <section class="gear-panel target-panel">
@@ -1433,8 +1534,14 @@ createApp({
               <span>{{ targetRunTimeSummary ? targetRunTimeSummary.total.toFixed(1) + 's' : '---' }}</span>
             </div>
 
-            <hr class="panel-divider" />
+          </section>
 
+        </div>
+
+        <div class="side-panel">
+
+          <!-- Target ETTVD -->
+          <section class="ettvd-block summary-block">
             <h2 class="panel-title"><abbr title="Expected Time To Valuable Drop — estimated average time until a desirable item drops, given target gear, MF, and run routine">ETTVD</abbr>: Time To Valuable Drop</h2>
             <div :class="['ettvd-main', 'ettvd-target', !targetEttvd && 'ettvd-empty']">{{ targetEttvd ? fmtEttvd(targetEttvd.total) : '---' }}</div>
             <div class="ettvd-breakdown">
@@ -1459,97 +1566,6 @@ createApp({
 
         </div>
 
-        <aside class="side-panel">
-
-          <!-- ETTVD -->
-          <section class="ettvd-block summary-block">
-            <h2 class="panel-title"><abbr title="Expected Time To Valuable Drop — estimated average time until a desirable item drops, given your gear, MF, and run routine">ETTVD</abbr>: Time To Valuable Drop</h2>
-            <div :class="['ettvd-main', !ettvd && 'ettvd-empty']">{{ ettvd ? fmtEttvd(ettvd.total) : '---' }}</div>
-            <div class="ettvd-breakdown">
-              <div class="breakdown-row breakdown-sub">
-                <span>Good Unique / Set Item <span class="info-icon" title="Expected time between any item from the Maxroll Low/Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
-                <span>{{ ettvd ? fmtEttvd(ettvd.items) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Good Rune <span class="info-icon" title="Expected time between any Pul+ rune drop">i</span></span>
-                <span>{{ ettvd ? fmtEttvd(ettvd.rune) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Any Skiller GC <span class="info-icon" title="Expected time between any class skiller Grand Charm drop">i</span></span>
-                <span>{{ ettvd ? fmtEttvd(ettvd.skiller) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Valuable SC <span class="info-icon" title="Expected time between a max-roll +5 all res, +7% MF, or +20 life Small Charm drop">i</span></span>
-                <span>{{ ettvd ? fmtEttvd(ettvd.valueSc) : '---' }}</span>
-              </div>
-            </div>
-          </section>
-
-          <!-- Run Routine -->
-          <section class="summary-block">
-            <h2 class="panel-title">Run Routine</h2>
-
-            <div v-if="runConfig.length === 0" class="placeholder">Loading…</div>
-
-            <div v-for="run in runConfig" :key="run.id" class="run-row">
-              <label :class="['run-label', !run.available && 'run-disabled']">
-                <input
-                  type="checkbox"
-                  :disabled="!run.available"
-                  v-model="state.run.bosses[run.id]"
-                  class="run-checkbox"
-                />
-                {{ run.label }}
-                <span v-if="!run.available" class="coming-soon">coming soon</span>
-              </label>
-              <span
-                v-if="run.available && runStats[run.id]"
-                class="info-icon"
-                :title="runStats[run.id].assumptions"
-              >i</span>
-            </div>
-
-            <div class="breakdown-run-label">Per run cycle</div>
-            <div class="breakdown-row breakdown-total">
-              <span>Total</span><span>{{ runTimeSummary ? runTimeSummary.total.toFixed(1) + 's' : '---' }}</span>
-            </div>
-            <div class="breakdown-row breakdown-sub">
-              <span>Travel</span><span>{{ runTimeSummary ? runTimeSummary.travel.toFixed(1) + 's' : '---' }}</span>
-            </div>
-            <div class="breakdown-row breakdown-sub">
-              <span>Kill</span><span>{{ runTimeSummary ? runTimeSummary.kill.toFixed(1) + 's' : '---' }}</span>
-            </div>
-
-            <div class="fold-section">
-              <button class="fold-header" @click="state.ui.folds.breakdown = !state.ui.folds.breakdown">
-                <span class="fold-arrow">{{ state.ui.folds.breakdown ? '▶' : '▼' }}</span>
-                Per-boss breakdown
-              </button>
-              <div v-if="!state.ui.folds.breakdown" class="breakdown-content">
-                <template v-if="Object.values(runStats).some(s => s.hasKillData)">
-                  <template v-for="run in runConfig" :key="run.id">
-                    <template v-if="state.run.bosses[run.id] && runStats[run.id]?.hasKillData">
-                      <div class="breakdown-run-label">{{ run.label }}</div>
-                      <div class="breakdown-row">
-                        <span>Travel <span class="info-icon" :title="runStats[run.id].travelDetail">i</span></span>
-                        <span>{{ runStats[run.id].travelSecs.toFixed(1) }}s</span>
-                      </div>
-                      <div class="breakdown-row">
-                        <span>Kill <span class="info-icon" :title="runStats[run.id].killDetail">i</span></span>
-                        <span>{{ runStats[run.id].killSecs.toFixed(1) }}s</span>
-                      </div>
-                      <div class="breakdown-row breakdown-total">
-                        <span>Total</span><span>{{ runStats[run.id].totalSecs.toFixed(1) }}s</span>
-                      </div>
-                    </template>
-                  </template>
-                </template>
-                <div v-else class="placeholder">Select at least one</div>
-              </div>
-            </div>
-          </section>
-
-        </aside>
       </main>
 
       <teleport to="body">
