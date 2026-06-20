@@ -466,6 +466,16 @@ if (params.has('s') && !decodeState(params.get('s'), state)) {
 // ── Shared data refs (populated via onMounted fetch) ───────────────────────
 
 const runConfig = ref([]);
+
+const runsByAct = computed(() => {
+  const seen = new Map();
+  for (const run of runConfig.value) {
+    const act = run.act ?? 0;
+    if (!seen.has(act)) seen.set(act, []);
+    seen.get(act).push(run);
+  }
+  return Array.from(seen.entries()).sort(([a], [b]) => a - b).map(([act, runs]) => ({ act, runs }));
+});
 const monsterDb = ref(null);
 
 // ── Build factory ──────────────────────────────────────────────────────────
@@ -1166,6 +1176,7 @@ createApp({
       GROUP_A,
       GROUP_B,
       runConfig,
+      runsByAct,
       TARGET_GEAR_PRESETS,
       targetPreset,
       targetSlots,
@@ -1396,23 +1407,26 @@ createApp({
 
             <div v-if="runConfig.length === 0" class="placeholder">Loading…</div>
 
-            <div v-for="run in runConfig" :key="run.id" class="run-row">
-              <label :class="['run-label', !run.available && 'run-disabled']">
-                <input
-                  type="checkbox"
-                  :disabled="!run.available"
-                  v-model="state.run.bosses[run.id]"
-                  class="run-checkbox"
-                />
-                {{ run.label }}
-                <span v-if="!run.available" class="coming-soon">coming soon</span>
-              </label>
-              <span
-                v-if="run.available && runStats[run.id]"
-                class="info-icon"
-                :title="runStats[run.id].assumptions"
-              >i</span>
-            </div>
+            <template v-for="group in runsByAct" :key="group.act">
+              <div class="run-act-header">ACT {{ group.act === 1 ? 'I' : group.act === 2 ? 'II' : group.act === 3 ? 'III' : group.act === 4 ? 'IV' : 'V' }}</div>
+              <div v-for="run in group.runs" :key="run.id" class="run-row">
+                <label :class="['run-label', !run.available && 'run-disabled']">
+                  <input
+                    type="checkbox"
+                    :disabled="!run.available"
+                    v-model="state.run.bosses[run.id]"
+                    class="run-checkbox"
+                  />
+                  {{ run.label }}
+                  <span v-if="!run.available" class="coming-soon">coming soon</span>
+                </label>
+                <span
+                  v-if="run.available && runStats[run.id]"
+                  class="info-icon"
+                  :title="runStats[run.id].assumptions"
+                >i</span>
+              </div>
+            </template>
 
             <div class="breakdown-run-label">Per run cycle</div>
             <div class="breakdown-row breakdown-total">
