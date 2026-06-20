@@ -280,7 +280,7 @@ body {
   gap: 0.4rem;
 }
 .socket-label {
-  width: 5.5rem;
+  width: calc(var(--col-label) + var(--col-gap));
   font-size: 0.75rem;
   color: var(--color-text-faint);
   flex-shrink: 0;
@@ -410,6 +410,7 @@ body {
   gap: 0.4rem;
   flex-basis: 100%;
   align-items: center;
+  padding-left: 6px;
 }
 .charm-custom-inputs {
   display: flex;
@@ -704,9 +705,9 @@ body {
   margin: 0.25rem 0;
 }
 
-/* Target gear card — amber border to distinguish from current */
+/* Target gear card — faint amber border to distinguish from current */
 .target-panel {
-  border-color: var(--color-rune);
+  border-color: color-mix(in srgb, var(--color-rune) 30%, var(--color-border));
 }
 
 /* Target ETTVD value */
