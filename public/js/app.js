@@ -1273,7 +1273,7 @@ createApp({
               <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.total) : '---' }}</span>
             </div>
             <div class="breakdown-row breakdown-sub">
-              <span>Good Unique / Set Item <span class="info-icon" title="Any item from the Maxroll Low/Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+              <span>Good Unique / Set Item <span class="info-icon" title="Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
               <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.itemProb) : '---' }}</span>
             </div>
             <div class="breakdown-row breakdown-sub">
@@ -1304,7 +1304,7 @@ createApp({
                         <span>{{ fmtOneIn(runDropProbs[run.id].total) }}</span>
                       </div>
                       <div class="breakdown-row breakdown-sub">
-                        <span>Good Unique / Set Item <span class="info-icon" title="Any item from the Maxroll Low/Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+                        <span>Good Unique / Set Item <span class="info-icon" title="Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
                         <span>{{ fmtOneIn(runDropProbs[run.id].itemProb) }}</span>
                       </div>
                       <div class="breakdown-row breakdown-sub">
@@ -1337,7 +1337,7 @@ createApp({
             <div :class="['ettvd-main', !ettvd && 'ettvd-empty']">{{ ettvd ? fmtEttvd(ettvd.total) : '---' }}</div>
             <div class="ettvd-breakdown">
               <div class="breakdown-row breakdown-sub">
-                <span>Good Unique / Set Item <span class="info-icon" title="Expected time between any item from the Maxroll Low/Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+                <span>Good Unique / Set Item <span class="info-icon" title="Expected time between any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
                 <span>{{ ettvd ? fmtEttvd(ettvd.items) : '---' }}</span>
               </div>
               <div class="breakdown-row breakdown-sub">

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Fetches trade-value items (>= Low tier) from Maxroll.gg and writes
+Fetches trade-value items (>= Med tier) from Maxroll.gg and writes
 data/valuables.json — a sorted JSON array of item names.
 """
 
@@ -16,7 +16,7 @@ OUT = Path(__file__).parent.parent / "data" / "valuables.json"
 
 # Worst-to-best rank; MIN_TIER controls the cutoff (inclusive).
 TIER_RANK = {"trash": 0, "none": 1, "low": 2, "med": 3, "high": 4}
-MIN_TIER = "low"
+MIN_TIER = "med"
 
 # Original Sunder Charm names → Latent (droppable) versions introduced in patch 3.2.
 # Maxroll still uses the old names; we remap them to match uniqueitems.txt display names.
