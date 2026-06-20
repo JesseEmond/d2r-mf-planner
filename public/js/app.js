@@ -1116,10 +1116,11 @@ createApp({
         monsterDb.value = db;
         const itemsBySlot = db.gear.items_by_slot;
         for (const { id } of GEAR_SLOTS) {
+          const sorted = [...(itemsBySlot[id] ?? [])].sort((a, b) => a.name.localeCompare(b.name));
           if (id === 'charms') {
-            PRESET_ITEMS.value[id] = [...(itemsBySlot[id] ?? []), CUSTOM_CHARM];
+            PRESET_ITEMS.value[id] = [...sorted, CUSTOM_CHARM];
           } else {
-            PRESET_ITEMS.value[id] = [...(itemsBySlot[id] ?? []), CUSTOM_ITEM];
+            PRESET_ITEMS.value[id] = [...sorted, CUSTOM_ITEM];
           }
         }
         SET_LEVEL_BONUSES.value = db.gear.set_level_bonuses ?? {};
