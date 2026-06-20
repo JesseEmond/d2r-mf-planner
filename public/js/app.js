@@ -713,6 +713,59 @@ const SetBonusBlock = defineComponent({
   `,
 });
 
+// ── CustomItem component ───────────────────────────────────────────────────
+
+const CustomItem = defineComponent({
+  props: {
+    modelValue:       { type: Object,   required: true },
+    presets:          { type: Array,    required: true },
+    isPresetDisabled: { type: Function, default: null  },
+  },
+  emits: ['update:modelValue'],
+  setup(props, { emit }) {
+    const basisId = ref('');
+    function update(patch) {
+      emit('update:modelValue', { ...props.modelValue, ...patch });
+    }
+    function applyBasis() {
+      const id = basisId.value;
+      if (!id) return;
+      const item = props.presets.find(p => p.id === id);
+      if (item) {
+        update({
+          name:             item.name,
+          fcr:              item.fcr              ?? 0,
+          mf:               item.mf               ?? 0,
+          allSkills:        item.allSkills        ?? 0,
+          coldSkills:       item.coldSkills       ?? 0,
+          coldDmgPct:       item.coldDmgPct       ?? 0,
+          enemyColdResPct:  item.enemyColdResPct  ?? 0,
+        });
+      }
+      basisId.value = '';
+    }
+    const realPresets = computed(() => props.presets.filter(p => p.id !== 'custom'));
+    return { basisId, update, applyBasis, realPresets };
+  },
+  template: `
+    <div class="custom-inputs">
+      <select v-model="basisId" @change="applyBasis" class="custom-basis-select" title="Copy stats from an existing item as a starting point">
+        <option value="">Start from...</option>
+        <option v-for="p in realPresets" :key="p.id" :value="p.id" :disabled="isPresetDisabled?.(p) ?? false">{{ p.name }}</option>
+      </select>
+      <input type="text" placeholder="Name" :value="modelValue.name" @input="update({ name: $event.target.value })" class="custom-text" />
+      <div class="custom-inputs-stats">
+        <label :class="{ 'custom-zero': !modelValue.fcr }">FCR    <input type="number" min="0" :value="modelValue.fcr"             @input="update({ fcr:             +$event.target.value })" class="custom-num" /></label>
+        <label :class="{ 'custom-zero': !modelValue.mf }">MF     <input type="number" min="0" :value="modelValue.mf"              @input="update({ mf:              +$event.target.value })" class="custom-num" /></label>
+        <label :class="{ 'custom-zero': !modelValue.allSkills }">+All   <input type="number" min="0" :value="modelValue.allSkills"       @input="update({ allSkills:       +$event.target.value })" class="custom-num" /></label>
+        <label :class="{ 'custom-zero': !modelValue.coldSkills }">+Cold  <input type="number" min="0" :value="modelValue.coldSkills"      @input="update({ coldSkills:      +$event.target.value })" class="custom-num" /></label>
+        <label :class="{ 'custom-zero': !modelValue.coldDmgPct }">Cold%  <input type="number" min="0" :value="modelValue.coldDmgPct"      @input="update({ coldDmgPct:      +$event.target.value })" class="custom-num" /></label>
+        <label :class="{ 'custom-zero': !modelValue.enemyColdResPct }">ECR%   <input type="number" min="0" :value="modelValue.enemyColdResPct" @input="update({ enemyColdResPct: +$event.target.value })" class="custom-num" title="Enemy Cold Resistance -X%" /></label>
+      </div>
+    </div>
+  `,
+});
+
 // ── GearSlot component ─────────────────────────────────────────────────────
 
 const GearSlot = defineComponent({
@@ -725,10 +778,8 @@ const GearSlot = defineComponent({
     usedUniqueSocketIds:  { type: Object, default: () => new Set() },
   },
   emits: ['update:modelValue'],
-  components: { StatPills },
+  components: { StatPills, CustomItem },
   setup(props, { emit }) {
-    const basisId = ref('');
-
     function update(patch) {
       const next = { ...props.modelValue, ...patch };
       if ('preset' in patch) {
@@ -742,28 +793,8 @@ const GearSlot = defineComponent({
       }
       emit('update:modelValue', next);
     }
-    function updateCustom(patch) {
-      emit('update:modelValue', {
-        ...props.modelValue,
-        custom: { ...props.modelValue.custom, ...patch },
-      });
-    }
-    function applyBasis() {
-      const id = basisId.value;
-      if (!id) return;
-      const item = (props.presets ?? []).find(p => p.id === id);
-      if (item) {
-        updateCustom({
-          name:             item.name,
-          fcr:              item.fcr              ?? 0,
-          mf:               item.mf               ?? 0,
-          allSkills:        item.allSkills        ?? 0,
-          coldSkills:       item.coldSkills       ?? 0,
-          coldDmgPct:       item.coldDmgPct       ?? 0,
-          enemyColdResPct:  item.enemyColdResPct  ?? 0,
-        });
-      }
-      basisId.value = '';
+    function updateCustom(newCustom) {
+      emit('update:modelValue', { ...props.modelValue, custom: newCustom });
     }
 
     const SOCKETABLE_SLOTS = new Set(['head', 'weapon', 'shield', 'armor']);
@@ -815,14 +846,13 @@ const GearSlot = defineComponent({
       return Stats.from(base).add(sockStats);
     }
 
-    const realPresets = computed(() => (props.presets ?? []).filter(p => p.id !== 'custom'));
     const matchedSetItem = computed(() => {
       if (props.modelValue.preset !== 'custom') return null;
       const name = props.modelValue.custom.name?.trim();
       if (!name) return null;
       return (props.presets ?? []).find(p => p.set_name && p.name === name) ?? null;
     });
-    return { update, updateCustom, applyBasis, stats, basisId, realPresets, matchedSetItem,
+    return { update, updateCustom, stats, matchedSetItem,
              currentMaxSockets, resolveSocketStats, addSocket, removeSocket, updateSocket };
   },
   template: `
@@ -841,21 +871,7 @@ const GearSlot = defineComponent({
         <span v-if="matchedSetItem && modelValue.preset !== 'custom'" class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
       </stat-pills>
 
-      <div v-if="modelValue.preset === 'custom'" class="custom-inputs">
-        <select v-model="basisId" @change="applyBasis" class="custom-basis-select" title="Copy stats from an existing item as a starting point">
-          <option value="">Start from...</option>
-          <option v-for="p in realPresets" :key="p.id" :value="p.id">{{ p.name }}</option>
-        </select>
-        <input type="text" placeholder="Name" :value="modelValue.custom.name" @input="updateCustom({ name: $event.target.value })" class="custom-text" />
-        <div class="custom-inputs-stats">
-          <label>FCR    <input type="number" min="0" :value="modelValue.custom.fcr"             @input="updateCustom({ fcr:             +$event.target.value })" class="custom-num" /></label>
-          <label>MF     <input type="number" min="0" :value="modelValue.custom.mf"              @input="updateCustom({ mf:              +$event.target.value })" class="custom-num" /></label>
-          <label>+All   <input type="number" min="0" :value="modelValue.custom.allSkills"       @input="updateCustom({ allSkills:       +$event.target.value })" class="custom-num" /></label>
-          <label>+Cold  <input type="number" min="0" :value="modelValue.custom.coldSkills"      @input="updateCustom({ coldSkills:      +$event.target.value })" class="custom-num" /></label>
-          <label>Cold%  <input type="number" min="0" :value="modelValue.custom.coldDmgPct"      @input="updateCustom({ coldDmgPct:      +$event.target.value })" class="custom-num" /></label>
-          <label>ECR%   <input type="number" min="0" :value="modelValue.custom.enemyColdResPct" @input="updateCustom({ enemyColdResPct: +$event.target.value })" class="custom-num" title="Enemy Cold Resistance -X%" /></label>
-        </div>
-      </div>
+      <custom-item v-if="modelValue.preset === 'custom'" :modelValue="modelValue.custom" @update:modelValue="updateCustom" :presets="presets" />
 
       <div v-if="modelValue.preset === 'custom' && matchedSetItem" class="custom-stat-pills">
         <span class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
@@ -899,7 +915,7 @@ const CharmsPanel = defineComponent({
     presets:    { type: Array,  required: true },
   },
   emits: ['update:modelValue'],
-  components: { StatPills },
+  components: { StatPills, CustomItem },
   setup(props, { emit }) {
     function emit_(next) { emit('update:modelValue', next); }
 
@@ -925,9 +941,9 @@ const CharmsPanel = defineComponent({
       emit_(next);
     }
 
-    function updateCharmCustom(idx, patch) {
+    function updateCharmCustomFull(idx, newCustom) {
       emit_(props.modelValue.map((c, i) =>
-        i === idx ? { ...c, custom: { ...c.custom, ...patch } } : c
+        i === idx ? { ...c, custom: newCustom } : c
       ));
     }
 
@@ -964,27 +980,7 @@ const CharmsPanel = defineComponent({
       return item?.sunder ? item.sunder : null;
     }
 
-    const charmBasisIds = reactive({});
-    function applyCharmBasis(idx) {
-      const id = charmBasisIds[idx];
-      if (!id) return;
-      const item = (props.presets ?? []).find(p => p.id === id);
-      if (item) {
-        updateCharmCustom(idx, {
-          name:             item.name,
-          fcr:              item.fcr              ?? 0,
-          mf:               item.mf               ?? 0,
-          allSkills:        item.allSkills        ?? 0,
-          coldSkills:       item.coldSkills       ?? 0,
-          coldDmgPct:       item.coldDmgPct       ?? 0,
-          enemyColdResPct:  item.enemyColdResPct  ?? 0,
-        });
-      }
-      charmBasisIds[idx] = '';
-    }
-    const realPresets = computed(() => (props.presets ?? []).filter(p => p.id !== 'custom'));
-
-    return { addCharm, removeCharm, updateCharm, updateCharmCustom, updateCharmCount, isUniqueCharm, isDisabled, singleCharmStats, sunderLabel, charmBasisIds, applyCharmBasis, realPresets, matchedUniquePreset };
+    return { addCharm, removeCharm, updateCharm, updateCharmCustomFull, updateCharmCount, isUniqueCharm, isDisabled, singleCharmStats, sunderLabel, matchedUniquePreset };
   },
   template: `
     <div class="charms-panel">
@@ -1016,19 +1012,7 @@ const CharmsPanel = defineComponent({
             <button @click="removeCharm(idx)" class="charm-remove" title="Remove charm">&times;</button>
           </div>
           <stat-pills v-if="charm.preset" :stats="singleCharmStats(charm)" :sunder="sunderLabel(charm)" />
-          <div v-if="charm.preset === 'custom'" class="charm-custom-inputs">
-            <select :value="charmBasisIds[idx] ?? ''" @change="charmBasisIds[idx] = $event.target.value; applyCharmBasis(idx)" class="custom-basis-select" title="Copy stats from an existing charm as a starting point">
-              <option value="">Start from...</option>
-              <option v-for="p in realPresets" :key="p.id" :value="p.id" :disabled="isDisabled(p, idx)">{{ p.name }}</option>
-            </select>
-            <input type="text" placeholder="Name" :value="charm.custom.name" @input="updateCharmCustom(idx, { name: $event.target.value })" class="custom-text" />
-            <label>FCR   <input type="number" min="0" :value="charm.custom.fcr"        @input="updateCharmCustom(idx, { fcr:        +$event.target.value })" class="custom-num" /></label>
-            <label>MF    <input type="number" min="0" :value="charm.custom.mf"         @input="updateCharmCustom(idx, { mf:         +$event.target.value })" class="custom-num" /></label>
-            <label>+All  <input type="number" min="0" :value="charm.custom.allSkills"  @input="updateCharmCustom(idx, { allSkills:  +$event.target.value })" class="custom-num" /></label>
-            <label>+Cold <input type="number" min="0" :value="charm.custom.coldSkills" @input="updateCharmCustom(idx, { coldSkills: +$event.target.value })" class="custom-num" /></label>
-            <label>Cold% <input type="number" min="0" :value="charm.custom.coldDmgPct" @input="updateCharmCustom(idx, { coldDmgPct: +$event.target.value })" class="custom-num" /></label>
-            <label>ECR%  <input type="number" min="0" :value="charm.custom.enemyColdResPct" @input="updateCharmCustom(idx, { enemyColdResPct: +$event.target.value })" class="custom-num" title="Enemy Cold Resistance -X%" /></label>
-          </div>
+          <custom-item v-if="charm.preset === 'custom'" :modelValue="charm.custom" @update:modelValue="updateCharmCustomFull(idx, $event)" :presets="presets" :isPresetDisabled="p => isDisabled(p, idx)" />
           <div v-if="charm.preset === 'custom' && matchedUniquePreset(charm)" class="charm-custom-stat-pills">
             <span class="pill pill-unique-match" title="Name matches a unique charm — treated as unique (only one allowed)">Unique: {{ matchedUniquePreset(charm).name }}</span>
           </div>

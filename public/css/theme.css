@@ -190,6 +190,7 @@ body {
   flex-wrap: wrap;
   gap: 0.4rem;
   grid-column: 2 / -1;
+  flex-basis: 100%;
   align-items: center;
   font-size: 0.78rem;
 }
@@ -224,6 +225,13 @@ body {
   font-size: 0.78rem;
   width: 48px;
   margin-left: 3px;
+}
+.custom-zero {
+  color: var(--color-text-faint);
+}
+.custom-zero .custom-num {
+  color: var(--color-text-faint);
+  border-color: #1c1f24;
 }
 
 /* Stat pills */
@@ -411,14 +419,6 @@ body {
   flex-basis: 100%;
   align-items: center;
   padding-left: 6px;
-}
-.charm-custom-inputs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  flex-basis: 100%;
-  align-items: center;
-  font-size: 0.78rem;
 }
 
 /* Sticky header */
