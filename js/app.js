@@ -665,10 +665,11 @@ watch(state, () => {
 // ── StatPills component ────────────────────────────────────────────────────
 
 const StatPills = defineComponent({
-  props: { stats: { type: Object, required: true } },
+  props: { stats: { type: Object, required: true }, sunder: { type: String, default: null } },
   template: `
     <div class="stat-pills">
       <slot />
+      <span v-if="sunder" class="pill pill-sunder" :title="'Sunders ' + sunder + ' immunity'">Sunders {{ sunder }}</span>
       <span v-if="stats.fcr"        class="pill pill-fcr"      title="Faster Cast Rate — reduces casting animation length">FCR +{{ stats.fcr }}%</span>
       <span v-if="stats.mf"         class="pill pill-mf"       title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ stats.mf }}%</span>
       <span v-if="stats.allSkills"  class="pill pill-skill"    title="+All Skills — adds to all character skill levels">+{{ stats.allSkills }} All</span>
@@ -1001,9 +1002,7 @@ const CharmsPanel = defineComponent({
             <div v-else-if="charm.preset" class="charm-count-spacer">× 1</div>
             <button @click="removeCharm(idx)" class="charm-remove" title="Remove charm">&times;</button>
           </div>
-          <stat-pills v-if="charm.preset" :stats="singleCharmStats(charm)">
-            <span v-if="sunderLabel(charm)" class="pill pill-sunder" :title="'Sunders ' + sunderLabel(charm) + ' immunity'">Sunders {{ sunderLabel(charm) }}</span>
-          </stat-pills>
+          <stat-pills v-if="charm.preset" :stats="singleCharmStats(charm)" :sunder="sunderLabel(charm)" />
           <div v-if="charm.preset === 'custom'" class="charm-custom-inputs">
             <select :value="charmBasisIds[idx] ?? ''" @change="charmBasisIds[idx] = $event.target.value; applyCharmBasis(idx)" class="custom-basis-select" title="Copy stats from an existing charm as a starting point">
               <option value="">Start from...</option>
@@ -1511,7 +1510,7 @@ createApp({
               <div v-for="c in targetPresetCharms" :key="c.id" class="target-slot-row">
                 <span class="slot-label">{{ c.count > 1 ? c.count + '×' : '' }}</span>
                 <span class="target-slot-name">{{ c.name }}</span>
-                <stat-pills :stats="c.stats" />
+                <stat-pills :stats="c.stats" :sunder="c.item?.sunder" />
               </div>
             </div>
 
