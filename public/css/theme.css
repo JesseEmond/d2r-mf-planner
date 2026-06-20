@@ -11,6 +11,13 @@
   --color-text-dim: #888;
   --color-text-faint: #555;
   --color-text-placeholder: #666;
+
+  /* Layout column tokens — shared across gear slots, target panel, set bonuses */
+  --col-label:  5.5rem;   /* slot name label */
+  --col-select: 260px;    /* editable slot dropdown */
+  --col-item:   200px;    /* read-only item name in target panel */
+  --col-gap:    0.4rem;   /* horizontal gap between columns */
+  --block-indent: 0.6rem; /* padding-left on bordered sub-blocks (set bonuses, charms) */
 }
 
 body {
@@ -28,6 +35,8 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 .app-header h1 {
   margin: 0;
@@ -120,6 +129,8 @@ body {
   gap: 1rem;
   padding: 1rem 1.5rem;
   align-items: start;
+  max-width: 1000px;
+  margin: 0 auto;
 }
 .panel-title {
   font-size: 0.85rem;
@@ -149,13 +160,14 @@ body {
 
 /* GearSlot */
 .gear-slot {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: var(--col-label) var(--col-select) 1fr;
+  column-gap: var(--col-gap);
+  row-gap: 0.3rem;
   align-items: center;
-  gap: 0.4rem;
 }
 .slot-label {
-  width: 5.5rem;
+  width: var(--col-label);
   font-size: 0.8rem;
   color: var(--color-text-muted);
   flex-shrink: 0;
@@ -168,7 +180,7 @@ body {
   padding: 2px 6px;
   font-size: 0.82rem;
   font-family: inherit;
-  flex: 0 0 260px;
+  flex: 0 0 var(--col-select);
 }
 .slot-select:focus { outline: 1px solid var(--color-unique); }
 
@@ -177,8 +189,7 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  width: 100%;
-  padding-left: 5.9rem;
+  grid-column: 2 / -1;
   align-items: center;
   font-size: 0.78rem;
 }
@@ -225,8 +236,7 @@ body {
   display: flex;
   gap: 0.3rem;
   flex-wrap: wrap;
-  flex-basis: 100%;
-  padding-left: 5.9rem;
+  grid-column: 2 / -1;
 }
 .charm-custom-stat-pills {
   display: flex;
@@ -257,8 +267,7 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  flex-basis: 100%;
-  margin-top: 0.1rem;
+  grid-column: 1 / -1;
 }
 .socket-list {
   display: flex;
@@ -303,7 +312,7 @@ body {
   cursor: pointer;
   font-family: inherit;
   align-self: flex-start;
-  margin-left: 5.9rem;
+  margin-left: calc(var(--col-label) + var(--col-gap));
 }
 .socket-add:hover { border-color: var(--color-text-faint); color: var(--color-text-muted); }
 
@@ -335,7 +344,7 @@ body {
   flex-wrap: wrap;
   align-items: center;
   gap: 0.4rem;
-  padding-left: 5.9rem;
+  padding-left: calc(var(--col-label) + var(--col-gap));
 }
 .charm-select-group {
   flex: 0 0 316px;
@@ -572,6 +581,26 @@ body {
 .breakdown-total { color: #ccc; border-top: 1px solid var(--color-border); margin-top: 2px; padding-top: 2px; }
 .breakdown-sub { padding-left: 1.25rem; }
 
+/* In left-col sections (Drop Odds, Target Run Info): pin value column to stat-pills position */
+.left-col .breakdown-row {
+  display: grid;
+  grid-template-columns: calc(var(--col-label) + var(--col-gap) + var(--col-select)) auto;
+  column-gap: var(--col-gap);
+  padding-left: 0;
+  padding-right: 0;
+  justify-content: unset;
+}
+.left-col .target-panel .breakdown-row {
+  grid-template-columns: calc(var(--col-label) + var(--col-gap) + var(--col-item)) auto;
+}
+/* Sub-row indent applies to label text only, so value column stays aligned */
+.left-col .breakdown-sub {
+  padding-left: 0;
+}
+.left-col .breakdown-sub > :first-child {
+  padding-left: 1.25rem;
+}
+
 /* Run routine */
 .run-row { padding: 0.2rem 0; display: flex; align-items: center; }
 .run-label {
@@ -595,10 +624,14 @@ body {
 .target-charms-block {
   margin: 0.6rem 0 0.25rem;
   border-left: 1px solid #997a00;
-  padding-left: 0.6rem;
+  padding-left: var(--block-indent);
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
+}
+/* Compensate for block's padding-left so pills align with gear slot pills above */
+.target-charms-block .slot-label {
+  width: calc(var(--col-label) - var(--block-indent));
 }
 .target-charms-header {
   font-size: 0.7rem;
@@ -611,7 +644,7 @@ body {
 .set-bonuses-block {
   margin: 0.6rem 0 0.25rem;
   border-left: 1px solid var(--color-set);
-  padding-left: 0.6rem;
+  padding-left: var(--block-indent);
   display: flex;
   flex-direction: column;
   gap: 0.4rem;
@@ -624,18 +657,21 @@ body {
   color: var(--color-set);
   opacity: 0.5;
 }
+/* Editable gear panel: meta spans label + gap + select, minus block's own padding-left */
 .set-bonus-row {
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: calc(var(--col-label) + var(--col-gap) + var(--col-select) - var(--block-indent)) 1fr;
+  column-gap: var(--col-gap);
+  align-items: start;
+}
+/* Target panel: meta spans label + gap + item-name, minus block's own padding-left */
+.target-panel .set-bonus-row {
+  grid-template-columns: calc(var(--col-label) + var(--col-gap) + var(--col-item) - var(--block-indent)) 1fr;
 }
 .set-bonus-meta {
   display: flex;
   align-items: center;
   gap: 0.4rem;
-  flex-shrink: 0;
-  width: calc(4.7rem + 260px);
 }
 .set-bonus-name {
   font-size: 0.78rem;
@@ -714,7 +750,7 @@ body {
 .target-slot-name {
   font-size: 0.82rem;
   color: var(--color-text);
-  flex: 0 0 200px;
+  flex: 0 0 var(--col-item);
 }
 .target-slot-empty {
   color: var(--color-text-faint);
@@ -762,12 +798,11 @@ abbr[title] { text-decoration: underline dashed; text-decoration-color: var(--co
     flex: 1;
     min-width: 0;
   }
-  .stat-pills {
-    flex-basis: 100%;
-    padding-left: 5.9rem;
+  .gear-slot {
+    grid-template-columns: var(--col-label) 1fr;
   }
-  .custom-inputs {
-    padding-left: 5.9rem;
+  .gear-slot .stat-pills {
+    grid-column: 2 / -1;
   }
   .ettvd-main {
     font-size: 1.9rem;
