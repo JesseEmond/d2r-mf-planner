@@ -747,10 +747,11 @@ body {
   padding-top: 0.5rem;
 }
 .target-slot-row {
-  display: flex;
-  flex-wrap: wrap;
+  display: grid;
+  grid-template-columns: var(--col-label) var(--col-item) 1fr;
+  column-gap: var(--col-gap);
+  row-gap: 0.2rem;
   align-items: center;
-  gap: 0.4rem;
 }
 .target-slot-name {
   font-size: 0.82rem;
@@ -852,5 +853,52 @@ abbr[title] { text-decoration: underline dashed; text-decoration-color: var(--co
   }
   .gear-panel {
     padding: 0.6rem 0.75rem;
+  }
+
+  /* Fix socket rows overflowing narrow screens */
+  .socket-select {
+    flex: 1;
+    min-width: 0;
+  }
+
+  /* Fix charm rows overflowing narrow screens */
+  .charm-row {
+    padding-left: 0;
+  }
+  .charm-select-group {
+    flex: 1;
+    min-width: 0;
+  }
+  .charm-add {
+    width: auto;
+    flex: 1;
+  }
+  /* Pills always on a new line so they don't squeeze the dropdown */
+  .charm-row .stat-pills {
+    flex-basis: 100%;
+  }
+
+  /* Target slot rows: 2-column grid, pills always on a new line aligned with item name */
+  .target-slot-row {
+    grid-template-columns: var(--col-label) 1fr;
+  }
+  .target-slot-row .stat-pills {
+    grid-column: 2 / -1;
+  }
+
+  /* Release fixed col-select calc so breakdown rows don't overflow narrow screens */
+  .left-col .breakdown-row {
+    grid-template-columns: 1fr auto;
+  }
+  .left-col .target-panel .breakdown-row {
+    grid-template-columns: 1fr auto;
+  }
+
+  /* Release fixed col-select calc on set-bonus rows */
+  .set-bonus-row {
+    grid-template-columns: auto 1fr;
+  }
+  .target-panel .set-bonus-row {
+    grid-template-columns: auto 1fr;
   }
 }
