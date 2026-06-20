@@ -133,7 +133,7 @@ export function computeCombat(totals, effCM) {
   const iceBlastDmg     = iceBlastDmgFormula(iceBlastSlvl) * coldDmgMult;
   const blizzDps        = blizzDmg / BLIZZARD_COOLDOWN_SECS;
   const iceBlastDps     = iceBlastCasts * iceBlastDmg / BLIZZARD_COOLDOWN_SECS;
-  return { effCM, bp, blizzDps, iceBlastDps, totalDps: blizzDps + iceBlastDps, blizzDmg, iceBlastDmg, iceBlastCasts, enemyColdResPct: totals.enemyColdResPct || 0 };
+  return { effCM, bp, blizzDps, iceBlastDps, totalDps: blizzDps + iceBlastDps, blizzDmg, iceBlastDmg, blizzSlvl, iceBlastSlvl, iceBlastCasts, enemyColdResPct: totals.enemyColdResPct || 0 };
 }
 
 function computeCombatAssumptions(combat) {
@@ -539,6 +539,8 @@ function makeBuild(getSlotStats) {
   const iceBlastDps       = computed(() => combat.value.iceBlastDps);
   const totalDps          = computed(() => combat.value.totalDps);
   const combatAssumptions = computed(() => computeCombatAssumptions(combat.value));
+  const blizzTooltip    = computed(() => `Blizzard Lv ${combat.value.blizzSlvl} — ${Math.round(combat.value.blizzDmg).toLocaleString()} damage per cast`);
+  const iceBlastTooltip = computed(() => `Ice Blast Lv ${combat.value.iceBlastSlvl} — ${Math.round(combat.value.iceBlastDmg).toLocaleString()} damage per cast`);
 
   const runStats = computed(() => {
     if (!runConfig.value.length || !monsterDb.value) return {};
@@ -573,7 +575,7 @@ function makeBuild(getSlotStats) {
   return {
     totalFCR, totalMF, totalAllSkills, totalColdSkills, totalColdDmgPct, totalEnemyColdResPct,
     effectiveColdMastery, fcrBreakpoint, fcrTooltip, fcrBadgeClass,
-    blizzDps, iceBlastDps, totalDps, combatAssumptions,
+    blizzDps, iceBlastDps, totalDps, combatAssumptions, blizzTooltip, iceBlastTooltip,
     runStats, runDropProbs, totalDropProbs, ettvd, runTimeSummary,
     activeSetBonuses,
   };
@@ -1201,6 +1203,8 @@ createApp({
       iceBlastDps:          currentBuild.iceBlastDps,
       totalDps:             currentBuild.totalDps,
       combatAssumptions:    currentBuild.combatAssumptions,
+      blizzTooltip:         currentBuild.blizzTooltip,
+      iceBlastTooltip:      currentBuild.iceBlastTooltip,
       runStats:             currentBuild.runStats,
       runDropProbs:         currentBuild.runDropProbs,
       totalDropProbs:       currentBuild.totalDropProbs,
@@ -1223,6 +1227,8 @@ createApp({
       targetIceBlastDps:          targetBuild.iceBlastDps,
       targetTotalDps:             targetBuild.totalDps,
       targetCombatAssumptions:    targetBuild.combatAssumptions,
+      targetBlizzTooltip:         targetBuild.blizzTooltip,
+      targetIceBlastTooltip:      targetBuild.iceBlastTooltip,
       targetRunStats:             targetBuild.runStats,
       targetRunDropProbs:         targetBuild.runDropProbs,
       targetTotalDropProbs:       targetBuild.totalDropProbs,
@@ -1282,17 +1288,14 @@ createApp({
             <hr class="panel-divider" />
 
             <h2 class="panel-title">Stats</h2>
-            <div class="summary-pills">
-              <span class="pill pill-fcr" :title="fcrTooltip">
-                FCR {{ totalFCR }}%
-                <span class="fcr-badge" :class="fcrBadgeClass" :title="fcrTooltip">{{ fcrBreakpoint.frames }}f</span>
-              </span>
-              <span v-if="totalMF"         class="pill pill-mf"       title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ totalMF }}%</span>
-              <span v-if="totalAllSkills"  class="pill pill-skill"    title="+All Skills — adds to all character skill levels">+{{ totalAllSkills }} All Skills</span>
-              <span v-if="totalColdSkills" class="pill pill-cold"     title="+Cold Skills — adds to cold skill levels only">+{{ totalColdSkills }} Cold Skills</span>
-              <span v-if="totalColdDmgPct"      class="pill pill-cold-pct" title="+% Cold Skill Damage — multiplies cold spell damage output">Cold +{{ totalColdDmgPct }}%</span>
-              <span v-if="totalEnemyColdResPct" class="pill pill-ecr"      title="Enemy Cold Resist -X% from gear — reduces enemy cold resistance, stacks with Cold Mastery">Enemy CR -{{ totalEnemyColdResPct }}%</span>
-              <span class="pill pill-cold" title="Cold Mastery — reduces enemy cold resistance; effective level includes +All Skills and +Cold Skills from gear">Cold Mastery Lv {{ effectiveColdMastery }}</span>
+            <div class="stat-line">
+              <span :title="fcrTooltip">FCR <span class="stat-val">{{ totalFCR }}%</span> <span class="fcr-badge" :class="fcrBadgeClass" :title="fcrTooltip">{{ fcrBreakpoint.frames }}f</span></span>
+              <span v-if="totalMF" title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF <span class="stat-val">+{{ totalMF }}%</span></span>
+              <span v-if="totalAllSkills" title="+All Skills — adds to all character skill levels">All Skills <span class="stat-val">+{{ totalAllSkills }}</span></span>
+              <span v-if="totalColdSkills" title="+Cold Skills — adds to cold skill levels only">Cold Skills <span class="stat-val">+{{ totalColdSkills }}</span></span>
+              <span v-if="totalColdDmgPct" title="+% Cold Skill Damage — multiplies cold spell damage output">Cold Damage <span class="stat-val">+{{ totalColdDmgPct }}%</span></span>
+              <span v-if="totalEnemyColdResPct" title="Enemy Cold Resist -X% from gear — reduces enemy cold resistance, stacks with Cold Mastery">Enemy CR <span class="stat-val">-{{ totalEnemyColdResPct }}%</span></span>
+              <span title="Cold Mastery — reduces enemy cold resistance; effective level includes +All Skills and +Cold Skills from gear">Cold Mastery <span class="stat-val">Lv {{ effectiveColdMastery }}</span></span>
             </div>
             <div class="cm-input-row">
               <label class="cm-label">
@@ -1304,57 +1307,44 @@ createApp({
 
             <hr class="panel-divider" />
 
-            <h2 class="panel-title">
-              Combat
-              <span class="info-icon" :title="combatAssumptions">i</span>
-            </h2>
-            <div class="summary-pills">
-              <span class="pill pill-total" title="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)">
-                Total ~{{ Math.round(totalDps).toLocaleString() }} DPS
-              </span>
-            </div>
-            <div class="summary-pills">
-              <span class="pill pill-skill" title="Blizzard damage per second (approximate, single-target boss)">
-                Blizzard ~{{ Math.round(blizzDps).toLocaleString() }} DPS
-              </span>
-              <span class="pill pill-cold" title="Effective Ice Blast DPS accounting for hit rate and current FCR">
-                Ice Blast ~{{ Math.round(iceBlastDps).toLocaleString() }} DPS
-              </span>
+            <h2 class="panel-title">Combat</h2>
+            <div class="combat-line">
+              <span class="combat-total" title="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)">Total ~{{ Math.round(totalDps).toLocaleString() }} DPS</span>
+              <span> &nbsp;·&nbsp; </span><span :title="blizzTooltip">Blizzard ~{{ Math.round(blizzDps).toLocaleString() }}</span>
+              <span> &nbsp;·&nbsp; </span><span :title="iceBlastTooltip">Ice Blast ~{{ Math.round(iceBlastDps).toLocaleString() }}</span>
             </div>
           </section>
 
           <!-- Drop Odds -->
           <section class="summary-block">
             <h2 class="panel-title">Drop Odds</h2>
-            <div class="summary-pills">
-              <span class="pill pill-mf" title="Effective MF applied to unique quality checks after diminishing returns: MF×250÷(MF+250)">
-                Eff. Unique MF {{ Math.round(effUniqueMF(totalMF)) }}%
-              </span>
-              <span class="pill pill-mf" title="Effective MF applied to set quality checks after diminishing returns: MF×500÷(MF+500)">
-                Eff. Set MF {{ Math.round(effSetMF(totalMF)) }}%
-              </span>
-            </div>
+            <div class="content-center">
+              <div class="stat-line">
+                <span title="Effective MF applied to unique quality checks after diminishing returns: MF×250÷(MF+250)">Eff. Unique MF <span class="stat-val">{{ Math.round(effUniqueMF(totalMF)) }}%</span></span>
+                <span title="Effective MF applied to set quality checks after diminishing returns: MF×500÷(MF+500)">Eff. Set MF <span class="stat-val">{{ Math.round(effSetMF(totalMF)) }}%</span></span>
+              </div>
 
-            <div class="breakdown-run-label">Per run cycle</div>
-            <div class="breakdown-row breakdown-total">
-              <span>Any valuable <span class="info-icon" title="P(at least one valuable drops across all selected bosses in one full run cycle)">i</span></span>
-              <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.total) : '---' }}</span>
-            </div>
-            <div class="breakdown-row breakdown-sub">
-              <span>Good Unique / Set Item <span class="info-icon" title="Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
-              <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.itemProb) : '---' }}</span>
-            </div>
-            <div class="breakdown-row breakdown-sub">
-              <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
-              <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.runeProb) : '---' }}</span>
-            </div>
-            <div class="breakdown-row breakdown-sub">
-              <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
-              <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.skillerProb) : '---' }}</span>
-            </div>
-            <div class="breakdown-row breakdown-sub">
-              <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
-              <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.valuableScProb) : '---' }}</span>
+              <div class="breakdown-run-label">Per run cycle</div>
+              <div class="breakdown-row breakdown-total breakdown-highlight">
+                <span>Any valuable <span class="info-icon" title="P(at least one valuable drops across all selected bosses in one full run cycle)">i</span></span>
+                <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.total) : '---' }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Good Unique / Set Item <span class="info-icon" title="Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+                <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.itemProb) : '---' }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
+                <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.runeProb) : '---' }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
+                <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.skillerProb) : '---' }}</span>
+              </div>
+              <div class="breakdown-row breakdown-sub">
+                <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
+                <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.valuableScProb) : '---' }}</span>
+              </div>
             </div>
 
             <div class="fold-section">
@@ -1532,17 +1522,14 @@ createApp({
             <hr class="panel-divider" />
 
             <h2 class="panel-title">Target Stats</h2>
-            <div class="summary-pills">
-              <span class="pill pill-fcr" :title="targetFcrTooltip">
-                FCR {{ targetTotalFCR }}%
-                <span class="fcr-badge" :class="targetFcrBadgeClass" :title="targetFcrTooltip">{{ targetFcrBreakpoint.frames }}f</span>
-              </span>
-              <span v-if="targetTotalMF"         class="pill pill-mf"       title="Magic Find">MF +{{ targetTotalMF }}%</span>
-              <span v-if="targetTotalAllSkills"  class="pill pill-skill"    title="+All Skills">+{{ targetTotalAllSkills }} All Skills</span>
-              <span v-if="targetTotalColdSkills" class="pill pill-cold"     title="+Cold Skills">+{{ targetTotalColdSkills }} Cold Skills</span>
-              <span v-if="targetTotalColdDmgPct"      class="pill pill-cold-pct" title="+% Cold Skill Damage">Cold +{{ targetTotalColdDmgPct }}%</span>
-              <span v-if="targetTotalEnemyColdResPct" class="pill pill-ecr"      title="Enemy Cold Resist -X% from target gear">Enemy CR -{{ targetTotalEnemyColdResPct }}%</span>
-              <span class="pill pill-cold" title="Cold Mastery effective level includes +All Skills and +Cold Skills from target gear">Cold Mastery Lv {{ targetEffectiveColdMastery }}</span>
+            <div class="stat-line">
+              <span :title="targetFcrTooltip">FCR <span class="stat-val">{{ targetTotalFCR }}%</span> <span class="fcr-badge" :class="targetFcrBadgeClass" :title="targetFcrTooltip">{{ targetFcrBreakpoint.frames }}f</span></span>
+              <span v-if="targetTotalMF" title="Magic Find">MF <span class="stat-val">+{{ targetTotalMF }}%</span></span>
+              <span v-if="targetTotalAllSkills" title="+All Skills">All Skills <span class="stat-val">+{{ targetTotalAllSkills }}</span></span>
+              <span v-if="targetTotalColdSkills" title="+Cold Skills">Cold Skills <span class="stat-val">+{{ targetTotalColdSkills }}</span></span>
+              <span v-if="targetTotalColdDmgPct" title="+% Cold Skill Damage">Cold Damage <span class="stat-val">+{{ targetTotalColdDmgPct }}%</span></span>
+              <span v-if="targetTotalEnemyColdResPct" title="Enemy Cold Resist -X% from target gear">Enemy CR <span class="stat-val">-{{ targetTotalEnemyColdResPct }}%</span></span>
+              <span title="Cold Mastery effective level includes +All Skills and +Cold Skills from target gear">Cold Mastery <span class="stat-val">Lv {{ targetEffectiveColdMastery }}</span></span>
             </div>
             <div class="cm-input-row">
               <label class="cm-label">
@@ -1554,34 +1541,25 @@ createApp({
 
             <hr class="panel-divider" />
 
-            <h2 class="panel-title">
-              Target Combat
-              <span class="info-icon" :title="targetCombatAssumptions">i</span>
-            </h2>
-            <div class="summary-pills">
-              <span class="pill pill-total" title="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)">
-                Total ~{{ Math.round(targetTotalDps).toLocaleString() }} DPS
-              </span>
-            </div>
-            <div class="summary-pills">
-              <span class="pill pill-skill" title="Blizzard damage per second (approximate, single-target boss)">
-                Blizzard ~{{ Math.round(targetBlizzDps).toLocaleString() }} DPS
-              </span>
-              <span class="pill pill-cold" title="Effective Ice Blast DPS accounting for hit rate and target FCR">
-                Ice Blast ~{{ Math.round(targetIceBlastDps).toLocaleString() }} DPS
-              </span>
+            <h2 class="panel-title">Target Combat</h2>
+            <div class="combat-line">
+              <span class="combat-total" title="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)">Total ~{{ Math.round(targetTotalDps).toLocaleString() }} DPS</span>
+              <span> &nbsp;·&nbsp; </span><span :title="targetBlizzTooltip">Blizzard ~{{ Math.round(targetBlizzDps).toLocaleString() }}</span>
+              <span> &nbsp;·&nbsp; </span><span :title="targetIceBlastTooltip">Ice Blast ~{{ Math.round(targetIceBlastDps).toLocaleString() }}</span>
             </div>
 
             <hr class="panel-divider" />
 
             <h2 class="panel-title">Target Run Info</h2>
-            <div class="breakdown-row">
-              <span>Any valuable <span class="info-icon" :title="targetTotalDropProbs ? 'Good Unique/Set: ' + fmtOneIn(targetTotalDropProbs.itemProb) + ' · Good Rune: ' + fmtOneIn(targetTotalDropProbs.runeProb) + ' · Skiller GC: ' + fmtOneIn(targetTotalDropProbs.skillerProb) + ' · Valuable SC: ' + fmtOneIn(targetTotalDropProbs.valuableScProb) : 'No drop data'">i</span></span>
-              <span>{{ targetTotalDropProbs ? fmtOneIn(targetTotalDropProbs.total) : '---' }}</span>
-            </div>
-            <div class="breakdown-row">
-              <span>Run time <span class="info-icon" :title="targetRunTimeSummary ? 'Travel: ' + targetRunTimeSummary.travel.toFixed(1) + 's · Kill: ' + targetRunTimeSummary.kill.toFixed(1) + 's' : 'No run data'">i</span></span>
-              <span>{{ targetRunTimeSummary ? targetRunTimeSummary.total.toFixed(1) + 's' : '---' }}</span>
+            <div class="content-center">
+              <div class="breakdown-row">
+                <span>Any valuable <span class="info-icon" :title="targetTotalDropProbs ? 'Good Unique/Set: ' + fmtOneIn(targetTotalDropProbs.itemProb) + ' · Good Rune: ' + fmtOneIn(targetTotalDropProbs.runeProb) + ' · Skiller GC: ' + fmtOneIn(targetTotalDropProbs.skillerProb) + ' · Valuable SC: ' + fmtOneIn(targetTotalDropProbs.valuableScProb) : 'No drop data'">i</span></span>
+                <span>{{ targetTotalDropProbs ? fmtOneIn(targetTotalDropProbs.total) : '---' }}</span>
+              </div>
+              <div class="breakdown-row">
+                <span>Run time <span class="info-icon" :title="targetRunTimeSummary ? 'Travel: ' + targetRunTimeSummary.travel.toFixed(1) + 's · Kill: ' + targetRunTimeSummary.kill.toFixed(1) + 's' : 'No run data'">i</span></span>
+                <span>{{ targetRunTimeSummary ? targetRunTimeSummary.total.toFixed(1) + 's' : '---' }}</span>
+              </div>
             </div>
 
           </section>

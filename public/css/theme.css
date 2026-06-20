@@ -136,7 +136,7 @@ body {
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.1em;
-  color: var(--color-unique);
+  color: var(--color-text-muted);
   margin: 0 0 0.75rem;
 }
 
@@ -164,7 +164,7 @@ body {
   grid-template-columns: var(--col-label) var(--col-select) 1fr;
   column-gap: var(--col-gap);
   row-gap: 0.3rem;
-  align-items: center;
+  align-items: start;
 }
 .slot-label {
   width: var(--col-label);
@@ -194,9 +194,9 @@ body {
   font-size: 0.78rem;
 }
 .custom-basis-select {
-  background: var(--color-bg);
+  background: #111318;
   color: var(--color-text-dim);
-  border: 1px dashed var(--color-border);
+  border: 1px dashed #252830;
   border-radius: 3px;
   padding: 2px 5px;
   font-size: 0.78rem;
@@ -207,18 +207,18 @@ body {
 .custom-basis-select:focus { outline: 1px solid var(--color-unique); }
 .custom-basis-select:hover { border-color: var(--color-text-faint); color: var(--color-text-muted); }
 .custom-text {
-  background: var(--color-bg);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
+  background: #111318;
+  color: var(--color-text-muted);
+  border: 1px solid #252830;
   border-radius: 3px;
   padding: 2px 5px;
   font-size: 0.78rem;
   width: 120px;
 }
 .custom-num {
-  background: var(--color-bg);
-  color: var(--color-text);
-  border: 1px solid var(--color-border);
+  background: #111318;
+  color: var(--color-text-muted);
+  border: 1px solid #252830;
   border-radius: 3px;
   padding: 2px 4px;
   font-size: 0.78rem;
@@ -251,12 +251,12 @@ body {
   font-family: system-ui, sans-serif;
   white-space: nowrap;
 }
-.pill-fcr       { background: #1e2a4a; color: #7ab3ff; }
-.pill-mf        { background: #1a2e1a; color: var(--color-set); }
-.pill-skill     { background: #2a1e40; color: #c8a0ff; }
-.pill-cold      { background: #142030; color: #80d0ff; }
-.pill-cold-pct  { background: #0d2035; color: #50c8ff; border: 1px solid #1a4060; }
-.pill-ecr       { background: #102010; color: #60e080; border: 1px solid #1a4a1a; }
+.pill-fcr       { background: #1e2132; color: #7a8aaa; border: 1px solid #282d42; }
+.pill-mf        { background: #1e2132; color: #7a8aaa; border: 1px solid #282d42; }
+.pill-skill     { background: #1e2132; color: #7a8aaa; border: 1px solid #282d42; }
+.pill-cold      { background: #1e2132; color: #7a8aaa; border: 1px solid #282d42; }
+.pill-cold-pct  { background: #1e2132; color: #7a8aaa; border: 1px solid #282d42; }
+.pill-ecr       { background: #1e2132; color: #7a8aaa; border: 1px solid #282d42; }
 .pill-total     { background: #2a2210; color: var(--color-unique); }
 .pill-set-match    { background: #0d1f0d; color: var(--color-set);    border: 1px solid #1a4a1a; font-style: italic; }
 .pill-unique-match { background: #1f1a0d; color: var(--color-unique); border: 1px solid #4a3a10; font-style: italic; }
@@ -288,6 +288,9 @@ body {
 }
 .socket-select {
   flex: 0 0 220px;
+  background: #111318;
+  color: var(--color-text-muted);
+  border-color: #252830;
 }
 .socket-remove {
   background: none;
@@ -393,10 +396,12 @@ body {
   border: 1px dashed var(--color-border);
   color: #777;
   border-radius: 3px;
-  padding: 1px 8px;
-  font-size: 0.78rem;
+  padding: 2px 6px;
+  font-size: 0.82rem;
   cursor: pointer;
   font-family: inherit;
+  width: var(--col-select);
+  text-align: center;
 }
 .charm-add:hover { border-color: var(--color-text-faint); color: var(--color-text-muted); }
 .custom-inputs-stats {
@@ -519,9 +524,9 @@ body {
   border-radius: 3px;
   font-weight: 600;
 }
-.badge-green   { background: #1a3a1a; color: #4dff4d; }
-.badge-amber   { background: #3a2a00; color: var(--color-rune); }
-.badge-default { background: #2a2a2a; color: var(--color-text-dim); }
+.badge-green,
+.badge-amber,
+.badge-default { background: #222430; color: var(--color-text-dim); }
 
 .cm-breakdown { color: var(--color-text-placeholder); font-size: 0.72rem; font-family: system-ui, sans-serif; }
 .cm-input-row { padding: 0.3rem 0 0.1rem; }
@@ -569,7 +574,7 @@ body {
 
 /* Breakdown */
 .breakdown-content { padding: 0.2rem 0 0.1rem; }
-.breakdown-run-label { font-size: 0.78rem; color: var(--color-unique); margin: 0.3rem 0 0.1rem; }
+.breakdown-run-label { font-size: 0.78rem; color: var(--color-text-muted); margin: 0.3rem 0 0.1rem; }
 .breakdown-row {
   display: flex;
   justify-content: space-between;
@@ -624,7 +629,7 @@ body {
 /* Set bonus block */
 .target-charms-block {
   margin: 0.6rem 0 0.25rem;
-  border-left: 1px solid #997a00;
+  border-left: 1px solid var(--color-border);
   padding-left: var(--block-indent);
   display: flex;
   flex-direction: column;
@@ -639,12 +644,11 @@ body {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: #997a00;
-  opacity: 0.7;
+  color: var(--color-text-dim);
 }
 .set-bonuses-block {
   margin: 0.6rem 0 0.25rem;
-  border-left: 1px solid var(--color-set);
+  border-left: 1px solid var(--color-border);
   padding-left: var(--block-indent);
   display: flex;
   flex-direction: column;
@@ -655,8 +659,7 @@ body {
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--color-set);
-  opacity: 0.5;
+  color: var(--color-text-dim);
 }
 /* Editable gear panel: meta spans label + gap + select, minus block's own padding-left */
 .set-bonus-row {
@@ -682,7 +685,7 @@ body {
   font-size: 0.65rem;
   letter-spacing: 0.1em;
 }
-.pip-on  { color: var(--color-set); }
+.pip-on  { color: var(--color-text-muted); }
 .pip-off { color: var(--color-text-faint); }
 .set-bonus-pills { margin-top: 0; }
 
@@ -782,6 +785,40 @@ body {
 
 [title] { cursor: help; }
 abbr[title] { text-decoration: underline dashed; text-decoration-color: var(--color-text-faint); }
+
+/* Plain-text stat line (replaces summary-pills in Stats section) */
+.stat-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.15rem 0.8rem;
+  font-family: system-ui, sans-serif;
+  font-size: 0.78rem;
+  color: var(--color-text-dim);
+  margin-bottom: 0.5rem;
+}
+.stat-val { color: var(--color-text); }
+
+/* Single-line combat display: gold total + muted breakdown */
+.combat-line {
+  font-family: system-ui, sans-serif;
+  font-size: 0.78rem;
+  color: var(--color-text-dim);
+  text-align: center;
+}
+.combat-total { color: var(--color-unique); font-weight: 600; }
+
+/* Centered content block — used in Drop Odds and Target Run Info */
+.content-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.content-center .stat-line { justify-content: center; }
+.content-center .breakdown-run-label { text-align: center; }
+.left-col .content-center .breakdown-row { width: fit-content; }
+
+/* Gold highlight for "Any valuable" row in Drop Odds */
+.breakdown-row.breakdown-highlight { color: var(--color-unique); font-weight: 600; }
 
 @media (max-width: 640px) {
   .app-header {
