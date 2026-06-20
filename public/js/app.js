@@ -766,9 +766,10 @@ const GearSlot = defineComponent({
       basisId.value = '';
     }
 
+    const SOCKETABLE_SLOTS = new Set(['head', 'weapon', 'shield', 'armor']);
     const currentMaxSockets = computed(() => {
       if (!props.modelValue.preset) return 0;
-      if (props.modelValue.preset === 'custom') return 1;
+      if (props.modelValue.preset === 'custom') return SOCKETABLE_SLOTS.has(props.slotId) ? 1 : 0;
       const item = (props.presets ?? []).find(p => p.id === props.modelValue.preset);
       return item?.max_sockets ?? 0;
     });
@@ -1357,7 +1358,7 @@ createApp({
                   <template v-for="run in runConfig" :key="run.id">
                     <template v-if="run.available && state.run.bosses[run.id] && runDropProbs[run.id]">
                       <div class="breakdown-run-label">{{ run.label }}</div>
-                      <div class="breakdown-row breakdown-total">
+                      <div class="breakdown-row breakdown-total breakdown-highlight">
                         <span>Any valuable <span class="info-icon" title="P(at least one of: trade-value unique/set, good rune, skiller GC, or valuable SC drops this run)">i</span></span>
                         <span>{{ fmtOneIn(runDropProbs[run.id].total) }}</span>
                       </div>
@@ -1552,7 +1553,7 @@ createApp({
 
             <h2 class="panel-title">Target Run Info</h2>
             <div class="content-center">
-              <div class="breakdown-row">
+              <div class="breakdown-row breakdown-highlight">
                 <span>Any valuable <span class="info-icon" :title="targetTotalDropProbs ? 'Good Unique/Set: ' + fmtOneIn(targetTotalDropProbs.itemProb) + ' · Good Rune: ' + fmtOneIn(targetTotalDropProbs.runeProb) + ' · Skiller GC: ' + fmtOneIn(targetTotalDropProbs.skillerProb) + ' · Valuable SC: ' + fmtOneIn(targetTotalDropProbs.valuableScProb) : 'No drop data'">i</span></span>
                 <span>{{ targetTotalDropProbs ? fmtOneIn(targetTotalDropProbs.total) : '---' }}</span>
               </div>
