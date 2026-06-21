@@ -785,12 +785,12 @@ const CustomItem = defineComponent({
       </select>
       <input type="text" placeholder="Name" :value="modelValue.name" @input="update({ name: $event.target.value })" class="custom-text" />
       <div class="custom-inputs-stats">
-        <label :class="{ 'custom-zero': !modelValue.fcr }">FCR    <input type="number" min="0" :value="modelValue.fcr"             @input="update({ fcr:             +$event.target.value })" class="custom-num" /></label>
-        <label :class="{ 'custom-zero': !modelValue.mf }">MF     <input type="number" min="0" :value="modelValue.mf"              @input="update({ mf:              +$event.target.value })" class="custom-num" /></label>
-        <label :class="{ 'custom-zero': !modelValue.allSkills }">+All   <input type="number" min="0" :value="modelValue.allSkills"       @input="update({ allSkills:       +$event.target.value })" class="custom-num" /></label>
-        <label :class="{ 'custom-zero': !modelValue.coldSkills }">+Cold  <input type="number" min="0" :value="modelValue.coldSkills"      @input="update({ coldSkills:      +$event.target.value })" class="custom-num" /></label>
-        <label :class="{ 'custom-zero': !modelValue.coldDmgPct }">Cold%  <input type="number" min="0" :value="modelValue.coldDmgPct"      @input="update({ coldDmgPct:      +$event.target.value })" class="custom-num" /></label>
-        <label :class="{ 'custom-zero': !modelValue.enemyColdResPct }">ECR%   <input type="number" min="0" :value="modelValue.enemyColdResPct" @input="update({ enemyColdResPct: +$event.target.value })" class="custom-num" title="Enemy Cold Resistance -X%" /></label>
+        <label :class="{ 'custom-zero': !modelValue.fcr }"><span>FCR</span><input type="number" min="0" :value="modelValue.fcr"             @input="update({ fcr:             +$event.target.value })" class="custom-num" /></label>
+        <label :class="{ 'custom-zero': !modelValue.mf }"><span>MF</span><input type="number" min="0" :value="modelValue.mf"              @input="update({ mf:              +$event.target.value })" class="custom-num" /></label>
+        <label :class="{ 'custom-zero': !modelValue.allSkills }"><span>+All</span><input type="number" min="0" :value="modelValue.allSkills"       @input="update({ allSkills:       +$event.target.value })" class="custom-num" /></label>
+        <label :class="{ 'custom-zero': !modelValue.coldSkills }"><span>+Cold</span><input type="number" min="0" :value="modelValue.coldSkills"      @input="update({ coldSkills:      +$event.target.value })" class="custom-num" /></label>
+        <label :class="{ 'custom-zero': !modelValue.coldDmgPct }"><span>Cold%</span><input type="number" min="0" :value="modelValue.coldDmgPct"      @input="update({ coldDmgPct:      +$event.target.value })" class="custom-num" /></label>
+        <label :class="{ 'custom-zero': !modelValue.enemyColdResPct }"><span>ECR%</span><input type="number" min="0" :value="modelValue.enemyColdResPct" @input="update({ enemyColdResPct: +$event.target.value })" class="custom-num" title="Enemy Cold Resistance -X%" /></label>
       </div>
     </div>
   `,
@@ -920,55 +920,59 @@ const GearSlot = defineComponent({
   },
   template: `
     <div class="gear-slot">
-      <label class="slot-label">{{ slotLabel }}</label>
-      <select
-        :value="modelValue.preset ?? ''"
-        @change="update({ preset: $event.target.value || null })"
-        class="slot-select"
-      >
-        <option value="">— none —</option>
-        <option v-for="p in presets" :key="p.id" :value="p.id">{{ p.name }}</option>
-      </select>
+      <div class="gear-slot-left">
+        <div class="gear-slot-top">
+          <label class="slot-label">{{ slotLabel }}</label>
+          <select
+            :value="modelValue.preset ?? ''"
+            @change="update({ preset: $event.target.value || null })"
+            class="slot-select"
+          >
+            <option value="">— none —</option>
+            <option v-for="p in presets" :key="p.id" :value="p.id">{{ p.name }}</option>
+          </select>
+        </div>
 
-      <stat-pills v-if="modelValue.preset" :stats="stats()">
-        <span v-if="matchedSetItem && modelValue.preset !== 'custom'" class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
-      </stat-pills>
+        <stat-pills v-if="modelValue.preset" :stats="stats()">
+          <span v-if="matchedSetItem && modelValue.preset !== 'custom'" class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
+        </stat-pills>
 
-      <custom-item v-if="modelValue.preset === 'custom'" :modelValue="modelValue.custom" @update:modelValue="updateCustom" :presets="presets" />
+        <custom-item v-if="modelValue.preset === 'custom'" :modelValue="modelValue.custom" @update:modelValue="updateCustom" :presets="presets" />
 
-      <div v-if="modelValue.preset === 'custom' && matchedSetItem" class="custom-stat-pills">
-        <span class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
-      </div>
+        <div v-if="modelValue.preset === 'custom' && matchedSetItem" class="custom-stat-pills">
+          <span class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
+        </div>
 
-      <div v-if="modelValue.preset && currentMaxSockets > 0" class="socket-section">
-        <div v-if="(modelValue.sockets ?? []).length" class="socket-list">
-          <div v-for="(sock, idx) in (modelValue.sockets ?? [])" :key="idx" class="socket-entry">
-            <div class="socket-row">
-              <span class="socket-label">(socket)</span>
-              <select
-                :value="sock.preset ?? ''"
-                @change="updateSocket(idx, $event.target.value)"
-                class="slot-select socket-select"
-              >
-                <option value="">— gem/rune —</option>
-                <option v-for="si in socketItems" :key="si.id" :value="si.id"
-                  :disabled="si.unique && usedUniqueSocketIds.has(si.id) && sock.preset !== si.id"
-                >{{ si.name }}</option>
-                <option value="custom">Custom / Other</option>
-              </select>
-              <button @click="removeSocket(idx)" class="socket-remove" title="Remove socketed item">&times;</button>
-            </div>
-            <custom-item v-if="sock.preset === 'custom'" :modelValue="sock.custom ?? {}" @update:modelValue="updateSocketCustom(idx, $event)" :presets="socketItemsForBasis" :isPresetDisabled="si => isSocketItemDisabledForBasis(si, sock)" />
-            <div v-if="sock.preset === 'custom' && matchedUniqueSocketPreset(sock)" class="charm-custom-stat-pills">
-              <span class="pill pill-unique-match" title="Name matches a unique socketed item — treated as unique (only one allowed)">Unique: {{ matchedUniqueSocketPreset(sock).name }}</span>
+        <div v-if="modelValue.preset && currentMaxSockets > 0" class="socket-section">
+          <div v-if="(modelValue.sockets ?? []).length" class="socket-list">
+            <div v-for="(sock, idx) in (modelValue.sockets ?? [])" :key="idx" class="socket-entry">
+              <div class="socket-row">
+                <span class="socket-label">(socket)</span>
+                <select
+                  :value="sock.preset ?? ''"
+                  @change="updateSocket(idx, $event.target.value)"
+                  class="slot-select socket-select"
+                >
+                  <option value="">— gem/rune —</option>
+                  <option v-for="si in socketItems" :key="si.id" :value="si.id"
+                    :disabled="si.unique && usedUniqueSocketIds.has(si.id) && sock.preset !== si.id"
+                  >{{ si.name }}</option>
+                  <option value="custom">Custom / Other</option>
+                </select>
+                <button @click="removeSocket(idx)" class="socket-remove" title="Remove socketed item">&times;</button>
+              </div>
+              <custom-item v-if="sock.preset === 'custom'" :modelValue="sock.custom ?? {}" @update:modelValue="updateSocketCustom(idx, $event)" :presets="socketItemsForBasis" :isPresetDisabled="si => isSocketItemDisabledForBasis(si, sock)" />
+              <div v-if="sock.preset === 'custom' && matchedUniqueSocketPreset(sock)" class="charm-custom-stat-pills">
+                <span class="pill pill-unique-match" title="Name matches a unique socketed item — treated as unique (only one allowed)">Unique: {{ matchedUniqueSocketPreset(sock).name }}</span>
+              </div>
             </div>
           </div>
+          <button
+            v-if="(modelValue.sockets ?? []).length < currentMaxSockets"
+            @click="addSocket"
+            class="socket-add"
+          >+ Socket</button>
         </div>
-        <button
-          v-if="(modelValue.sockets ?? []).length < currentMaxSockets"
-          @click="addSocket"
-          class="socket-add"
-        >+ Socket</button>
       </div>
     </div>
   `,

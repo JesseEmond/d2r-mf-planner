@@ -161,10 +161,28 @@ body {
 /* GearSlot */
 .gear-slot {
   display: grid;
-  grid-template-columns: var(--col-label) var(--col-select) 1fr;
+  grid-template-columns: calc(var(--col-label) + var(--col-gap) + var(--col-select)) 1fr;
   column-gap: var(--col-gap);
   row-gap: 0.3rem;
   align-items: start;
+}
+/* On desktop, gear-slot-left dissolves into the parent grid so its children
+   are direct grid items: gear-slot-top and siblings auto-place into col 1,
+   stat-pills auto-places into col 2 and spans all rows. */
+.gear-slot-left {
+  display: contents;
+}
+.gear-slot-top {
+  display: flex;
+  align-items: center;
+  gap: var(--col-gap);
+}
+/* stat-pills lands in col 2 via auto-placement and spans all rows so it
+   never contributes to individual row heights in col 1. */
+.gear-slot-left > .stat-pills {
+  grid-column: 2;
+  grid-row: 1 / span 10;
+  align-self: start;
 }
 .slot-label {
   width: var(--col-label);
@@ -189,8 +207,6 @@ body {
   display: flex;
   flex-wrap: wrap;
   gap: 0.4rem;
-  grid-column: 2 / -1;
-  flex-basis: 100%;
   align-items: center;
   font-size: 0.78rem;
 }
@@ -224,7 +240,6 @@ body {
   padding: 2px 4px;
   font-size: 0.78rem;
   width: 48px;
-  margin-left: 3px;
 }
 .custom-zero {
   color: var(--color-text-faint);
@@ -244,7 +259,6 @@ body {
   display: flex;
   gap: 0.3rem;
   flex-wrap: wrap;
-  grid-column: 2 / -1;
 }
 .charm-custom-stat-pills {
   display: flex;
@@ -275,7 +289,6 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.25rem;
-  grid-column: 1 / -1;
 }
 .socket-list {
   display: flex;
@@ -293,7 +306,7 @@ body {
   gap: 0.4rem;
 }
 .socket-label {
-  width: calc(var(--col-label) + var(--col-gap));
+  width: var(--col-label);
   font-size: 0.75rem;
   color: var(--color-text-faint);
   flex-shrink: 0;
@@ -418,12 +431,21 @@ body {
 }
 .charm-add:hover { border-color: var(--color-text-faint); color: var(--color-text-muted); }
 .custom-inputs-stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
+  display: grid;
+  grid-template-columns: repeat(3, max-content max-content);
+  column-gap: 0.35rem;
+  row-gap: 0.3rem;
   flex-basis: 100%;
   align-items: center;
   padding-left: 6px;
+}
+.custom-inputs-stats > label {
+  display: contents;
+}
+/* extra gap before the 2nd and 3rd column pairs */
+.custom-inputs-stats > label:nth-child(3n+2) > span,
+.custom-inputs-stats > label:nth-child(3n) > span {
+  padding-left: 0.5rem;
 }
 
 /* Sticky header */
@@ -843,11 +865,15 @@ abbr[title] { text-decoration: underline dashed; text-decoration-color: var(--co
     flex: 1;
     min-width: 0;
   }
+  /* On mobile, restore gear-slot-left as a flex column so pills fall naturally
+     between the dropdown and any custom/socket content. */
   .gear-slot {
-    grid-template-columns: var(--col-label) 1fr;
+    display: block;
   }
-  .gear-slot .stat-pills {
-    grid-column: 2 / -1;
+  .gear-slot-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
   }
   .ettvd-main {
     font-size: 1.9rem;
