@@ -209,6 +209,10 @@ body {
   gap: 0.4rem;
   align-items: center;
   font-size: 0.78rem;
+  border-left: 2px solid #2e3240;
+  padding-left: 0.65rem;
+  margin-left: 0.15rem;
+  margin-top: 0.15rem;
 }
 .custom-basis-select {
   background: #111318;
