@@ -1309,26 +1309,28 @@ createApp({
                 <span title="Effective MF applied to set quality checks after diminishing returns: MF×500÷(MF+500)">Eff. Set MF <span class="stat-val">{{ Math.round(effSetMF(totalMF)) }}%</span></span>
               </div>
 
-              <div class="breakdown-run-label">Per run cycle</div>
-              <div class="breakdown-row breakdown-total breakdown-highlight">
-                <span>Any valuable <span class="info-icon" title="P(at least one valuable drops across all selected bosses in one full run cycle)">i</span></span>
-                <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.total) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Good Unique / Set Item <span class="info-icon" title="Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
-                <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.itemProb) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
-                <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.runeProb) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
-                <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.skillerProb) : '---' }}</span>
-              </div>
-              <div class="breakdown-row breakdown-sub">
-                <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
-                <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.valuableScProb) : '---' }}</span>
+              <div class="breakdown-group">
+                <div class="breakdown-run-label">Per run cycle</div>
+                <div class="breakdown-row breakdown-total breakdown-highlight">
+                  <span>Any valuable <span class="info-icon" title="P(at least one valuable drops across all selected bosses in one full run cycle)">i</span></span>
+                  <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.total) : '---' }}</span>
+                </div>
+                <div class="breakdown-row breakdown-sub">
+                  <span>Good Unique / Set Item <span class="info-icon" title="Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+                  <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.itemProb) : '---' }}</span>
+                </div>
+                <div class="breakdown-row breakdown-sub">
+                  <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
+                  <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.runeProb) : '---' }}</span>
+                </div>
+                <div class="breakdown-row breakdown-sub">
+                  <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
+                  <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.skillerProb) : '---' }}</span>
+                </div>
+                <div class="breakdown-row breakdown-sub">
+                  <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
+                  <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.valuableScProb) : '---' }}</span>
+                </div>
               </div>
             </div>
 
