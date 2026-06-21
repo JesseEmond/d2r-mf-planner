@@ -817,7 +817,7 @@ abbr[title] { text-decoration: underline dashed; text-decoration-color: var(--co
 }
 .content-center .stat-line { justify-content: center; }
 .content-center .breakdown-run-label { text-align: center; }
-.left-col .content-center .breakdown-row { width: fit-content; }
+.breakdown-group { width: fit-content; }
 
 /* Gold highlight for "Any valuable" row in Drop Odds */
 .breakdown-row.breakdown-highlight { color: var(--color-unique); font-weight: 600; }
