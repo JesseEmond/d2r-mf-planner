@@ -22,8 +22,9 @@ const ICE_BLAST_HARD_PTS     = 20;
 
 const DEFAULT_BOSSES = { andy: true };
 
-const CUSTOM_ITEM  = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
-const CUSTOM_CHARM = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0, unique: false };
+const CUSTOM_ITEM   = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
+const CUSTOM_CHARM  = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0, unique: false };
+const CUSTOM_SOCKET = { id: 'custom', name: 'Custom / Other' };
 
 const PRESET_ITEMS = ref({});
 const TARGET_GEAR_PRESETS = ref([]);
@@ -305,7 +306,21 @@ function encodeState(state) {
         if (c.coldDmgPct)      entry.cdp = c.coldDmgPct;
         if (c.enemyColdResPct) entry.ecr = c.enemyColdResPct;
       }
-      const sk = (slot.sockets ?? []).filter(s => s.preset).map(s => s.preset);
+      const sk = (slot.sockets ?? []).filter(s => s.preset).map(s => {
+        if (s.preset === 'custom') {
+          const c = s.custom ?? {};
+          const obj = { p: 'custom' };
+          if (c.name)            obj.n   = c.name;
+          if (c.fcr)             obj.f   = c.fcr;
+          if (c.mf)              obj.m   = c.mf;
+          if (c.allSkills)       obj.a   = c.allSkills;
+          if (c.coldSkills)      obj.cs  = c.coldSkills;
+          if (c.coldDmgPct)      obj.cdp = c.coldDmgPct;
+          if (c.enemyColdResPct) obj.ecr = c.enemyColdResPct;
+          return obj;
+        }
+        return s.preset;
+      });
       if (sk.length) entry.sk = sk;
       gear[id] = entry;
     }
@@ -358,7 +373,13 @@ function decodeState(b64, state) {
               allSkills: e.a ?? 0, coldSkills: e.cs ?? 0, coldDmgPct: e.cdp ?? 0, enemyColdResPct: e.ecr ?? 0 };
           }
           if (e.sk) {
-            state.gear[id].sockets = e.sk.map(p => ({ preset: p }));
+            state.gear[id].sockets = e.sk.map(p => {
+              if (typeof p === 'object' && p.p === 'custom') {
+                return { preset: 'custom', custom: { name: p.n ?? '', fcr: p.f ?? 0, mf: p.m ?? 0,
+                  allSkills: p.a ?? 0, coldSkills: p.cs ?? 0, coldDmgPct: p.cdp ?? 0, enemyColdResPct: p.ecr ?? 0 } };
+              }
+              return { preset: p };
+            });
           }
         }
       }
@@ -401,6 +422,7 @@ function findSetItemByName(name) {
 
 function socketItemStats(sock, slotId) {
   if (!sock.preset) return Stats.zero();
+  if (sock.preset === 'custom') return Stats.from(sock.custom ?? {});
   const item = SOCKET_ITEMS.value.find(si => si.id === sock.preset);
   if (!item) return Stats.zero();
   if (item.slot_stats) {
@@ -593,8 +615,16 @@ const usedUniqueSocketIds = computed(() => {
     if (id === 'charms') continue;
     for (const sock of (state.gear[id].sockets ?? [])) {
       if (!sock.preset) continue;
-      const item = SOCKET_ITEMS.value.find(si => si.id === sock.preset);
-      if (item?.unique) used.add(sock.preset);
+      if (sock.preset === 'custom') {
+        const name = sock.custom?.name?.trim();
+        if (name) {
+          const matched = SOCKET_ITEMS.value.find(si => si.unique && si.name === name);
+          if (matched) used.add(matched.id);
+        }
+      } else {
+        const item = SOCKET_ITEMS.value.find(si => si.id === sock.preset);
+        if (item?.unique) used.add(sock.preset);
+      }
     }
   }
   return used;
@@ -807,6 +837,7 @@ const GearSlot = defineComponent({
 
     function resolveSocketStats(sock) {
       if (!sock.preset) return Stats.zero();
+      if (sock.preset === 'custom') return Stats.from(sock.custom ?? {});
       const item = (props.socketItems ?? []).find(si => si.id === sock.preset);
       if (!item) return Stats.zero();
       if (item.slot_stats) {
@@ -826,8 +857,17 @@ const GearSlot = defineComponent({
       emit('update:modelValue', { ...props.modelValue, sockets });
     }
     function updateSocket(idx, presetId) {
+      const sockets = (props.modelValue.sockets ?? []).map((s, i) => {
+        if (i !== idx) return s;
+        if (!presetId) return { preset: null };
+        if (presetId === 'custom') return { preset: 'custom', custom: { name: '', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 } };
+        return { preset: presetId };
+      });
+      emit('update:modelValue', { ...props.modelValue, sockets });
+    }
+    function updateSocketCustom(idx, newCustom) {
       const sockets = (props.modelValue.sockets ?? []).map((s, i) =>
-        i === idx ? { preset: presetId || null } : s
+        i === idx ? { ...s, custom: newCustom } : s
       );
       emit('update:modelValue', { ...props.modelValue, sockets });
     }
@@ -852,8 +892,31 @@ const GearSlot = defineComponent({
       if (!name) return null;
       return (props.presets ?? []).find(p => p.set_name && p.name === name) ?? null;
     });
+    const socketItemsForBasis = computed(() =>
+      (props.socketItems ?? []).map(si => {
+        if (!si.slot_stats) return si;
+        const ss = si.slot_stats[props.slotId] ?? si.slot_stats['default'] ?? {};
+        return { ...si, ...ss };
+      })
+    );
+
+    function matchedUniqueSocketPreset(sock) {
+      if (sock.preset !== 'custom') return null;
+      const name = sock.custom?.name?.trim();
+      if (!name) return null;
+      return (props.socketItems ?? []).find(si => si.unique && si.name === name) ?? null;
+    }
+
+    function isSocketItemDisabledForBasis(si, sock) {
+      if (!si.unique) return false;
+      const selfMatch = matchedUniqueSocketPreset(sock);
+      if (selfMatch?.id === si.id) return false;
+      return props.usedUniqueSocketIds.has(si.id);
+    }
+
     return { update, updateCustom, stats, matchedSetItem,
-             currentMaxSockets, resolveSocketStats, addSocket, removeSocket, updateSocket };
+             currentMaxSockets, resolveSocketStats, addSocket, removeSocket, updateSocket, updateSocketCustom,
+             socketItemsForBasis, matchedUniqueSocketPreset, isSocketItemDisabledForBasis };
   },
   template: `
     <div class="gear-slot">
@@ -879,19 +942,26 @@ const GearSlot = defineComponent({
 
       <div v-if="modelValue.preset && currentMaxSockets > 0" class="socket-section">
         <div v-if="(modelValue.sockets ?? []).length" class="socket-list">
-          <div v-for="(sock, idx) in (modelValue.sockets ?? [])" :key="idx" class="socket-row">
-            <span class="socket-label">(socket)</span>
-            <select
-              :value="sock.preset ?? ''"
-              @change="updateSocket(idx, $event.target.value)"
-              class="slot-select socket-select"
-            >
-              <option value="">— gem/rune —</option>
-              <option v-for="si in socketItems" :key="si.id" :value="si.id"
-                :disabled="si.unique && usedUniqueSocketIds.has(si.id) && sock.preset !== si.id"
-              >{{ si.name }}</option>
-            </select>
-            <button @click="removeSocket(idx)" class="socket-remove" title="Remove socketed item">&times;</button>
+          <div v-for="(sock, idx) in (modelValue.sockets ?? [])" :key="idx" class="socket-entry">
+            <div class="socket-row">
+              <span class="socket-label">(socket)</span>
+              <select
+                :value="sock.preset ?? ''"
+                @change="updateSocket(idx, $event.target.value)"
+                class="slot-select socket-select"
+              >
+                <option value="">— gem/rune —</option>
+                <option v-for="si in socketItems" :key="si.id" :value="si.id"
+                  :disabled="si.unique && usedUniqueSocketIds.has(si.id) && sock.preset !== si.id"
+                >{{ si.name }}</option>
+                <option value="custom">Custom / Other</option>
+              </select>
+              <button @click="removeSocket(idx)" class="socket-remove" title="Remove socketed item">&times;</button>
+            </div>
+            <custom-item v-if="sock.preset === 'custom'" :modelValue="sock.custom ?? {}" @update:modelValue="updateSocketCustom(idx, $event)" :presets="socketItemsForBasis" :isPresetDisabled="si => isSocketItemDisabledForBasis(si, sock)" />
+            <div v-if="sock.preset === 'custom' && matchedUniqueSocketPreset(sock)" class="charm-custom-stat-pills">
+              <span class="pill pill-unique-match" title="Name matches a unique socketed item — treated as unique (only one allowed)">Unique: {{ matchedUniqueSocketPreset(sock).name }}</span>
+            </div>
           </div>
         </div>
         <button
