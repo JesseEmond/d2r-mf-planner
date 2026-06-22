@@ -1564,30 +1564,38 @@ createApp({
             <div class="target-slot-group">
               <template v-for="id in GROUP_A" :key="id">
                 <div class="target-slot-row">
-                  <span class="slot-label">{{ GEAR_SLOTS.find(s => s.id === id).label }}</span>
-                  <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
-                    {{ targetSlots[id].item?.name ?? '—' }}
-                  </span>
-                  <stat-pills :stats="targetSlots[id].stats" />
-                </div>
-                <div v-for="si in targetSlots[id].sockets" :key="si.id" class="target-slot-row target-socket-row">
-                  <span class="slot-label target-socket-label">(socket)</span>
-                  <span class="target-slot-name target-socket-name">{{ si.name }}</span>
+                  <div class="target-slot-left">
+                    <div class="target-slot-top">
+                      <span class="slot-label">{{ GEAR_SLOTS.find(s => s.id === id).label }}</span>
+                      <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
+                        {{ targetSlots[id].item?.name ?? '—' }}
+                      </span>
+                    </div>
+                    <div v-for="si in targetSlots[id].sockets" :key="si.id" class="target-socket-row">
+                      <span class="socket-label">(socket)</span>
+                      <span class="target-slot-name target-socket-name">{{ si.name }}</span>
+                    </div>
+                    <stat-pills :stats="targetSlots[id].stats" />
+                  </div>
                 </div>
               </template>
             </div>
             <div class="target-slot-group">
               <template v-for="id in GROUP_B" :key="id">
                 <div class="target-slot-row">
-                  <span class="slot-label">{{ GEAR_SLOTS.find(s => s.id === id).label }}</span>
-                  <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
-                    {{ targetSlots[id].item?.name ?? '—' }}
-                  </span>
-                  <stat-pills :stats="targetSlots[id].stats" />
-                </div>
-                <div v-for="si in targetSlots[id].sockets" :key="si.id" class="target-slot-row target-socket-row">
-                  <span class="slot-label target-socket-label">(socket)</span>
-                  <span class="target-slot-name target-socket-name">{{ si.name }}</span>
+                  <div class="target-slot-left">
+                    <div class="target-slot-top">
+                      <span class="slot-label">{{ GEAR_SLOTS.find(s => s.id === id).label }}</span>
+                      <span :class="['target-slot-name', !targetSlots[id].item && 'target-slot-empty']">
+                        {{ targetSlots[id].item?.name ?? '—' }}
+                      </span>
+                    </div>
+                    <div v-for="si in targetSlots[id].sockets" :key="si.id" class="target-socket-row">
+                      <span class="socket-label">(socket)</span>
+                      <span class="target-slot-name target-socket-name">{{ si.name }}</span>
+                    </div>
+                    <stat-pills :stats="targetSlots[id].stats" />
+                  </div>
                 </div>
               </template>
             </div>
