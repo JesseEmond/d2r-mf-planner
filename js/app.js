@@ -473,6 +473,16 @@ function charmSlotStats(charmsArray) {
   return charmsArray.reduce((t, charm) => t.add(singleCharmStats(charm)), Stats.zero());
 }
 
+function charmSunder(charm) {
+  if (!charm.preset) return null;
+  const presets = PRESET_ITEMS.value['charms'] ?? [];
+  if (charm.preset === 'custom') {
+    const name = charm.custom?.name?.trim();
+    return presets.find(p => p.unique && p.name === name)?.sunder ?? null;
+  }
+  return presets.find(p => p.id === charm.preset)?.sunder ?? null;
+}
+
 // ── Reactive state ─────────────────────────────────────────────────────────
 
 const state = reactive(makeDefaultState());
@@ -677,6 +687,14 @@ const targetPresetCharms = computed(() => {
     return { id, name: item?.name ?? id, count: n, item, stats: Stats.from(item).scale(n) };
   });
 });
+
+const gearSunders = computed(() =>
+  [...new Set(state.gear.charms.map(charmSunder).filter(Boolean))]
+);
+
+const targetSunders = computed(() =>
+  [...new Set(targetPresetCharms.value.map(c => c.item?.sunder).filter(Boolean))]
+);
 
 const targetSlots = computed(() => {
   const out = {};
@@ -1050,8 +1068,10 @@ const CharmsPanel = defineComponent({
 
 
     function sunderLabel(charm) {
-      const item = (props.presets ?? []).find(p => p.id === charm.preset);
-      return item?.sunder ? item.sunder : null;
+      const item = charm.preset === 'custom'
+        ? matchedUniquePreset(charm)
+        : (props.presets ?? []).find(p => p.id === charm.preset);
+      return item?.sunder ?? null;
     }
 
     return { addCharm, removeCharm, updateCharm, updateCharmCustomFull, updateCharmCount, isUniqueCharm, isDisabled, singleCharmStats, sunderLabel, matchedUniquePreset };
@@ -1294,6 +1314,8 @@ createApp({
       targetRunTimeSummary:       targetBuild.runTimeSummary,
       targetEttvd:                targetBuild.ettvd,
       targetPresetCharms,
+      gearSunders,
+      targetSunders,
     };
   },
   template: `
@@ -1354,6 +1376,7 @@ createApp({
               <span v-if="totalColdSkills" title="+Cold Skills — adds to cold skill levels only">Cold Skills <span class="stat-val">+{{ totalColdSkills }}</span></span>
               <span v-if="totalColdDmgPct" title="+% Cold Skill Damage — multiplies cold spell damage output">Cold Damage <span class="stat-val">+{{ totalColdDmgPct }}%</span></span>
               <span v-if="totalEnemyColdResPct" title="Enemy Cold Resist -X% from gear — reduces enemy cold resistance, stacks with Cold Mastery">Enemy CR <span class="stat-val">-{{ totalEnemyColdResPct }}%</span></span>
+              <span v-for="s in gearSunders" :key="s" class="pill pill-sunder" :title="'Sunders ' + s + ' immunity'">Sunders {{ s }}</span>
               <span title="Cold Mastery — reduces enemy cold resistance; effective level includes +All Skills and +Cold Skills from gear">Cold Mastery <span class="stat-val">Lv {{ effectiveColdMastery }}</span></span>
             </div>
             <div class="cm-input-row">
@@ -1590,6 +1613,7 @@ createApp({
               <span v-if="targetTotalColdSkills" title="+Cold Skills">Cold Skills <span class="stat-val">+{{ targetTotalColdSkills }}</span></span>
               <span v-if="targetTotalColdDmgPct" title="+% Cold Skill Damage">Cold Damage <span class="stat-val">+{{ targetTotalColdDmgPct }}%</span></span>
               <span v-if="targetTotalEnemyColdResPct" title="Enemy Cold Resist -X% from target gear">Enemy CR <span class="stat-val">-{{ targetTotalEnemyColdResPct }}%</span></span>
+              <span v-for="s in targetSunders" :key="s" class="pill pill-sunder" :title="'Sunders ' + s + ' immunity'">Sunders {{ s }}</span>
               <span title="Cold Mastery effective level includes +All Skills and +Cold Skills from target gear">Cold Mastery <span class="stat-val">Lv {{ targetEffectiveColdMastery }}</span></span>
             </div>
             <div class="cm-input-row">
