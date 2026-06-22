@@ -163,8 +163,10 @@ body {
   display: grid;
   grid-template-columns: calc(var(--col-label) + var(--col-gap) + var(--col-select)) 1fr;
   column-gap: var(--col-gap);
-  row-gap: 0.3rem;
   align-items: start;
+  /* No row-gap: span-10 trick creates 10 ghost rows and row-gap would add
+     ~2.4rem of blank space below filled slots. Use margin-top on each
+     subsequent col-1 item instead so empty rows cost nothing. */
 }
 /* On desktop, gear-slot-left dissolves into the parent grid so its children
    are direct grid items: gear-slot-top and siblings auto-place into col 1,
@@ -183,6 +185,13 @@ body {
   grid-column: 2;
   grid-row: 1 / span 10;
   align-self: start;
+}
+/* Replace the removed row-gap with per-item top margin (only on desktop where
+   gear-slot-left uses display:contents; mobile flex gap handles spacing). */
+.gear-slot-left > .custom-inputs,
+.gear-slot-left > .custom-stat-pills,
+.gear-slot-left > .socket-section {
+  margin-top: 0.3rem;
 }
 .slot-label {
   width: var(--col-label);
@@ -785,21 +794,33 @@ body {
 }
 .target-slot-row {
   display: grid;
-  grid-template-columns: var(--col-label) var(--col-item) 1fr;
+  grid-template-columns: calc(var(--col-label) + var(--col-gap) + var(--col-item)) 1fr;
   column-gap: var(--col-gap);
-  row-gap: 0.2rem;
+  align-items: start;
+}
+.target-slot-left {
+  display: contents;
+}
+.target-slot-top {
+  display: flex;
   align-items: center;
+  gap: var(--col-gap);
+}
+.target-slot-left > .stat-pills {
+  grid-column: 2;
+  grid-row: 1 / span 10;
+  align-self: start;
+}
+.target-socket-row {
+  display: flex;
+  align-items: center;
+  gap: var(--col-gap);
 }
 .target-slot-name {
   font-size: 0.82rem;
   color: var(--color-text);
-  flex: 0 0 var(--col-item);
 }
 .target-slot-empty {
-  color: var(--color-text-faint);
-  font-style: italic;
-}
-.target-socket-label {
   color: var(--color-text-faint);
   font-style: italic;
 }
@@ -885,6 +906,12 @@ abbr[title] { text-decoration: underline dashed; text-decoration-color: var(--co
     flex-direction: column;
     gap: 0.3rem;
   }
+  /* flex gap handles spacing on mobile; cancel the desktop margin-top */
+  .gear-slot-left > .custom-inputs,
+  .gear-slot-left > .custom-stat-pills,
+  .gear-slot-left > .socket-section {
+    margin-top: 0;
+  }
   .ettvd-main {
     font-size: 1.9rem;
     padding: 0.25rem 0 0.4rem;
@@ -916,12 +943,14 @@ abbr[title] { text-decoration: underline dashed; text-decoration-color: var(--co
     flex: 1;
   }
 
-  /* Target slot rows: 2-column grid, pills always on a new line aligned with item name */
+  /* Target slot rows: stack vertically on mobile */
   .target-slot-row {
-    grid-template-columns: var(--col-label) 1fr;
+    display: block;
   }
-  .target-slot-row .stat-pills {
-    grid-column: 2 / -1;
+  .target-slot-left {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
   }
 
   /* Release fixed col-select calc so breakdown rows don't overflow narrow screens */
