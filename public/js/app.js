@@ -1,4 +1,4 @@
-import { createApp, defineComponent, reactive, computed, watch, ref, onMounted } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+import { createApp, defineComponent, reactive, computed, watch, ref, onMounted, onUnmounted } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
 import { GEAR_SLOTS } from './gear-db.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
@@ -722,6 +722,47 @@ watch(state, () => {
   history.replaceState(null, '', encoded ? `?s=${encoded}` : location.pathname);
 }, { deep: true });
 
+// ── TooltipPopup component ─────────────────────────────────────────────────
+
+const TooltipPopup = defineComponent({
+  name: 'TooltipPopup',
+  props: { text: { type: String, default: '' } },
+  setup(props) {
+    const visible = ref(false);
+    const popupStyle = ref({});
+    const wrapRef = ref(null);
+
+    function computeStyle() {
+      if (!wrapRef.value) return;
+      const rect = wrapRef.value.getBoundingClientRect();
+      const vw = window.innerWidth;
+      const maxW = Math.min(280, vw - 16);
+      let left = rect.left + rect.width / 2 - maxW / 2;
+      if (left < 8) left = 8;
+      if (left + maxW > vw - 8) left = vw - maxW - 8;
+      const style = { position: 'fixed', left: left + 'px', maxWidth: maxW + 'px', zIndex: '9999' };
+      if (rect.top > 80) {
+        style.top = (rect.top - 8) + 'px';
+        style.transform = 'translateY(-100%)';
+      } else {
+        style.top = (rect.bottom + 8) + 'px';
+      }
+      popupStyle.value = style;
+    }
+
+    function show() { computeStyle(); visible.value = true; }
+    function hide() { visible.value = false; }
+    function toggle(e) { e.stopPropagation(); visible.value ? hide() : show(); }
+    function onDocClick() { if (visible.value) hide(); }
+
+    onMounted(() => document.addEventListener('click', onDocClick));
+    onUnmounted(() => document.removeEventListener('click', onDocClick));
+
+    return { visible, popupStyle, wrapRef, show, hide, toggle };
+  },
+  template: `<span ref="wrapRef" class="tooltip-wrap" @mouseenter="show" @mouseleave="hide" @click.stop="toggle"><slot /><teleport to="body"><div v-if="visible && text" class="tooltip-popup" :style="popupStyle">{{ text }}</div></teleport></span>`,
+});
+
 // ── StatPills component ────────────────────────────────────────────────────
 
 const StatPills = defineComponent({
@@ -729,13 +770,13 @@ const StatPills = defineComponent({
   template: `
     <div class="stat-pills">
       <slot />
-      <span v-if="sunder" class="pill pill-sunder" :title="'Sunders ' + sunder + ' immunity'">Sunders {{ sunder }}</span>
-      <span v-if="stats.fcr"        class="pill pill-fcr"      title="Faster Cast Rate — reduces casting animation length">FCR +{{ stats.fcr }}%</span>
-      <span v-if="stats.mf"         class="pill pill-mf"       title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF +{{ stats.mf }}%</span>
-      <span v-if="stats.allSkills"  class="pill pill-skill"    title="+All Skills — adds to all character skill levels">+{{ stats.allSkills }} All</span>
-      <span v-if="stats.coldSkills" class="pill pill-cold"     title="+Cold Skills — adds to cold skill levels only">+{{ stats.coldSkills }} Cold</span>
-      <span v-if="stats.coldDmgPct"      class="pill pill-cold-pct" title="+% Cold Skill Damage — multiplies cold spell damage output">Cold +{{ stats.coldDmgPct }}%</span>
-      <span v-if="stats.enemyColdResPct" class="pill pill-ecr"      title="Enemy Cold Resist -X% — reduces enemy cold resistance, increasing cold damage">Enemy CR -{{ stats.enemyColdResPct }}%</span>
+      <tooltip-popup v-if="sunder" :text="'Sunders ' + sunder + ' immunity'"><span class="pill pill-sunder">Sunders {{ sunder }}</span></tooltip-popup>
+      <tooltip-popup v-if="stats.fcr"               text="Faster Cast Rate — reduces casting animation length"><span class="pill pill-fcr">FCR +{{ stats.fcr }}%</span></tooltip-popup>
+      <tooltip-popup v-if="stats.mf"                text="Magic Find — increases chance of finding magic, rare, set, and unique items"><span class="pill pill-mf">MF +{{ stats.mf }}%</span></tooltip-popup>
+      <tooltip-popup v-if="stats.allSkills"          text="+All Skills — adds to all character skill levels"><span class="pill pill-skill">+{{ stats.allSkills }} All</span></tooltip-popup>
+      <tooltip-popup v-if="stats.coldSkills"         text="+Cold Skills — adds to cold skill levels only"><span class="pill pill-cold">+{{ stats.coldSkills }} Cold</span></tooltip-popup>
+      <tooltip-popup v-if="stats.coldDmgPct"         text="+% Cold Skill Damage — multiplies cold spell damage output"><span class="pill pill-cold-pct">Cold +{{ stats.coldDmgPct }}%</span></tooltip-popup>
+      <tooltip-popup v-if="stats.enemyColdResPct"    text="Enemy Cold Resist -X% — reduces enemy cold resistance, increasing cold damage"><span class="pill pill-ecr">Enemy CR -{{ stats.enemyColdResPct }}%</span></tooltip-popup>
     </div>
   `,
 });
@@ -751,9 +792,11 @@ const SetBonusBlock = defineComponent({
       <div v-for="sb in activeSets" :key="sb.name" class="set-bonus-row">
         <div class="set-bonus-meta">
           <span class="set-bonus-name">{{ sb.name }}</span>
-          <span class="set-pips" :title="sb.pieces + ' of ' + sb.total + ' pieces equipped'">
-            <span v-for="i in sb.total" :key="i" :class="i <= sb.pieces ? 'pip pip-on' : 'pip pip-off'">{{ i <= sb.pieces ? '●' : '○' }}</span>
-          </span>
+          <tooltip-popup :text="sb.pieces + ' of ' + sb.total + ' pieces equipped'">
+            <span class="set-pips">
+              <span v-for="i in sb.total" :key="i" :class="i <= sb.pieces ? 'pip pip-on' : 'pip pip-off'">{{ i <= sb.pieces ? '●' : '○' }}</span>
+            </span>
+          </tooltip-popup>
         </div>
         <stat-pills :stats="sb.stats" class="set-bonus-pills" />
       </div>
@@ -797,7 +840,7 @@ const CustomItem = defineComponent({
   },
   template: `
     <div class="custom-inputs">
-      <select v-model="basisId" @change="applyBasis" class="custom-basis-select" title="Copy stats from an existing item as a starting point">
+      <select v-model="basisId" @change="applyBasis" class="custom-basis-select">
         <option value="">Start from...</option>
         <option v-for="p in realPresets" :key="p.id" :value="p.id" :disabled="isPresetDisabled?.(p) ?? false">{{ p.name }}</option>
       </select>
@@ -808,7 +851,7 @@ const CustomItem = defineComponent({
         <label :class="{ 'custom-zero': !modelValue.allSkills }"><span>+All</span><input type="number" min="0" :value="modelValue.allSkills"       @input="update({ allSkills:       +$event.target.value })" class="custom-num" /></label>
         <label :class="{ 'custom-zero': !modelValue.coldSkills }"><span>+Cold</span><input type="number" min="0" :value="modelValue.coldSkills"      @input="update({ coldSkills:      +$event.target.value })" class="custom-num" /></label>
         <label :class="{ 'custom-zero': !modelValue.coldDmgPct }"><span>Cold%</span><input type="number" min="0" :value="modelValue.coldDmgPct"      @input="update({ coldDmgPct:      +$event.target.value })" class="custom-num" /></label>
-        <label :class="{ 'custom-zero': !modelValue.enemyColdResPct }"><span>ECR%</span><input type="number" min="0" :value="modelValue.enemyColdResPct" @input="update({ enemyColdResPct: +$event.target.value })" class="custom-num" title="Enemy Cold Resistance -X%" /></label>
+        <label :class="{ 'custom-zero': !modelValue.enemyColdResPct }"><span>ECR%</span><input type="number" min="0" :value="modelValue.enemyColdResPct" @input="update({ enemyColdResPct: +$event.target.value })" class="custom-num" /></label>
       </div>
     </div>
   `,
@@ -952,13 +995,13 @@ const GearSlot = defineComponent({
         </div>
 
         <stat-pills v-if="modelValue.preset" :stats="stats()">
-          <span v-if="matchedSetItem && modelValue.preset !== 'custom'" class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
+          <tooltip-popup v-if="matchedSetItem && modelValue.preset !== 'custom'" :text="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'"><span class="pill pill-set-match">Set: {{ matchedSetItem.set_name }}</span></tooltip-popup>
         </stat-pills>
 
         <custom-item v-if="modelValue.preset === 'custom'" :modelValue="modelValue.custom" @update:modelValue="updateCustom" :presets="presets" />
 
         <div v-if="modelValue.preset === 'custom' && matchedSetItem" class="custom-stat-pills">
-          <span class="pill pill-set-match" :title="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'">Set: {{ matchedSetItem.set_name }}</span>
+          <tooltip-popup :text="'Name matches ' + matchedSetItem.set_name + ' set item — counted towards set bonus'"><span class="pill pill-set-match">Set: {{ matchedSetItem.set_name }}</span></tooltip-popup>
         </div>
 
         <div v-if="modelValue.preset && currentMaxSockets > 0" class="socket-section">
@@ -977,11 +1020,11 @@ const GearSlot = defineComponent({
                   >{{ si.name }}</option>
                   <option value="custom">Custom / Other</option>
                 </select>
-                <button @click="removeSocket(idx)" class="socket-remove" title="Remove socketed item">&times;</button>
+                <button @click="removeSocket(idx)" class="socket-remove">&times;</button>
               </div>
               <custom-item v-if="sock.preset === 'custom'" :modelValue="sock.custom ?? {}" @update:modelValue="updateSocketCustom(idx, $event)" :presets="socketItemsForBasis" :isPresetDisabled="si => isSocketItemDisabledForBasis(si, sock)" />
               <div v-if="sock.preset === 'custom' && matchedUniqueSocketPreset(sock)" class="charm-custom-stat-pills">
-                <span class="pill pill-unique-match" title="Name matches a unique socketed item — treated as unique (only one allowed)">Unique: {{ matchedUniqueSocketPreset(sock).name }}</span>
+                <tooltip-popup text="Name matches a unique socketed item — treated as unique (only one allowed)"><span class="pill pill-unique-match">Unique: {{ matchedUniqueSocketPreset(sock).name }}</span></tooltip-popup>
               </div>
             </div>
           </div>
@@ -1103,12 +1146,12 @@ const CharmsPanel = defineComponent({
               class="charm-count"
             />
             <div v-else-if="charm.preset" class="charm-count-spacer">× 1</div>
-            <button @click="removeCharm(idx)" class="charm-remove" title="Remove charm">&times;</button>
+            <button @click="removeCharm(idx)" class="charm-remove">&times;</button>
           </div>
           <stat-pills v-if="charm.preset" :stats="singleCharmStats(charm)" :sunder="sunderLabel(charm)" />
           <custom-item v-if="charm.preset === 'custom'" :modelValue="charm.custom" @update:modelValue="updateCharmCustomFull(idx, $event)" :presets="presets" :isPresetDisabled="p => isDisabled(p, idx)" />
           <div v-if="charm.preset === 'custom' && matchedUniquePreset(charm)" class="charm-custom-stat-pills">
-            <span class="pill pill-unique-match" title="Name matches a unique charm — treated as unique (only one allowed)">Unique: {{ matchedUniquePreset(charm).name }}</span>
+            <tooltip-popup text="Name matches a unique charm — treated as unique (only one allowed)"><span class="pill pill-unique-match">Unique: {{ matchedUniquePreset(charm).name }}</span></tooltip-popup>
           </div>
         </div>
       </div>
@@ -1163,17 +1206,17 @@ const TimeToValuableDropSummary = defineComponent({
   template: `
     <section :class="['ettvd-block', 'summary-block', isTarget && 'ettvd-block-target']">
       <h2 class="panel-title">
-        <abbr :title="isTarget
+        <tooltip-popup :text="isTarget
           ? 'Expected Time To Valuable Drop — estimated average time until a desirable item drops, given target gear, MF, and run routine'
           : 'Expected Time To Valuable Drop — estimated average time until a desirable item drops, given your gear, MF, and run routine'"
-        >ETTVD</abbr>: Time To Valuable Drop
+        ><abbr>ETTVD</abbr></tooltip-popup>: Time To Valuable Drop
       </h2>
       <div :class="['ettvd-main', isTarget && 'ettvd-target', !ettvd && 'ettvd-empty']">
         {{ ettvd ? fmt(ettvd.total) : '---' }}
       </div>
       <div class="ettvd-breakdown">
         <div v-for="row in ETTVD_ROWS" :key="row.key" class="breakdown-row breakdown-sub">
-          <span>{{ row.label }} <span class="info-icon" :title="row.tooltip">i</span></span>
+          <span>{{ row.label }} <tooltip-popup :text="row.tooltip"><span class="info-icon">i</span></tooltip-popup></span>
           <span>{{ ettvd ? fmt(ettvd[row.key]) : '---' }}</span>
         </div>
       </div>
@@ -1321,8 +1364,8 @@ createApp({
   template: `
     <div class="app-root">
       <header class="app-header sticky-header">
-        <h1>D2R Blizzard Sorc — <abbr title="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine">ETTVD</abbr> Optimizer</h1>
-        <button class="reset-btn" @click="showResetConfirm = true" title="Reset all gear and settings to defaults">Reset</button>
+        <h1>D2R Blizzard Sorc — <tooltip-popup text="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine"><abbr>ETTVD</abbr></tooltip-popup> Optimizer</h1>
+        <button class="reset-btn" @click="showResetConfirm = true">Reset</button>
       </header>
 
       <div v-if="stateError" class="error-banner" role="alert">
@@ -1370,14 +1413,14 @@ createApp({
 
             <h2 class="panel-title">Stats</h2>
             <div class="stat-line">
-              <span :title="fcrTooltip">FCR <span class="stat-val">{{ totalFCR }}%</span> <span class="fcr-badge" :class="fcrBadgeClass" :title="fcrTooltip">{{ fcrBreakpoint.frames }}f</span></span>
-              <span v-if="totalMF" title="Magic Find — increases chance of finding magic, rare, set, and unique items">MF <span class="stat-val">+{{ totalMF }}%</span></span>
-              <span v-if="totalAllSkills" title="+All Skills — adds to all character skill levels">All Skills <span class="stat-val">+{{ totalAllSkills }}</span></span>
-              <span v-if="totalColdSkills" title="+Cold Skills — adds to cold skill levels only">Cold Skills <span class="stat-val">+{{ totalColdSkills }}</span></span>
-              <span v-if="totalColdDmgPct" title="+% Cold Skill Damage — multiplies cold spell damage output">Cold Damage <span class="stat-val">+{{ totalColdDmgPct }}%</span></span>
-              <span v-if="totalEnemyColdResPct" title="Enemy Cold Resist -X% from gear — reduces enemy cold resistance, stacks with Cold Mastery">Enemy CR <span class="stat-val">-{{ totalEnemyColdResPct }}%</span></span>
-              <span v-for="s in gearSunders" :key="s" class="pill pill-sunder" :title="'Sunders ' + s + ' immunity'">Sunders {{ s }}</span>
-              <span title="Cold Mastery — reduces enemy cold resistance; effective level includes +All Skills and +Cold Skills from gear">Cold Mastery <span class="stat-val">Lv {{ effectiveColdMastery }}</span></span>
+              <tooltip-popup :text="fcrTooltip"><span>FCR <span class="stat-val">{{ totalFCR }}%</span> <span class="fcr-badge" :class="fcrBadgeClass">{{ fcrBreakpoint.frames }}f</span></span></tooltip-popup>
+              <tooltip-popup v-if="totalMF" text="Magic Find — increases chance of finding magic, rare, set, and unique items"><span>MF <span class="stat-val">+{{ totalMF }}%</span></span></tooltip-popup>
+              <tooltip-popup v-if="totalAllSkills" text="+All Skills — adds to all character skill levels"><span>All Skills <span class="stat-val">+{{ totalAllSkills }}</span></span></tooltip-popup>
+              <tooltip-popup v-if="totalColdSkills" text="+Cold Skills — adds to cold skill levels only"><span>Cold Skills <span class="stat-val">+{{ totalColdSkills }}</span></span></tooltip-popup>
+              <tooltip-popup v-if="totalColdDmgPct" text="+% Cold Skill Damage — multiplies cold spell damage output"><span>Cold Damage <span class="stat-val">+{{ totalColdDmgPct }}%</span></span></tooltip-popup>
+              <tooltip-popup v-if="totalEnemyColdResPct" text="Enemy Cold Resist -X% from gear — reduces enemy cold resistance, stacks with Cold Mastery"><span>Enemy CR <span class="stat-val">-{{ totalEnemyColdResPct }}%</span></span></tooltip-popup>
+              <tooltip-popup v-for="s in gearSunders" :key="s" :text="'Sunders ' + s + ' immunity'"><span class="pill pill-sunder">Sunders {{ s }}</span></tooltip-popup>
+              <tooltip-popup text="Cold Mastery — reduces enemy cold resistance; effective level includes +All Skills and +Cold Skills from gear"><span>Cold Mastery <span class="stat-val">Lv {{ effectiveColdMastery }}</span></span></tooltip-popup>
             </div>
             <div class="cm-input-row">
               <label class="cm-label">
@@ -1391,9 +1434,9 @@ createApp({
 
             <h2 class="panel-title">Combat</h2>
             <div class="combat-line">
-              <span class="combat-total" title="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)">Total ~{{ Math.round(totalDps).toLocaleString() }} DPS</span>
-              <span> &nbsp;·&nbsp; </span><span :title="blizzTooltip">Blizzard ~{{ Math.round(blizzDps).toLocaleString() }}</span>
-              <span> &nbsp;·&nbsp; </span><span :title="iceBlastTooltip">Ice Blast ~{{ Math.round(iceBlastDps).toLocaleString() }}</span>
+              <tooltip-popup text="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)"><span class="combat-total">Total ~{{ Math.round(totalDps).toLocaleString() }} DPS</span></tooltip-popup>
+              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="blizzTooltip"><span>Blizzard ~{{ Math.round(blizzDps).toLocaleString() }}</span></tooltip-popup>
+              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="iceBlastTooltip"><span>Ice Blast ~{{ Math.round(iceBlastDps).toLocaleString() }}</span></tooltip-popup>
             </div>
           </section>
 
@@ -1402,30 +1445,30 @@ createApp({
             <h2 class="panel-title">Drop Odds</h2>
             <div class="content-center">
               <div class="stat-line">
-                <span title="Effective MF applied to unique quality checks after diminishing returns: MF×250÷(MF+250)">Eff. Unique MF <span class="stat-val">{{ Math.round(effUniqueMF(totalMF)) }}%</span></span>
-                <span title="Effective MF applied to set quality checks after diminishing returns: MF×500÷(MF+500)">Eff. Set MF <span class="stat-val">{{ Math.round(effSetMF(totalMF)) }}%</span></span>
+                <tooltip-popup text="Effective MF applied to unique quality checks after diminishing returns: MF×250÷(MF+250)"><span>Eff. Unique MF <span class="stat-val">{{ Math.round(effUniqueMF(totalMF)) }}%</span></span></tooltip-popup>
+                <tooltip-popup text="Effective MF applied to set quality checks after diminishing returns: MF×500÷(MF+500)"><span>Eff. Set MF <span class="stat-val">{{ Math.round(effSetMF(totalMF)) }}%</span></span></tooltip-popup>
               </div>
 
               <div class="breakdown-group">
                 <div class="breakdown-run-label">Per run cycle</div>
                 <div class="breakdown-row breakdown-total breakdown-highlight">
-                  <span>Any valuable <span class="info-icon" title="P(at least one valuable drops across all selected bosses in one full run cycle)">i</span></span>
+                  <span>Any valuable <tooltip-popup text="P(at least one valuable drops across all selected bosses in one full run cycle)"><span class="info-icon">i</span></tooltip-popup></span>
                   <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.total) : '---' }}</span>
                 </div>
                 <div class="breakdown-row breakdown-sub">
-                  <span>Good Unique / Set Item <span class="info-icon" title="Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+                  <span>Good Unique / Set Item <tooltip-popup text="Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll."><span class="info-icon">i</span></tooltip-popup></span>
                   <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.itemProb) : '---' }}</span>
                 </div>
                 <div class="breakdown-row breakdown-sub">
-                  <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
+                  <span>Good Rune <tooltip-popup text="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades."><span class="info-icon">i</span></tooltip-popup></span>
                   <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.runeProb) : '---' }}</span>
                 </div>
                 <div class="breakdown-row breakdown-sub">
-                  <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
+                  <span>Any Skiller GC <tooltip-popup text="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction."><span class="info-icon">i</span></tooltip-popup></span>
                   <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.skillerProb) : '---' }}</span>
                 </div>
                 <div class="breakdown-row breakdown-sub">
-                  <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
+                  <span>Valuable SC <tooltip-popup text="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution."><span class="info-icon">i</span></tooltip-popup></span>
                   <span>{{ totalDropProbs ? fmtOneIn(totalDropProbs.valuableScProb) : '---' }}</span>
                 </div>
               </div>
@@ -1442,23 +1485,23 @@ createApp({
                     <template v-if="run.available && state.run.bosses[run.id] && runDropProbs[run.id]">
                       <div class="breakdown-run-label">{{ run.label }}</div>
                       <div class="breakdown-row breakdown-total breakdown-highlight">
-                        <span>Any valuable <span class="info-icon" title="P(at least one of: trade-value unique/set, good rune, skiller GC, or valuable SC drops this run)">i</span></span>
+                        <span>Any valuable <tooltip-popup text="P(at least one of: trade-value unique/set, good rune, skiller GC, or valuable SC drops this run)"><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ fmtOneIn(runDropProbs[run.id].total) }}</span>
                       </div>
                       <div class="breakdown-row breakdown-sub">
-                        <span>Good Unique / Set Item <span class="info-icon" title="Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.">i</span></span>
+                        <span>Good Unique / Set Item <tooltip-popup text="Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll."><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ fmtOneIn(runDropProbs[run.id].itemProb) }}</span>
                       </div>
                       <div class="breakdown-row breakdown-sub">
-                        <span>Good Rune <span class="info-icon" title="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.">i</span></span>
+                        <span>Good Rune <tooltip-popup text="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades."><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ fmtOneIn(runDropProbs[run.id].runeProb) }}</span>
                       </div>
                       <div class="breakdown-row breakdown-sub">
-                        <span>Any Skiller GC <span class="info-icon" title="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.">i</span></span>
+                        <span>Any Skiller GC <tooltip-popup text="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction."><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ fmtOneIn(runDropProbs[run.id].skillerProb) }}</span>
                       </div>
                       <div class="breakdown-row breakdown-sub">
-                        <span>Valuable SC <span class="info-icon" title="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.">i</span></span>
+                        <span>Valuable SC <tooltip-popup text="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution."><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ fmtOneIn(runDropProbs[run.id].valuableScProb) }}</span>
                       </div>
                     </template>
@@ -1495,11 +1538,9 @@ createApp({
                   {{ run.label }}
                   <span v-if="!run.available" class="coming-soon">coming soon</span>
                 </label>
-                <span
-                  v-if="run.available && runStats[run.id]"
-                  class="info-icon"
-                  :title="runStats[run.id].assumptions"
-                >i</span>
+                <tooltip-popup v-if="run.available && runStats[run.id]" :text="runStats[run.id].assumptions">
+                  <span class="info-icon">i</span>
+                </tooltip-popup>
               </div>
             </template>
 
@@ -1525,11 +1566,11 @@ createApp({
                     <template v-if="state.run.bosses[run.id] && runStats[run.id]?.hasKillData">
                       <div class="breakdown-run-label">{{ run.label }}</div>
                       <div class="breakdown-row">
-                        <span>Travel <span class="info-icon" :title="runStats[run.id].travelDetail">i</span></span>
+                        <span>Travel <tooltip-popup :text="runStats[run.id].travelDetail"><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ runStats[run.id].travelSecs.toFixed(1) }}s</span>
                       </div>
                       <div class="breakdown-row">
-                        <span>Kill <span class="info-icon" :title="runStats[run.id].killDetail">i</span></span>
+                        <span>Kill <tooltip-popup :text="runStats[run.id].killDetail"><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ runStats[run.id].killSecs.toFixed(1) }}s</span>
                       </div>
                       <div class="breakdown-row breakdown-total">
@@ -1615,14 +1656,14 @@ createApp({
 
             <h2 class="panel-title">Target Stats</h2>
             <div class="stat-line">
-              <span :title="targetFcrTooltip">FCR <span class="stat-val">{{ targetTotalFCR }}%</span> <span class="fcr-badge" :class="targetFcrBadgeClass" :title="targetFcrTooltip">{{ targetFcrBreakpoint.frames }}f</span></span>
-              <span v-if="targetTotalMF" title="Magic Find">MF <span class="stat-val">+{{ targetTotalMF }}%</span></span>
-              <span v-if="targetTotalAllSkills" title="+All Skills">All Skills <span class="stat-val">+{{ targetTotalAllSkills }}</span></span>
-              <span v-if="targetTotalColdSkills" title="+Cold Skills">Cold Skills <span class="stat-val">+{{ targetTotalColdSkills }}</span></span>
-              <span v-if="targetTotalColdDmgPct" title="+% Cold Skill Damage">Cold Damage <span class="stat-val">+{{ targetTotalColdDmgPct }}%</span></span>
-              <span v-if="targetTotalEnemyColdResPct" title="Enemy Cold Resist -X% from target gear">Enemy CR <span class="stat-val">-{{ targetTotalEnemyColdResPct }}%</span></span>
-              <span v-for="s in targetSunders" :key="s" class="pill pill-sunder" :title="'Sunders ' + s + ' immunity'">Sunders {{ s }}</span>
-              <span title="Cold Mastery effective level includes +All Skills and +Cold Skills from target gear">Cold Mastery <span class="stat-val">Lv {{ targetEffectiveColdMastery }}</span></span>
+              <tooltip-popup :text="targetFcrTooltip"><span>FCR <span class="stat-val">{{ targetTotalFCR }}%</span> <span class="fcr-badge" :class="targetFcrBadgeClass">{{ targetFcrBreakpoint.frames }}f</span></span></tooltip-popup>
+              <tooltip-popup v-if="targetTotalMF" text="Magic Find — increases chance of finding magic, rare, set, and unique items"><span>MF <span class="stat-val">+{{ targetTotalMF }}%</span></span></tooltip-popup>
+              <tooltip-popup v-if="targetTotalAllSkills" text="+All Skills — adds to all character skill levels"><span>All Skills <span class="stat-val">+{{ targetTotalAllSkills }}</span></span></tooltip-popup>
+              <tooltip-popup v-if="targetTotalColdSkills" text="+Cold Skills — adds to cold skill levels only"><span>Cold Skills <span class="stat-val">+{{ targetTotalColdSkills }}</span></span></tooltip-popup>
+              <tooltip-popup v-if="targetTotalColdDmgPct" text="+% Cold Skill Damage — multiplies cold spell damage output"><span>Cold Damage <span class="stat-val">+{{ targetTotalColdDmgPct }}%</span></span></tooltip-popup>
+              <tooltip-popup v-if="targetTotalEnemyColdResPct" text="Enemy Cold Resist -X% from target gear — reduces enemy cold resistance, stacks with Cold Mastery"><span>Enemy CR <span class="stat-val">-{{ targetTotalEnemyColdResPct }}%</span></span></tooltip-popup>
+              <tooltip-popup v-for="s in targetSunders" :key="s" :text="'Sunders ' + s + ' immunity'"><span class="pill pill-sunder">Sunders {{ s }}</span></tooltip-popup>
+              <tooltip-popup text="Cold Mastery effective level includes +All Skills and +Cold Skills from target gear"><span>Cold Mastery <span class="stat-val">Lv {{ targetEffectiveColdMastery }}</span></span></tooltip-popup>
             </div>
             <div class="cm-input-row">
               <label class="cm-label">
@@ -1636,9 +1677,9 @@ createApp({
 
             <h2 class="panel-title">Target Combat</h2>
             <div class="combat-line">
-              <span class="combat-total" title="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)">Total ~{{ Math.round(targetTotalDps).toLocaleString() }} DPS</span>
-              <span> &nbsp;·&nbsp; </span><span :title="targetBlizzTooltip">Blizzard ~{{ Math.round(targetBlizzDps).toLocaleString() }}</span>
-              <span> &nbsp;·&nbsp; </span><span :title="targetIceBlastTooltip">Ice Blast ~{{ Math.round(targetIceBlastDps).toLocaleString() }}</span>
+              <tooltip-popup text="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)"><span class="combat-total">Total ~{{ Math.round(targetTotalDps).toLocaleString() }} DPS</span></tooltip-popup>
+              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="targetBlizzTooltip"><span>Blizzard ~{{ Math.round(targetBlizzDps).toLocaleString() }}</span></tooltip-popup>
+              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="targetIceBlastTooltip"><span>Ice Blast ~{{ Math.round(targetIceBlastDps).toLocaleString() }}</span></tooltip-popup>
             </div>
 
             <hr class="panel-divider" />
@@ -1646,11 +1687,11 @@ createApp({
             <h2 class="panel-title">Target Run Info</h2>
             <div class="content-center">
               <div class="breakdown-row breakdown-highlight">
-                <span>Any valuable <span class="info-icon" :title="targetTotalDropProbs ? 'Good Unique/Set: ' + fmtOneIn(targetTotalDropProbs.itemProb) + ' · Good Rune: ' + fmtOneIn(targetTotalDropProbs.runeProb) + ' · Skiller GC: ' + fmtOneIn(targetTotalDropProbs.skillerProb) + ' · Valuable SC: ' + fmtOneIn(targetTotalDropProbs.valuableScProb) : 'No drop data'">i</span></span>
+                <span>Any valuable <tooltip-popup :text="targetTotalDropProbs ? 'Good Unique/Set: ' + fmtOneIn(targetTotalDropProbs.itemProb) + ' · Good Rune: ' + fmtOneIn(targetTotalDropProbs.runeProb) + ' · Skiller GC: ' + fmtOneIn(targetTotalDropProbs.skillerProb) + ' · Valuable SC: ' + fmtOneIn(targetTotalDropProbs.valuableScProb) : 'No drop data'"><span class="info-icon">i</span></tooltip-popup></span>
                 <span>{{ targetTotalDropProbs ? fmtOneIn(targetTotalDropProbs.total) : '---' }}</span>
               </div>
               <div class="breakdown-row">
-                <span>Run time <span class="info-icon" :title="targetRunTimeSummary ? 'Travel: ' + targetRunTimeSummary.travel.toFixed(1) + 's · Kill: ' + targetRunTimeSummary.kill.toFixed(1) + 's' : 'No run data'">i</span></span>
+                <span>Run time <tooltip-popup :text="targetRunTimeSummary ? 'Travel: ' + targetRunTimeSummary.travel.toFixed(1) + 's · Kill: ' + targetRunTimeSummary.kill.toFixed(1) + 's' : 'No run data'"><span class="info-icon">i</span></tooltip-popup></span>
                 <span>{{ targetRunTimeSummary ? targetRunTimeSummary.total.toFixed(1) + 's' : '---' }}</span>
               </div>
             </div>
@@ -1682,4 +1723,6 @@ createApp({
       </teleport>
     </div>
   `,
-}).mount('#app');
+})
+  .component('TooltipPopup', TooltipPopup)
+  .mount('#app');
