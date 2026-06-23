@@ -47,7 +47,7 @@ function makeDefaultState() {
   };
 }
 
-function encodeState(state) {
+function buildStateObject(state) {
   const gear = {};
   for (const { id } of GEAR_SLOTS) {
     if (id === 'charms') continue;
@@ -114,12 +114,39 @@ function encodeState(state) {
   const uf = Object.entries(state.ui.folds).filter(([, v]) => !v).map(([k]) => k);
   if (uf.length) out.uf = uf;
   if (state.targetPresetId !== DEFAULT_TARGET_PRESET_ID) out.tp = state.targetPresetId;
-  return Object.keys(out).length ? btoa(JSON.stringify(out)) : null;
+  return out;
 }
 
-function decodeState(b64, state) {
+async function encodeState(state) {
+  const out = buildStateObject(state);
+  if (!Object.keys(out).length) return null;
+  const bytes = new TextEncoder().encode(JSON.stringify(out));
+  const cs = new CompressionStream('deflate-raw');
+  const writer = cs.writable.getWriter();
+  writer.write(bytes);
+  writer.close();
+  const compressed = new Uint8Array(await new Response(cs.readable).arrayBuffer());
+  let binary = '';
+  for (let i = 0; i < compressed.length; i++) binary += String.fromCharCode(compressed[i]);
+  return '.' + btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+}
+
+async function decodeState(encoded, state) {
   try {
-    const out = JSON.parse(atob(b64));
+    let out;
+    if (encoded.startsWith('.')) {
+      const b64 = encoded.slice(1).replace(/-/g, '+').replace(/_/g, '/');
+      const padded = b64 + '=='.slice(0, (4 - b64.length % 4) % 4);
+      const raw = Uint8Array.from(atob(padded), c => c.charCodeAt(0));
+      const ds = new DecompressionStream('deflate-raw');
+      const writer = ds.writable.getWriter();
+      writer.write(raw);
+      writer.close();
+      const decompressed = await new Response(ds.readable).arrayBuffer();
+      out = JSON.parse(new TextDecoder().decode(decompressed));
+    } else {
+      out = JSON.parse(atob(encoded));
+    }
     if (out.gear) {
       for (const { id } of GEAR_SLOTS) {
         if (id === 'charms') continue;
@@ -247,11 +274,7 @@ const state = reactive(makeDefaultState());
 
 const stateError = ref(null);
 
-const params = new URLSearchParams(window.location.search);
-if (params.has('s') && !decodeState(params.get('s'), state)) {
-  Object.assign(state, makeDefaultState());
-  stateError.value = 'Saved state could not be loaded (it may be from an older version). Starting fresh.';
-}
+// URL state decoded asynchronously before mount — see IIFE at bottom of file
 
 // ── Shared data refs (populated via onMounted fetch) ───────────────────────
 
@@ -480,8 +503,8 @@ const targetBuild = makeBuild((slotId) => {
 
 // ── URL sync ───────────────────────────────────────────────────────────────
 
-watch(state, () => {
-  const encoded = encodeState(state);
+watch(state, async () => {
+  const encoded = await encodeState(state);
   history.replaceState(null, '', encoded ? `?s=${encoded}` : location.pathname);
 }, { deep: true });
 
@@ -989,7 +1012,7 @@ const TimeToValuableDropSummary = defineComponent({
 
 // ── App ────────────────────────────────────────────────────────────────────
 
-createApp({
+const app = createApp({
   components: { GearSlot, CharmsPanel, StatPills, SetBonusBlock, TimeToValuableDropSummary },
   setup() {
     onMounted(async () => {
@@ -1488,5 +1511,21 @@ createApp({
     </div>
   `,
 })
-  .component('TooltipPopup', TooltipPopup)
-  .mount('#app');
+  .component('TooltipPopup', TooltipPopup);
+
+(async () => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.has('s')) {
+    const encoded = params.get('s');
+    const ok = await decodeState(encoded, state);
+    if (!ok) {
+      Object.assign(state, makeDefaultState());
+      stateError.value = 'Saved state could not be loaded (it may be from an older version). Starting fresh.';
+    } else if (!encoded.startsWith('.')) {
+      // Auto-upgrade legacy (non-gzip) URL to gzip format
+      const reencoded = await encodeState(state);
+      history.replaceState(null, '', reencoded ? `?s=${reencoded}` : location.pathname);
+    }
+  }
+  app.mount('#app');
+})();
