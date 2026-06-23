@@ -334,7 +334,7 @@ function makeBuild(getSlotStats) {
     ? `Blizzard Lv ${combat.value.blizzSlvl} — ${Math.round(combat.value.blizzPerShard).toLocaleString()} avg damage per shard (×${BLIZZARD_BOLTS_VS_BOSS} shards vs boss)`
     : 'Loading…');
   const iceBlastTooltip = computed(() => combat.value
-    ? `Ice Blast Lv ${combat.value.iceBlastSlvl} — ${Math.round(combat.value.iceBlastDmg).toLocaleString()} damage per cast`
+    ? `Ice Blast Lv ${combat.value.iceBlastSlvl} — ${Math.round(combat.value.iceBlastDmg).toLocaleString()} damage per cast (assumes 80% hit rate)`
     : 'Loading…');
 
   const runStats = computed(() => {
@@ -1196,7 +1196,7 @@ createApp({
 
             <hr class="panel-divider" />
 
-            <h2 class="panel-title">Combat</h2>
+            <h2 class="panel-title">Combat <tooltip-popup :text="combatAssumptions"><span class="info-icon">i</span></tooltip-popup></h2>
             <div class="combat-line">
               <tooltip-popup text="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)"><span class="combat-total">Total {{ totalDps != null ? '~' + Math.round(totalDps).toLocaleString() : '---' }} DPS</span></tooltip-popup>
               <span> &nbsp;·&nbsp; </span><tooltip-popup :text="blizzTooltip"><span>Blizzard {{ blizzDps != null ? '~' + Math.round(blizzDps).toLocaleString() : '---' }}</span></tooltip-popup>
@@ -1439,7 +1439,7 @@ createApp({
 
             <hr class="panel-divider" />
 
-            <h2 class="panel-title">Target Combat</h2>
+            <h2 class="panel-title">Target Combat <tooltip-popup :text="targetCombatAssumptions"><span class="info-icon">i</span></tooltip-popup></h2>
             <div class="combat-line">
               <tooltip-popup text="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)"><span class="combat-total">Total {{ targetTotalDps != null ? '~' + Math.round(targetTotalDps).toLocaleString() : '---' }} DPS</span></tooltip-popup>
               <span> &nbsp;·&nbsp; </span><tooltip-popup :text="targetBlizzTooltip"><span>Blizzard {{ targetBlizzDps != null ? '~' + Math.round(targetBlizzDps).toLocaleString() : '---' }}</span></tooltip-popup>
