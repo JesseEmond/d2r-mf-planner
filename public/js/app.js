@@ -1,5 +1,5 @@
 import { createApp, defineComponent, reactive, computed, watch, ref, onMounted, onUnmounted } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
-import { GEAR_SLOTS, Stats, effUniqueMF, effSetMF, computeFcrBreakpoint, computeFcrTooltip, computeFcrBadgeClass, computeGearTotals, computeCombat, computeCombatAssumptions, computeRunStats, computeRunDropProbs, aggregateDropProbs, computeEttvd } from './engine.js';
+import { GEAR_SLOTS, BLIZZARD_BOLTS_VS_BOSS, Stats, effUniqueMF, effSetMF, computeFcrBreakpoint, computeFcrTooltip, computeFcrBadgeClass, computeGearTotals, computeCombat, computeCombatAssumptions, computeRunStats, computeRunDropProbs, aggregateDropProbs, computeEttvd } from './engine.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -267,6 +267,7 @@ const runsByAct = computed(() => {
   return Array.from(seen.entries()).sort(([a], [b]) => a - b).map(([act, runs]) => ({ act, runs }));
 });
 const monsterDb = ref(null);
+const skillData  = ref({});
 
 // ── Build factory ──────────────────────────────────────────────────────────
 // Creates a set of Vue computeds for one gear configuration.
@@ -324,12 +325,12 @@ function makeBuild(getSlotStats) {
   const fcrTooltip    = computed(() => computeFcrTooltip(totalFCR.value));
   const fcrBadgeClass = computed(() => computeFcrBadgeClass(totalFCR.value));
 
-  const combat = computed(() => computeCombat(gearTotals.value, effectiveColdMastery.value));
+  const combat = computed(() => computeCombat(gearTotals.value, effectiveColdMastery.value, skillData.value));
   const blizzDps          = computed(() => combat.value.blizzDps);
   const iceBlastDps       = computed(() => combat.value.iceBlastDps);
   const totalDps          = computed(() => combat.value.totalDps);
   const combatAssumptions = computed(() => computeCombatAssumptions(combat.value));
-  const blizzTooltip    = computed(() => `Blizzard Lv ${combat.value.blizzSlvl} — ${Math.round(combat.value.blizzDmg).toLocaleString()} damage per cast`);
+  const blizzTooltip    = computed(() => `Blizzard Lv ${combat.value.blizzSlvl} — ${Math.round(combat.value.blizzPerShard).toLocaleString()} avg damage per shard (×${BLIZZARD_BOLTS_VS_BOSS} shards vs boss)`);
   const iceBlastTooltip = computed(() => `Ice Blast Lv ${combat.value.iceBlastSlvl} — ${Math.round(combat.value.iceBlastDmg).toLocaleString()} damage per cast`);
 
   const runStats = computed(() => {
@@ -996,6 +997,7 @@ createApp({
         const [rc, db] = await Promise.all([rcRes.json(), dbRes.json()]);
         runConfig.value = rc.runs;
         monsterDb.value = db;
+        skillData.value  = db.skill_data ?? {};
         const itemsBySlot = db.gear.items_by_slot;
         for (const { id } of GEAR_SLOTS) {
           const sorted = [...(itemsBySlot[id] ?? [])].sort((a, b) => a.name.localeCompare(b.name));

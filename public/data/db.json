@@ -2371,5 +2371,49 @@
         "enemyColdResPct": 10
       }
     ]
+  },
+  "skill_data": {
+    "Ice Blast": {
+      "synergy_pct_per_level": 8,
+      "synergy_skills": [
+        "Ice Bolt",
+        "Blizzard",
+        "Frozen Orb"
+      ],
+      "emin": 16,
+      "emax": 24,
+      "emin_lev1": 14,
+      "emax_lev1": 15,
+      "emin_lev2": 28,
+      "emax_lev2": 29,
+      "emin_lev3": 42,
+      "emax_lev3": 43,
+      "emin_lev4": 56,
+      "emax_lev4": 57,
+      "emin_lev5": 70,
+      "emax_lev5": 71,
+      "hit_shift": 7
+    },
+    "Blizzard": {
+      "synergy_pct_per_level": 5,
+      "synergy_skills": [
+        "Ice Bolt",
+        "Ice Blast",
+        "Glacial Spike"
+      ],
+      "emin": 45,
+      "emax": 75,
+      "emin_lev1": 15,
+      "emax_lev1": 16,
+      "emin_lev2": 30,
+      "emax_lev2": 31,
+      "emin_lev3": 45,
+      "emax_lev3": 46,
+      "emin_lev4": 55,
+      "emax_lev4": 56,
+      "emin_lev5": 65,
+      "emax_lev5": 66,
+      "hit_shift": 8
+    }
   }
 }
