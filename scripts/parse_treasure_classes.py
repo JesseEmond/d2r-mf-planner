@@ -573,6 +573,10 @@ def get_monster_combat_stats(monster_id: str, difficulty: str = 'hell') -> dict:
 
     monlvl = _get_monlvl()
 
+    superuniques = _get_superuniques()
+    if monster_id in superuniques:
+        monster_id = superuniques[monster_id].get('class', monster_id)
+
     for row in _csv_rows('monstats.txt'):
         if row.get('Id', '').strip() != monster_id:
             continue
