@@ -161,11 +161,16 @@ export function computeGearTotals(getSlotStats) {
 export function computeCombat(totals, effCM, skillData = {}) {
   const bp          = computeFcrBreakpoint(totals.fcr);
   const skillBonus  = totals.allSkills + totals.coldSkills;
-  const coldDmgMult = 1 + (totals.coldDmgPct || 0) / 100;
-
-  // Effective skill levels = hard points + gear bonus (+All Skills / +Cold Skills)
   const blizzSlvl    = SKILL_HARD_PTS['Blizzard']  + skillBonus;
   const iceBlastSlvl = SKILL_HARD_PTS['Ice Blast']  + skillBonus;
+  const iceBlastCasts = iceBlastsPerWindow(bp.frames);
+
+  const blizzDat    = skillData['Blizzard'];
+  const iceBlastDat = skillData['Ice Blast'];
+
+  if (!blizzDat || !iceBlastDat) return null;
+
+  const coldDmgMult = 1 + (totals.coldDmgPct || 0) / 100;
 
   function synergyMult(dat) {
     const rate = (dat.synergy_pct_per_level ?? 0) / 100;
@@ -175,14 +180,9 @@ export function computeCombat(totals, effCM, skillData = {}) {
     return 1 + rate * totalBlvl;
   }
 
-  const blizzDat    = skillData['Blizzard'];
-  const iceBlastDat = skillData['Ice Blast'];
-
   const blizzPerShard = calcSkillAvgBase(blizzSlvl, blizzDat) * synergyMult(blizzDat) * coldDmgMult;
   const blizzDmg      = BLIZZARD_BOLTS_VS_BOSS * blizzPerShard;
   const iceBlastDmg   = calcSkillAvgBase(iceBlastSlvl, iceBlastDat) * synergyMult(iceBlastDat) * coldDmgMult;
-
-  const iceBlastCasts = iceBlastsPerWindow(bp.frames);
   const blizzDps      = blizzDmg / BLIZZARD_COOLDOWN_SECS;
   const iceBlastDps   = iceBlastCasts * iceBlastDmg / BLIZZARD_COOLDOWN_SECS;
   return { effCM, bp, blizzDps, iceBlastDps, totalDps: blizzDps + iceBlastDps,

@@ -326,15 +326,19 @@ function makeBuild(getSlotStats) {
   const fcrBadgeClass = computed(() => computeFcrBadgeClass(totalFCR.value));
 
   const combat = computed(() => computeCombat(gearTotals.value, effectiveColdMastery.value, skillData.value));
-  const blizzDps          = computed(() => combat.value.blizzDps);
-  const iceBlastDps       = computed(() => combat.value.iceBlastDps);
-  const totalDps          = computed(() => combat.value.totalDps);
-  const combatAssumptions = computed(() => computeCombatAssumptions(combat.value));
-  const blizzTooltip    = computed(() => `Blizzard Lv ${combat.value.blizzSlvl} — ${Math.round(combat.value.blizzPerShard).toLocaleString()} avg damage per shard (×${BLIZZARD_BOLTS_VS_BOSS} shards vs boss)`);
-  const iceBlastTooltip = computed(() => `Ice Blast Lv ${combat.value.iceBlastSlvl} — ${Math.round(combat.value.iceBlastDmg).toLocaleString()} damage per cast`);
+  const blizzDps          = computed(() => combat.value?.blizzDps ?? null);
+  const iceBlastDps       = computed(() => combat.value?.iceBlastDps ?? null);
+  const totalDps          = computed(() => combat.value?.totalDps ?? null);
+  const combatAssumptions = computed(() => combat.value ? computeCombatAssumptions(combat.value) : '');
+  const blizzTooltip    = computed(() => combat.value
+    ? `Blizzard Lv ${combat.value.blizzSlvl} — ${Math.round(combat.value.blizzPerShard).toLocaleString()} avg damage per shard (×${BLIZZARD_BOLTS_VS_BOSS} shards vs boss)`
+    : 'Loading…');
+  const iceBlastTooltip = computed(() => combat.value
+    ? `Ice Blast Lv ${combat.value.iceBlastSlvl} — ${Math.round(combat.value.iceBlastDmg).toLocaleString()} damage per cast`
+    : 'Loading…');
 
   const runStats = computed(() => {
-    if (!runConfig.value.length || !monsterDb.value) return {};
+    if (!runConfig.value.length || !monsterDb.value || !combat.value) return {};
     return computeRunStats(combat.value, runConfig.value, monsterDb.value, state.run.bosses);
   });
 
@@ -1194,9 +1198,9 @@ createApp({
 
             <h2 class="panel-title">Combat</h2>
             <div class="combat-line">
-              <tooltip-popup text="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)"><span class="combat-total">Total ~{{ Math.round(totalDps).toLocaleString() }} DPS</span></tooltip-popup>
-              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="blizzTooltip"><span>Blizzard ~{{ Math.round(blizzDps).toLocaleString() }}</span></tooltip-popup>
-              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="iceBlastTooltip"><span>Ice Blast ~{{ Math.round(iceBlastDps).toLocaleString() }}</span></tooltip-popup>
+              <tooltip-popup text="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)"><span class="combat-total">Total {{ totalDps != null ? '~' + Math.round(totalDps).toLocaleString() : '---' }} DPS</span></tooltip-popup>
+              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="blizzTooltip"><span>Blizzard {{ blizzDps != null ? '~' + Math.round(blizzDps).toLocaleString() : '---' }}</span></tooltip-popup>
+              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="iceBlastTooltip"><span>Ice Blast {{ iceBlastDps != null ? '~' + Math.round(iceBlastDps).toLocaleString() : '---' }}</span></tooltip-popup>
             </div>
           </section>
 
@@ -1437,9 +1441,9 @@ createApp({
 
             <h2 class="panel-title">Target Combat</h2>
             <div class="combat-line">
-              <tooltip-popup text="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)"><span class="combat-total">Total ~{{ Math.round(targetTotalDps).toLocaleString() }} DPS</span></tooltip-popup>
-              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="targetBlizzTooltip"><span>Blizzard ~{{ Math.round(targetBlizzDps).toLocaleString() }}</span></tooltip-popup>
-              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="targetIceBlastTooltip"><span>Ice Blast ~{{ Math.round(targetIceBlastDps).toLocaleString() }}</span></tooltip-popup>
+              <tooltip-popup text="Combined Blizzard + Ice Blast DPS (approximate, single-target boss)"><span class="combat-total">Total {{ targetTotalDps != null ? '~' + Math.round(targetTotalDps).toLocaleString() : '---' }} DPS</span></tooltip-popup>
+              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="targetBlizzTooltip"><span>Blizzard {{ targetBlizzDps != null ? '~' + Math.round(targetBlizzDps).toLocaleString() : '---' }}</span></tooltip-popup>
+              <span> &nbsp;·&nbsp; </span><tooltip-popup :text="targetIceBlastTooltip"><span>Ice Blast {{ targetIceBlastDps != null ? '~' + Math.round(targetIceBlastDps).toLocaleString() : '---' }}</span></tooltip-popup>
             </div>
 
             <hr class="panel-divider" />
