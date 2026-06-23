@@ -198,8 +198,9 @@ function fmtMonsterId(id) {
   return id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
 }
 
-export function computeRunStats(combat, runConfigData, monsterDbData, runBosses) {
+export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbData, runBosses) {
   const { bp, effCM, blizzDmg, iceBlastDmg, iceBlastCasts } = combat;
+  const actOverhead = runConfigMeta.act_overhead_secs ?? {};
   const stats = {};
   for (const run of runConfigData) {
     if (!run.available) continue;
@@ -238,7 +239,8 @@ export function computeRunStats(combat, runConfigData, monsterDbData, runBosses)
       monsterLines.length ? `Kills: ${monsterLines.join(', ')}` : null,
     ].filter(Boolean).join('\n');
 
-    stats[run.id] = { travelSecs, killSecs, totalSecs: travelSecs + killSecs,
+    const overheadSecs = actOverhead[run.act] ?? 0;
+    stats[run.id] = { travelSecs, killSecs, overheadSecs, totalSecs: travelSecs + killSecs + overheadSecs,
       hasKillData: killSecs > 0, assumptions, travelDetail, killDetail };
   }
   return stats;
@@ -291,12 +293,8 @@ export function aggregateDropProbs(perBossProbs) {
   };
 }
 
-export function computeEttvd(runStatsData, runConfigData, runBosses, totalDropProbsData) {
-  let totalRunSecs = 0;
-  for (const run of runConfigData) {
-    if (runBosses[run.id] && runStatsData[run.id]) totalRunSecs += runStatsData[run.id].totalSecs;
-  }
-  if (totalRunSecs === 0 || !totalDropProbsData) return null;
+export function computeEttvd(totalRunSecs, totalDropProbsData) {
+  if (!totalRunSecs || !totalDropProbsData) return null;
   const p = totalDropProbsData;
   const secs = (prob) => prob > 0 ? totalRunSecs / prob : null;
   return { total: secs(p.total), items: secs(p.itemProb), rune: secs(p.runeProb),
