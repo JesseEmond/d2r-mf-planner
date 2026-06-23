@@ -24,12 +24,25 @@ const FCR_BREAKPOINTS = [
   { minFCR: 0,   frames: 13 },
 ];
 
-const BLIZZARD_COOLDOWN_SECS = 1.8;
-const ICE_BLAST_HIT_RATE     = 0.80;
-const D2_FPS                 = 25;
-const BLIZZARD_BOLTS_VS_BOSS = 4;
-const BLIZZARD_HARD_PTS      = 20;
-const ICE_BLAST_HARD_PTS     = 20;
+const BLIZZARD_COOLDOWN_SECS  = 1.8;
+const ICE_BLAST_HIT_RATE      = 0.80;
+const D2_FPS                  = 25;
+export const BLIZZARD_BOLTS_VS_BOSS  = 4;
+
+// Hard points (base-allocated skill levels, blvl) for each skill in the build.
+// +skills from gear does NOT boost synergy bonuses — synergies use blvl only.
+const SKILL_HARD_PTS = {
+  'Blizzard':      20,
+  'Ice Blast':     20,
+  'Ice Bolt':      20,
+  'Glacial Spike': 20,
+  'Frozen Orb':     0,
+};
+
+// D2R damage formula: standard per-level tier caps for ALL skills.
+// EMinLev1-5 give the damage-per-level added at each tier boundary.
+const DAMAGE_TIER_CAPS = [7, 8, 6, 6]; // last tier (5) is unlimited
+
 
 // ── Stats ──────────────────────────────────────────────────────────────────
 // Computed stat aggregates. Raw items (DB) and custom fields in Vue state
@@ -81,8 +94,30 @@ function qualityCheckProb(qp, mlvl, effMF) {
   return 1 / qc;
 }
 
-function blizzDmgFormula(slvl)    { return BLIZZARD_BOLTS_VS_BOSS * (20 * slvl + 10); }
-function iceBlastDmgFormula(slvl) { return 10 * slvl + 10; }
+// Compute average base damage per hit/shard using the exact D2R formula.
+// lvl is the effective skill level (hard pts + gear bonus).
+// dat is a skill_data entry (from db.json or DEFAULT_SKILL_DATA).
+function calcSkillAvgBase(lvl, dat) {
+  function rawDamage(base, levs) {
+    let raw = base;
+    let remaining = lvl - 1;
+    for (let i = 0; i <= DAMAGE_TIER_CAPS.length; i++) {
+      if (remaining <= 0) break;
+      const cap = i < DAMAGE_TIER_CAPS.length ? DAMAGE_TIER_CAPS[i] : Infinity;
+      const inTier = cap === Infinity ? remaining : Math.min(remaining, cap);
+      raw += inTier * (levs[i] ?? 0);
+      remaining -= inTier;
+    }
+    return raw;
+  }
+  const levKeys = ['emin_lev1','emin_lev2','emin_lev3','emin_lev4','emin_lev5'];
+  const levMaxKeys = ['emax_lev1','emax_lev2','emax_lev3','emax_lev4','emax_lev5'];
+  const divisor = Math.pow(2, 8 - (dat.hit_shift ?? 8));
+  const baseMin = Math.floor(rawDamage(dat.emin ?? 0, levKeys.map(k => dat[k] ?? 0)) / divisor);
+  const baseMax = Math.floor(rawDamage(dat.emax ?? 0, levMaxKeys.map(k => dat[k] ?? 0)) / divisor);
+  return (baseMin + baseMax) / 2;
+}
+
 function iceBlastsPerWindow(framesPerCast) {
   return (Math.floor(BLIZZARD_COOLDOWN_SECS / (framesPerCast / D2_FPS)) - 1) * ICE_BLAST_HIT_RATE;
 }
@@ -123,27 +158,48 @@ export function computeGearTotals(getSlotStats) {
   return t;
 }
 
-export function computeCombat(totals, effCM) {
-  const bp            = computeFcrBreakpoint(totals.fcr);
-  const blizzSlvl     = BLIZZARD_HARD_PTS + totals.allSkills + totals.coldSkills;
-  const iceBlastSlvl    = ICE_BLAST_HARD_PTS + totals.allSkills + totals.coldSkills;
-  const iceBlastCasts   = iceBlastsPerWindow(bp.frames);
-  const coldDmgMult     = 1 + (totals.coldDmgPct || 0) / 100;
-  const blizzDmg        = blizzDmgFormula(blizzSlvl) * coldDmgMult;
-  const iceBlastDmg     = iceBlastDmgFormula(iceBlastSlvl) * coldDmgMult;
-  const blizzDps        = blizzDmg / BLIZZARD_COOLDOWN_SECS;
-  const iceBlastDps     = iceBlastCasts * iceBlastDmg / BLIZZARD_COOLDOWN_SECS;
-  return { effCM, bp, blizzDps, iceBlastDps, totalDps: blizzDps + iceBlastDps, blizzDmg, iceBlastDmg, blizzSlvl, iceBlastSlvl, iceBlastCasts, enemyColdResPct: totals.enemyColdResPct || 0 };
+export function computeCombat(totals, effCM, skillData = {}) {
+  const bp          = computeFcrBreakpoint(totals.fcr);
+  const skillBonus  = totals.allSkills + totals.coldSkills;
+  const coldDmgMult = 1 + (totals.coldDmgPct || 0) / 100;
+
+  // Effective skill levels = hard points + gear bonus (+All Skills / +Cold Skills)
+  const blizzSlvl    = SKILL_HARD_PTS['Blizzard']  + skillBonus;
+  const iceBlastSlvl = SKILL_HARD_PTS['Ice Blast']  + skillBonus;
+
+  function synergyMult(dat) {
+    const rate = (dat.synergy_pct_per_level ?? 0) / 100;
+    const totalBlvl = (dat.synergy_skills ?? []).reduce(
+      (sum, sk) => sum + (SKILL_HARD_PTS[sk] ?? 0), 0
+    );
+    return 1 + rate * totalBlvl;
+  }
+
+  const blizzDat    = skillData['Blizzard'];
+  const iceBlastDat = skillData['Ice Blast'];
+
+  const blizzPerShard = calcSkillAvgBase(blizzSlvl, blizzDat) * synergyMult(blizzDat) * coldDmgMult;
+  const blizzDmg      = BLIZZARD_BOLTS_VS_BOSS * blizzPerShard;
+  const iceBlastDmg   = calcSkillAvgBase(iceBlastSlvl, iceBlastDat) * synergyMult(iceBlastDat) * coldDmgMult;
+
+  const iceBlastCasts = iceBlastsPerWindow(bp.frames);
+  const blizzDps      = blizzDmg / BLIZZARD_COOLDOWN_SECS;
+  const iceBlastDps   = iceBlastCasts * iceBlastDmg / BLIZZARD_COOLDOWN_SECS;
+  return { effCM, bp, blizzDps, iceBlastDps, totalDps: blizzDps + iceBlastDps,
+    blizzDmg, blizzPerShard, iceBlastDmg, blizzSlvl, iceBlastSlvl,
+    iceBlastCasts, enemyColdResPct: totals.enemyColdResPct || 0 };
 }
 
 export function computeCombatAssumptions(combat) {
   const { bp, iceBlastCasts } = combat;
+  const hardPts = Object.entries(SKILL_HARD_PTS).map(([k, v]) => `${k}: ${v}`).join(', ');
   return [
-    `Blizzard: 1 cast / ${BLIZZARD_COOLDOWN_SECS}s cooldown, ~${BLIZZARD_BOLTS_VS_BOSS} bolts hitting boss per cast`,
+    `Blizzard: 1 cast / ${BLIZZARD_COOLDOWN_SECS}s cooldown, ~${BLIZZARD_BOLTS_VS_BOSS} shards hitting boss per cast`,
     `Ice Blast: ${iceBlastCasts.toFixed(1)} effective casts per window at ${ICE_BLAST_HIT_RATE * 100}% hit rate (${bp.frames} frames/cast)`,
-    `Skill levels assume ${BLIZZARD_HARD_PTS} hard points in each spell; scale with +All/+Cold Skills from gear`,
+    `Hard points assumed: ${hardPts}; +All/+Cold Skills from gear raise effective level but NOT synergy bonuses (synergies use blvl)`,
+    `Blizzard synergy: +5%/blvl from Ice Bolt + Ice Blast + Glacial Spike; Ice Blast synergy: +8%/blvl from Ice Bolt + Blizzard`,
+    `Base damage uses D2R's exact formula: EMin/EMax + per-tier EMinLev additions → right-shifted by HitShift`,
     `Boss HP = avg(minHP, maxHP) × L-HP[level] ÷ 100 (from monlvl.txt)`,
-    `Damage values are approximate`,
   ].join('\n');
 }
 
