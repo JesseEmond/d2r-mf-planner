@@ -1,4 +1,4 @@
-import { createApp, defineComponent, reactive, computed, watch, ref, onMounted, onUnmounted } from 'https://unpkg.com/vue@3/dist/vue.esm-browser.js';
+import { createApp, defineComponent, reactive, computed, watch, ref, onMounted, onUnmounted } from './vendor/vue.esm-browser.prod.js';
 import { GEAR_SLOTS, BLIZZARD_BOLTS_VS_BOSS, Stats, effUniqueMF, effSetMF, computeFcrBreakpoint, computeFcrTooltip, computeFcrBadgeClass, computeGearTotals, computeCombat, computeCombatAssumptions, computeRunStats, computeRunDropProbs, aggregateDropProbs, computeEttvd } from './engine.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
