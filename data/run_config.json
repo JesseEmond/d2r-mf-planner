@@ -45,17 +45,35 @@
       "id": "meph",
       "label": "Meph",
       "act": 3,
-      "teleports": 20,
-      "monsters": [],
-      "available": false
+      "teleports": 30,
+      "monsters": [
+        {
+          "id": "meph",
+          "monster_id": "mephisto",
+          "difficulty": "hell",
+          "superunique": false,
+          "amount": 1,
+          "probability": 1.0
+        }
+      ],
+      "available": true
     },
     {
       "id": "pindle",
       "label": "Pindle",
       "act": 5,
       "teleports": 3,
-      "monsters": [],
-      "available": false
+      "monsters": [
+        {
+          "id": "pindle",
+          "monster_id": "Pindleskin",
+          "difficulty": "hell",
+          "superunique": true,
+          "amount": 1,
+          "probability": 1.0
+        }
+      ],
+      "available": true
     }
   ]
 }

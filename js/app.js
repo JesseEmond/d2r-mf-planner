@@ -3,7 +3,7 @@ import { GEAR_SLOTS, BLIZZARD_BOLTS_VS_BOSS, Stats, effUniqueMF, effSetMF, compu
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
-const DEFAULT_BOSSES = { andy: true };
+const DEFAULT_BOSSES = { andy: true, meph: true };
 
 const CUSTOM_ITEM   = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
 const CUSTOM_CHARM  = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0, unique: false };
