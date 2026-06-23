@@ -675,7 +675,7 @@ body {
 
 /* Run routine */
 .run-act-header { font-size: 0.7rem; font-weight: 700; letter-spacing: 0.08em; color: var(--color-text-faint); margin: 0.5rem 0 0.1rem; text-transform: uppercase; }
-.run-row { padding: 0.2rem 0 0.2rem 0.75rem; display: flex; align-items: center; }
+.run-row { padding: 0.2rem 0 0.2rem 0.75rem; display: flex; align-items: center; gap: 0.4rem; }
 .run-label {
   display: flex;
   align-items: center;
