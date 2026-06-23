@@ -278,7 +278,8 @@ const stateError = ref(null);
 
 // ── Shared data refs (populated via onMounted fetch) ───────────────────────
 
-const runConfig = ref([]);
+const runConfig    = ref([]);
+const runConfigMeta = ref({});
 
 const runsByAct = computed(() => {
   const seen = new Map();
@@ -362,7 +363,7 @@ function makeBuild(getSlotStats) {
 
   const runStats = computed(() => {
     if (!runConfig.value.length || !monsterDb.value || !combat.value) return {};
-    return computeRunStats(combat.value, runConfig.value, monsterDb.value, state.run.bosses);
+    return computeRunStats(combat.value, runConfig.value, runConfigMeta.value, monsterDb.value, state.run.bosses);
   });
 
   const runDropProbs = computed(() => {
@@ -374,18 +375,20 @@ function makeBuild(getSlotStats) {
   const totalDropProbs = computed(() => aggregateDropProbs(runDropProbs.value));
 
   const ettvd = computed(() =>
-    computeEttvd(runStats.value, runConfig.value, state.run.bosses, totalDropProbs.value)
+    computeEttvd(runTimeSummary.value?.total, totalDropProbs.value)
   );
 
   const runTimeSummary = computed(() => {
-    let travel = 0, kill = 0;
+    let travel = 0, kill = 0, overhead = 0;
     for (const [id, s] of Object.entries(runStats.value)) {
       if (!state.run.bosses[id]) continue;
-      travel += s.travelSecs;
-      kill   += s.killSecs;
+      travel   += s.travelSecs;
+      kill     += s.killSecs;
+      overhead += s.overheadSecs;
     }
-    const total = travel + kill;
-    return total > 0 ? { travel, kill, total } : null;
+    overhead += runConfigMeta.value.game_creation_secs ?? 0;
+    const total = travel + kill + overhead;
+    return total > 0 ? { travel, kill, overhead, total } : null;
   });
 
   const activeSetBonuses = computed(() => setBonuses.value.activeSets);
@@ -1022,7 +1025,8 @@ const app = createApp({
           fetch('data/db.json',         { cache: 'no-cache' }),
         ]);
         const [rc, db] = await Promise.all([rcRes.json(), dbRes.json()]);
-        runConfig.value = rc.runs;
+        runConfig.value    = rc.runs;
+        runConfigMeta.value = { act_overhead_secs: rc.act_overhead_secs ?? {}, game_creation_secs: rc.game_creation_secs ?? 0 };
         monsterDb.value = db;
         skillData.value  = db.skill_data ?? {};
         const itemsBySlot = db.gear.items_by_slot;
@@ -1089,6 +1093,7 @@ const app = createApp({
       GROUP_B,
       runConfig,
       runsByAct,
+      runConfigMeta,
       TARGET_GEAR_PRESETS,
       targetPreset,
       targetSlots,
@@ -1341,6 +1346,10 @@ const app = createApp({
             <div class="breakdown-row breakdown-sub">
               <span>Kill</span><span>{{ runTimeSummary ? runTimeSummary.kill.toFixed(1) + 's' : '---' }}</span>
             </div>
+            <div class="breakdown-row breakdown-sub">
+              <span>Overhead <tooltip-popup :text="runTimeSummary ? 'Game creation: ' + (runConfigMeta.game_creation_secs ?? 0) + 's · Town walks: ' + (runTimeSummary.overhead - (runConfigMeta.game_creation_secs ?? 0)).toFixed(1) + 's' : 'No run data'"><span class="info-icon">i</span></tooltip-popup></span>
+              <span>{{ runTimeSummary ? runTimeSummary.overhead.toFixed(1) + 's' : '---' }}</span>
+            </div>
 
             <div class="fold-section">
               <button class="fold-header" @click="state.ui.folds.breakdown = !state.ui.folds.breakdown">
@@ -1478,7 +1487,7 @@ const app = createApp({
                 <span>{{ targetTotalDropProbs ? fmtOneIn(targetTotalDropProbs.total) : '---' }}</span>
               </div>
               <div class="breakdown-row">
-                <span>Run time <tooltip-popup :text="targetRunTimeSummary ? 'Travel: ' + targetRunTimeSummary.travel.toFixed(1) + 's · Kill: ' + targetRunTimeSummary.kill.toFixed(1) + 's' : 'No run data'"><span class="info-icon">i</span></tooltip-popup></span>
+                <span>Run time <tooltip-popup :text="targetRunTimeSummary ? 'Travel: ' + targetRunTimeSummary.travel.toFixed(1) + 's · Kill: ' + targetRunTimeSummary.kill.toFixed(1) + 's · Overhead: ' + targetRunTimeSummary.overhead.toFixed(1) + 's' : 'No run data'"><span class="info-icon">i</span></tooltip-popup></span>
                 <span>{{ targetRunTimeSummary ? targetRunTimeSummary.total.toFixed(1) + 's' : '---' }}</span>
               </div>
             </div>
