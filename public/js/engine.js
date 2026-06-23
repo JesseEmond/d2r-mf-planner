@@ -190,17 +190,8 @@ export function computeCombat(totals, effCM, skillData = {}) {
     iceBlastCasts, enemyColdResPct: totals.enemyColdResPct || 0 };
 }
 
-export function computeCombatAssumptions(combat) {
-  const { bp, iceBlastCasts } = combat;
-  const hardPts = Object.entries(SKILL_HARD_PTS).map(([k, v]) => `${k}: ${v}`).join(', ');
-  return [
-    `Blizzard: 1 cast / ${BLIZZARD_COOLDOWN_SECS}s cooldown, ~${BLIZZARD_BOLTS_VS_BOSS} shards hitting boss per cast`,
-    `Ice Blast: ${iceBlastCasts.toFixed(1)} effective casts per window at ${ICE_BLAST_HIT_RATE * 100}% hit rate (${bp.frames} frames/cast)`,
-    `Hard points assumed: ${hardPts}; +All/+Cold Skills from gear raise effective level but NOT synergy bonuses (synergies use blvl)`,
-    `Blizzard synergy: +5%/blvl from Ice Bolt + Ice Blast + Glacial Spike; Ice Blast synergy: +8%/blvl from Ice Bolt + Blizzard`,
-    `Base damage uses D2R's exact formula: EMin/EMax + per-tier EMinLev additions → right-shifted by HitShift`,
-    `Boss HP = avg(minHP, maxHP) × L-HP[level] ÷ 100 (from monlvl.txt)`,
-  ].join('\n');
+export function computeCombatAssumptions(_combat) {
+  return `Assumes:\n- Standard blizz sorc build\n- All Blizzard shards hit the target\n- ~${ICE_BLAST_HIT_RATE * 100}% of Ice Blasts hit the target`;
 }
 
 function fmtMonsterId(id) {
