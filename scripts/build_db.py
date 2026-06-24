@@ -13,9 +13,10 @@ Writes:
 import json
 from pathlib import Path
 
+import extract_combat_stats
 import extract_gear_stats
 import extract_skill_data
-import parse_treasure_classes as ptc
+import run_targets
 
 ROOT = Path(__file__).parent.parent
 VALUABLES_IN = ROOT / "data" / "valuables.json"
@@ -28,13 +29,10 @@ def main() -> None:
     drop_odds: dict = json.loads(DROP_ODDS_IN.read_text())
 
     monsters = drop_odds["monsters"]
-    for entry in monsters.values():
-        monster_id = entry.get("monster_id")
-        difficulty = entry.get("difficulty", "hell")
-        if monster_id:
-            stats = ptc.get_monster_combat_stats(monster_id, difficulty)
-            if stats["hp"]:
-                entry["combat"] = stats
+    combat = extract_combat_stats.extract(run_targets.load_targets())
+    for key, entry in monsters.items():
+        if key in combat:
+            entry["combat"] = combat[key]
 
     gear = extract_gear_stats.extract()
     skill_data = extract_skill_data.extract()

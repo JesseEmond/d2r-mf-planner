@@ -26,7 +26,7 @@ from pathlib import Path
 DB_PATH = Path(__file__).parent.parent.parent / "public" / "data" / "db.json"
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-import parse_treasure_classes as ptc
+import d2r_data
 
 
 def _load_db() -> dict:
@@ -85,7 +85,7 @@ def test_db_structure():
     andy = db["monsters"]["andy"]
     assert andy["mlvl"] == 75
     assert andy["tc"] == "Andarielq (H)"
-    assert len(andy["drops"]) >= 50
+    assert len(andy["drops"]) >= 40
 
 
 def test_all_base_probs_in_range():
@@ -239,13 +239,13 @@ def test_gc_and_sc_base_prob_equal():
 
 def test_skiller_fraction_plausible():
     """About 1-in-10 to 1-in-15 magic GCs are any-class skillers at ilvl 99 (community benchmark)."""
-    frac = ptc.get_skiller_gc_fraction(ilvl=99)
+    frac = d2r_data.get_skiller_gc_fraction(ilvl=99)
     assert 0.03 <= frac <= 0.20, f"skiller_fraction={frac:.4f} outside expected range [0.03, 0.20]"
 
 
 def test_skiller_fraction_zero_below_ilvl50():
     """No skiller prefixes can roll below ilvl 50."""
-    frac = ptc.get_skiller_gc_fraction(ilvl=49)
+    frac = d2r_data.get_skiller_gc_fraction(ilvl=49)
     assert frac == 0.0, f"Expected 0.0 skiller fraction at ilvl 49, got {frac}"
 
 

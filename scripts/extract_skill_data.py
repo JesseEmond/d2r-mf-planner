@@ -25,12 +25,9 @@ Damage formula (for min damage, identical for max):
 Note: synergies use HARD POINTS (blvl), not effective level with +skills bonuses.
 """
 
-import csv
 import re
-from pathlib import Path
 
-ROOT = Path(__file__).parent.parent
-RAW = ROOT / "data" / "raw"
+import d2r_data
 
 SKILLS_OF_INTEREST = {"Blizzard", "Ice Blast"}
 
@@ -50,34 +47,31 @@ def _int(val: str) -> int | None:
 
 
 def extract() -> dict:
-    skills_file = RAW / "skills.txt"
     result = {}
 
-    with open(skills_file, newline="", encoding="utf-8") as f:
-        reader = csv.DictReader(f, delimiter="\t")
-        for row in reader:
-            name = row.get("skill", "")
-            if name not in SKILLS_OF_INTEREST:
-                continue
+    for row in d2r_data.csv_rows("skills.txt"):
+        name = row.get("skill", "")
+        if name not in SKILLS_OF_INTEREST:
+            continue
 
-            synergy_formula = row.get("EDmgSymPerCalc", "")
-            result[name] = {
-                "synergy_pct_per_level": _int(row.get("Param8")),
-                "synergy_skills":        _parse_synergy_skills(synergy_formula),
-                "emin":                  _int(row.get("EMin")),
-                "emax":                  _int(row.get("EMax")),
-                "emin_lev1":             _int(row.get("EMinLev1")),
-                "emax_lev1":             _int(row.get("EMaxLev1")),
-                "emin_lev2":             _int(row.get("EMinLev2")),
-                "emax_lev2":             _int(row.get("EMaxLev2")),
-                "emin_lev3":             _int(row.get("EMinLev3")),
-                "emax_lev3":             _int(row.get("EMaxLev3")),
-                "emin_lev4":             _int(row.get("EMinLev4")),
-                "emax_lev4":             _int(row.get("EMaxLev4")),
-                "emin_lev5":             _int(row.get("EMinLev5")),
-                "emax_lev5":             _int(row.get("EMaxLev5")),
-                "hit_shift":             _int(row.get("HitShift")),
-            }
+        synergy_formula = row.get("EDmgSymPerCalc", "")
+        result[name] = {
+            "synergy_pct_per_level": _int(row.get("Param8")),
+            "synergy_skills":        _parse_synergy_skills(synergy_formula),
+            "emin":                  _int(row.get("EMin")),
+            "emax":                  _int(row.get("EMax")),
+            "emin_lev1":             _int(row.get("EMinLev1")),
+            "emax_lev1":             _int(row.get("EMaxLev1")),
+            "emin_lev2":             _int(row.get("EMinLev2")),
+            "emax_lev2":             _int(row.get("EMaxLev2")),
+            "emin_lev3":             _int(row.get("EMinLev3")),
+            "emax_lev3":             _int(row.get("EMaxLev3")),
+            "emin_lev4":             _int(row.get("EMinLev4")),
+            "emax_lev4":             _int(row.get("EMaxLev4")),
+            "emin_lev5":             _int(row.get("EMinLev5")),
+            "emax_lev5":             _int(row.get("EMaxLev5")),
+            "hit_shift":             _int(row.get("HitShift")),
+        }
 
     missing = SKILLS_OF_INTEREST - result.keys()
     if missing:

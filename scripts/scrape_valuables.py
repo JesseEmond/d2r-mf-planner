@@ -56,6 +56,11 @@ MANUAL_ADDITIONS = [
     "Horazon's Hold",
     "Horazon's Legacy",
     "Horazon's Secrets",
+    # Latent Sunder Charms rated Low on Maxroll — included because they are
+    # droppable GCs (cm3) with the same drop path as Gheed's Fortune, so any
+    # run that can drop a Gheed's can drop these, and they have real trade value.
+    "Latent Rotting Fissure",
+    "Latent Black Cleft",
     # Colossal Ancient Jewels — excluded, not droppable in normal MF runs
     # "Defender's Bile",
     # "Guardian's Thunder",

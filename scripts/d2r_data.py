@@ -1,16 +1,26 @@
 """
-parse_treasure_classes.py — D2R txt ingestion library
+d2r_data.py — D2R txt ingestion library
 
-Parses raw D2R .txt files and exposes helpers used by downstream scripts.
+Parses raw D2R .txt files and exposes the data as Python objects.
+All raw file I/O lives here; downstream scripts only call these functions.
 
-Public API:
+Public API — raw data access:
+  csv_rows(filename) -> list[dict]
+  get_item_names() -> dict[str, str]
+  get_monstats() -> dict[str, MonsterInfo]
+  get_superuniques() -> dict[str, dict]
+  get_monlvl() -> dict[int, dict[str, int]]
+
+Public API — derived/computed helpers:
   resolve_tc(monster_id, difficulty) -> str
   walk_tc(tc_name) -> Generator[(item_code, probability, quality_factor)]
   get_item_ratio(item_code) -> ItemRatioRow
   get_unique_candidates(item_code, ilvl) -> list[(name, rarity)]
+  get_skiller_gc_fraction(ilvl) -> float
 """
 
 import csv
+import json
 import os
 from dataclasses import dataclass
 from typing import Generator
@@ -18,7 +28,7 @@ from typing import Generator
 RAW_DIR = os.path.join(os.path.dirname(__file__), '..', 'data', 'raw')
 
 
-def _csv_rows(filename: str) -> list[dict]:
+def csv_rows(filename: str) -> list[dict]:
     path = os.path.join(RAW_DIR, filename)
     with open(path, newline='', encoding='utf-8-sig') as f:
         reader = csv.DictReader(f, delimiter='\t')
@@ -80,7 +90,7 @@ class UniqueEntry:
 
 def _load_tc_data() -> dict[str, TreasureClass]:
     tcs: dict[str, TreasureClass] = {}
-    for row in _csv_rows('treasureclassex.txt'):
+    for row in csv_rows('treasureclassex.txt'):
         name = row['Treasure Class'].strip()
         if not name:
             continue
@@ -119,7 +129,7 @@ def _build_atomic_tcs() -> dict[str, TreasureClass]:
     armor_by_qlvl: dict[int, list[tuple[str, int]]] = {}
     weap_by_qlvl: dict[int, list[tuple[str, int]]] = {}
 
-    for row in _csv_rows('armor.txt'):
+    for row in csv_rows('armor.txt'):
         lvl_s = row.get('level', '').strip()
         code = row.get('code', '').strip()
         spawnable = row.get('spawnable', '0').strip()
@@ -130,7 +140,7 @@ def _build_atomic_tcs() -> dict[str, TreasureClass]:
         rarity = int(rarity_s) if rarity_s else 1
         armor_by_qlvl.setdefault(qlvl, []).append((code, rarity))
 
-    for row in _csv_rows('weapons.txt'):
+    for row in csv_rows('weapons.txt'):
         lvl_s = row.get('level', '').strip()
         code = row.get('code', '').strip()
         spawnable = row.get('spawnable', '0').strip()
@@ -162,7 +172,7 @@ def _build_atomic_tcs() -> dict[str, TreasureClass]:
 
 def _load_monstats() -> dict[str, MonsterInfo]:
     monsters: dict[str, MonsterInfo] = {}
-    for row in _csv_rows('monstats.txt'):
+    for row in csv_rows('monstats.txt'):
         mid = row.get('Id', '').strip()
         if not mid:
             continue
@@ -183,7 +193,7 @@ def _load_monstats() -> dict[str, MonsterInfo]:
 
 def _load_superuniques() -> dict[str, dict]:
     sus: dict[str, dict] = {}
-    for row in _csv_rows('superuniques.txt'):
+    for row in csv_rows('superuniques.txt'):
         name = row.get('Superunique', '').strip()
         if not name:
             continue
@@ -200,7 +210,7 @@ def _load_superuniques() -> dict[str, dict]:
 
 def _load_item_ratio() -> dict[tuple[int, int, int], ItemRatioRow]:
     rows: dict[tuple[int, int, int], ItemRatioRow] = {}
-    for row in _csv_rows('itemratio.txt'):
+    for row in csv_rows('itemratio.txt'):
         key = (
             int(row.get('Version', '0') or '0'),
             int(row.get('Uber', '0') or '0'),
@@ -226,7 +236,7 @@ def _load_unique_items() -> dict[str, list[UniqueEntry]]:
     key_to_display = {e['Key']: e['enUS'] for e in _json.loads(open(names_path, encoding='utf-8-sig').read()) if 'Key' in e and 'enUS' in e}
 
     by_code: dict[str, list[UniqueEntry]] = {}
-    for row in _csv_rows('uniqueitems.txt'):
+    for row in csv_rows('uniqueitems.txt'):
         index = row.get('index', '').strip()
         code = row.get('code', '').strip()
         disabled = row.get('disabled', '0').strip()
@@ -246,7 +256,7 @@ def _load_unique_items() -> dict[str, list[UniqueEntry]]:
 
 def _load_set_items() -> dict[str, list[UniqueEntry]]:
     by_code: dict[str, list[UniqueEntry]] = {}
-    for row in _csv_rows('setitems.txt'):
+    for row in csv_rows('setitems.txt'):
         name = row.get('index', '').strip()
         code = row.get('item', '').strip()
         disabled = row.get('disabled', '0').strip()
@@ -265,7 +275,7 @@ def _load_set_items() -> dict[str, list[UniqueEntry]]:
 def _load_class_specific_types() -> frozenset[str]:
     """Return the set of item type codes that are class-specific (have a Class field in itemtypes.txt)."""
     codes: set[str] = set()
-    for row in _csv_rows('itemtypes.txt'):
+    for row in csv_rows('itemtypes.txt'):
         if row.get('Class', '').strip():
             code = row.get('Code', '').strip()
             if code:
@@ -277,7 +287,7 @@ def _load_item_type_map() -> dict[str, str]:
     """Return item_code -> item_type from armor.txt, weapons.txt, and misc.txt."""
     code_to_type: dict[str, str] = {}
     for fname in ('armor.txt', 'weapons.txt', 'misc.txt'):
-        for row in _csv_rows(fname):
+        for row in csv_rows(fname):
             code = row.get('code', '').strip()
             itype = row.get('type', '').strip()
             if code and itype:
@@ -308,14 +318,14 @@ def _get_tcs() -> dict[str, TreasureClass]:
     return _TC_DATA
 
 
-def _get_monstats() -> dict[str, MonsterInfo]:
+def get_monstats() -> dict[str, MonsterInfo]:
     global _MONSTATS
     if _MONSTATS is None:
         _MONSTATS = _load_monstats()
     return _MONSTATS
 
 
-def _get_superuniques() -> dict[str, dict]:
+def get_superuniques() -> dict[str, dict]:
     global _SUPERUNIQUES
     if _SUPERUNIQUES is None:
         _SUPERUNIQUES = _load_superuniques()
@@ -329,14 +339,14 @@ def _get_item_ratio() -> dict[tuple, ItemRatioRow]:
     return _ITEM_RATIO
 
 
-def _get_unique_items() -> dict[str, list[UniqueEntry]]:
+def get_unique_items() -> dict[str, list[UniqueEntry]]:
     global _UNIQUE_ITEMS
     if _UNIQUE_ITEMS is None:
         _UNIQUE_ITEMS = _load_unique_items()
     return _UNIQUE_ITEMS
 
 
-def _get_set_items() -> dict[str, list[UniqueEntry]]:
+def get_set_items() -> dict[str, list[UniqueEntry]]:
     global _SET_ITEMS
     if _SET_ITEMS is None:
         _SET_ITEMS = _load_set_items()
@@ -370,6 +380,34 @@ def _get_group_index() -> dict[int, list[TreasureClass]]:
     return _GROUP_INDEX
 
 
+_ITEM_NAMES: dict[str, str] | None = None
+_MONLVL: dict[int, dict[str, int]] | None = None
+
+
+def get_item_names() -> dict[str, str]:
+    """Return {internal_key: enUS_display_name} from item-names.json."""
+    global _ITEM_NAMES
+    if _ITEM_NAMES is None:
+        path = os.path.join(RAW_DIR, 'item-names.json')
+        entries = json.loads(open(path, encoding='utf-8-sig').read())
+        _ITEM_NAMES = {e['Key']: e['enUS'] for e in entries if 'Key' in e and 'enUS' in e}
+    return _ITEM_NAMES
+
+
+def get_monlvl() -> dict[int, dict[str, int]]:
+    """Return {level: {stat_col: value}} from monlvl.txt (HP, L-HP, and difficulty variants)."""
+    global _MONLVL
+    if _MONLVL is None:
+        _MONLVL = {}
+        for row in csv_rows('monlvl.txt'):
+            try:
+                lvl = int(row['Level'])
+            except (KeyError, ValueError):
+                continue
+            _MONLVL[lvl] = {k: int(v) for k, v in row.items() if v.strip().lstrip('-').isdigit()}
+    return _MONLVL
+
+
 # ---------------------------------------------------------------------------
 # TC upgrade logic
 # ---------------------------------------------------------------------------
@@ -399,8 +437,8 @@ def resolve_tc(monster_id: str, difficulty: str) -> str:
     monster_id: monstats Id (e.g. 'andariel') or superunique name (e.g. 'Pindleskin')
     difficulty: 'normal', 'nightmare', or 'hell'
     """
-    superuniques = _get_superuniques()
-    monstats = _get_monstats()
+    superuniques = get_superuniques()
+    monstats = get_monstats()
 
     if monster_id in superuniques:
         su = superuniques[monster_id]
@@ -476,7 +514,7 @@ _GC_PREFIX_ROWS: list[dict] | None = None
 
 
 def _build_type_ancestors(code: str) -> frozenset[str]:
-    all_rows = {r.get('Code', '').strip(): r for r in _csv_rows('itemtypes.txt') if r.get('Code', '').strip()}
+    all_rows = {r.get('Code', '').strip(): r for r in csv_rows('itemtypes.txt') if r.get('Code', '').strip()}
     visited: set[str] = set()
     stack = [code]
     while stack:
@@ -502,7 +540,7 @@ def _get_gc_prefix_rows() -> list[dict]:
     gc_ancestors = _build_type_ancestors(gc_itype)
 
     result = []
-    for row in _csv_rows('magicprefix.txt'):
+    for row in csv_rows('magicprefix.txt'):
         if row.get('spawnable', '').strip() != '1':
             continue
         freq_s = row.get('frequency', '').strip()
@@ -537,60 +575,6 @@ def get_skiller_gc_fraction(ilvl: int) -> float:
     return skiller_weight / total_weight if total_weight > 0 else 0.0
 
 
-_monlvl_cache: dict[int, dict[str, int]] | None = None
-
-
-def _get_monlvl() -> dict[int, dict[str, int]]:
-    """Return monlvl lookup: {level: {'HP': ..., 'HP(N)': ..., 'HP(H)': ..., 'L-HP': ..., 'L-HP(N)': ..., 'L-HP(H)': ...}}."""
-    global _monlvl_cache
-    if _monlvl_cache is None:
-        _monlvl_cache = {}
-        for row in _csv_rows('monlvl.txt'):
-            try:
-                lvl = int(row['Level'])
-            except (KeyError, ValueError):
-                continue
-            _monlvl_cache[lvl] = {k: int(v) for k, v in row.items() if v.strip().lstrip('-').isdigit()}
-    return _monlvl_cache
-
-
-def get_monster_combat_stats(monster_id: str, difficulty: str = 'hell') -> dict:
-    """Return HP and cold resistance for a monster at the given difficulty.
-
-    HP formula: avg(minHP, maxHP) * L-HP(difficulty)[monster_level] / 100
-    Uses the L-HP column from monlvl.txt, which applies to boss/named monsters.
-    """
-    suffix = {'normal': '', 'nightmare': '(N)', 'hell': '(H)'}[difficulty]
-    lhp_col = {'normal': 'L-HP', 'nightmare': 'L-HP(N)', 'hell': 'L-HP(H)'}[difficulty]
-    lvl_col = {'normal': 'Level', 'nightmare': 'Level(N)', 'hell': 'Level(H)'}[difficulty]
-
-    def _ri(row: dict, col: str) -> int:
-        v = row.get(col, '') or ''
-        try:
-            return int(v.strip())
-        except ValueError:
-            return 0
-
-    monlvl = _get_monlvl()
-
-    superuniques = _get_superuniques()
-    if monster_id in superuniques:
-        monster_id = superuniques[monster_id].get('class', monster_id)
-
-    for row in _csv_rows('monstats.txt'):
-        if row.get('Id', '').strip() != monster_id:
-            continue
-        min_hp = _ri(row, f'MinHP{suffix}' if suffix else 'minHP')
-        max_hp = _ri(row, f'MaxHP{suffix}' if suffix else 'maxHP')
-        avg_hp = (min_hp + max_hp) // 2
-        cold_resist = _ri(row, f'ResCo{suffix}' if suffix else 'ResCo')
-        level = _ri(row, lvl_col if suffix else 'Level')
-        lhp_scale = monlvl.get(level, {}).get(lhp_col, 100)
-        return {'hp': avg_hp * lhp_scale // 100, 'cold_resist': cold_resist}
-
-    return {'hp': 0, 'cold_resist': 0}
-
-
 def get_unique_candidates(item_code: str, ilvl: int) -> list[tuple[str, int]]:
     """
     Return (name, rarity) for all unique and set items of this base type with qlvl <= ilvl.
@@ -599,10 +583,10 @@ def get_unique_candidates(item_code: str, ilvl: int) -> list[tuple[str, int]]:
       P(this unique) = rarity / sum(all eligible rarities)
     """
     candidates: list[tuple[str, int]] = []
-    for entry in _get_unique_items().get(item_code, []):
+    for entry in get_unique_items().get(item_code, []):
         if entry.qlvl <= ilvl:
             candidates.append((entry.name, entry.rarity))
-    for entry in _get_set_items().get(item_code, []):
+    for entry in get_set_items().get(item_code, []):
         if entry.qlvl <= ilvl:
             candidates.append((entry.name, entry.rarity))
     return candidates

@@ -14,7 +14,8 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
-import parse_treasure_classes as ptc
+import extract_combat_stats
+import d2r_data
 
 DB_PATH = Path(__file__).parent.parent.parent / "public" / "data" / "db.json"
 
@@ -32,13 +33,13 @@ def test_andy_hp_matches_wiki():
 
     avg(1193, 1193) * L-HP(H)[75] / 100 = 1193 * 5032 / 100 = 60,031.
     """
-    stats = ptc.get_monster_combat_stats('andariel', 'hell')
+    stats = extract_combat_stats._get_combat_stats('andariel', 'hell')
     assert stats['hp'] == 60_031, f"Expected 60031, got {stats['hp']}"
 
 
 def test_andy_cold_resist():
     """Andariel Hell cold resistance is 66% (ResCo(H) from monstats.txt)."""
-    stats = ptc.get_monster_combat_stats('andariel', 'hell')
+    stats = extract_combat_stats._get_combat_stats('andariel', 'hell')
     assert stats['cold_resist'] == 66
 
 

@@ -30,6 +30,17 @@ entirely — not to hardcode the value.
    - A reference (URL, file, community resource) that documents it
    - A note that it should be revisited if a data source is found later
 
+## Script vs. d2r_data.py
+
+`d2r_data.py` owns all raw D2R file I/O. Any function that reads a `.txt` or `.json` file
+from `data/raw/` belongs there. Downstream scripts (`calculate_drop_odds.py`,
+`extract_combat_stats.py`, `extract_gear_stats.py`, etc.) only call `d2r_data` functions —
+they never open raw files themselves.
+
+The test: if a function's only job is "read this D2R file and return structured data," it
+lives in `d2r_data.py`. If it applies project-level logic or formulas to that data, it lives
+in the script.
+
 ### What this means in practice
 
 - If you can't find a value in the expected file, look for related files before giving up.

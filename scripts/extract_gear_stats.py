@@ -16,12 +16,12 @@ Returns a dict with keys:
   presets:       { presetName: { slot: itemId, ... }, ... }
 """
 
-import csv
 import json
 from pathlib import Path
 
+import d2r_data
+
 ROOT = Path(__file__).parent.parent
-RAW = ROOT / "data" / "raw"
 CONFIG = ROOT / "data" / "items_config.json"
 
 # D2R body location codes → app slot names.
@@ -60,14 +60,9 @@ def _assert_no_perlevel(prop: str, context: str) -> None:
         )
 
 
-def _load_tsv(path: Path) -> list[dict]:
-    with open(path, encoding="utf-8-sig", newline="") as f:
-        return list(csv.DictReader(f, delimiter="\t"))
-
-
 def _build_item_type_index() -> dict[str, dict]:
     """Index itemtypes.txt by Code field."""
-    return {row["Code"].strip(): row for row in _load_tsv(RAW / "itemtypes.txt") if row.get("Code", "").strip()}
+    return {row["Code"].strip(): row for row in d2r_data.csv_rows("itemtypes.txt") if row.get("Code", "").strip()}
 
 
 def _ancestors(type_code: str, type_index: dict[str, dict], _seen: set | None = None) -> set[str]:
@@ -102,7 +97,7 @@ def _build_code_to_slot(type_index: dict[str, dict]) -> dict[str, str]:
         code_to_slot[code] = "charms"
 
     for src in ("armor", "misc", "weapons"):
-        for row in _load_tsv(RAW / f"{src}.txt"):
+        for row in d2r_data.csv_rows(f"{src}.txt"):
             code = row.get("code", "").strip()
             itype = row.get("type", "").strip()
             if not code or not itype or itype not in type_index:
@@ -120,7 +115,7 @@ def _build_code_to_max_sockets() -> dict[str, int]:
     """Map item base code → maximum number of sockets from armor/misc/weapons data."""
     code_to_max: dict[str, int] = {}
     for src in ("armor", "misc", "weapons"):
-        for row in _load_tsv(RAW / f"{src}.txt"):
+        for row in d2r_data.csv_rows(f"{src}.txt"):
             code = row.get("code", "").strip()
             sockets = row.get("gemsockets", "").strip()
             if code and sockets:
@@ -131,10 +126,6 @@ def _build_code_to_max_sockets() -> dict[str, int]:
     return code_to_max
 
 
-def _build_name_lookup() -> dict[str, str]:
-    """Map internal item name (Key) → display name (enUS)."""
-    data = json.loads((RAW / "item-names.json").read_text(encoding="utf-8-sig"))
-    return {entry["Key"]: entry["enUS"] for entry in data if "Key" in entry and "enUS" in entry}
 
 
 def _itype_to_slot(itype: str, type_index: dict[str, dict]) -> str | None:
@@ -329,22 +320,22 @@ def extract() -> dict:
     type_index = _build_item_type_index()
     code_to_slot = _build_code_to_slot(type_index)
     code_to_max_sockets = _build_code_to_max_sockets()
-    name_to_display = _build_name_lookup()
+    name_to_display = d2r_data.get_item_names()
 
     unique_rows: dict[str, dict] = {}
-    for row in _load_tsv(RAW / "uniqueitems.txt"):
+    for row in d2r_data.csv_rows("uniqueitems.txt"):
         idx = row.get("index", "").strip()
         if idx:
             unique_rows[idx] = row
 
     runeword_rows: dict[str, dict] = {}
     if runeword_names:
-        for row in _load_tsv(RAW / "runes.txt"):
+        for row in d2r_data.csv_rows("runes.txt"):
             name = row.get("*Rune Name", "").strip()
             if name:
                 runeword_rows[name] = row
 
-    all_set_item_rows = _load_tsv(RAW / "setitems.txt")
+    all_set_item_rows = d2r_data.csv_rows("setitems.txt")
     set_item_rows: dict[str, dict] = {}
     set_sizes: dict[str, int] = {}
     for row in all_set_item_rows:
@@ -355,7 +346,7 @@ def extract() -> dict:
         if sname:
             set_sizes[sname] = set_sizes.get(sname, 0) + 1
 
-    sets_rows = _load_tsv(RAW / "sets.txt")
+    sets_rows = d2r_data.csv_rows("sets.txt")
     relevant_sets = {set_item_rows[n].get("set", "").strip()
                      for n in set_item_names if n in set_item_rows}
     set_level_bonuses = _extract_set_level_bonuses(sets_rows, set_sizes, relevant_sets)

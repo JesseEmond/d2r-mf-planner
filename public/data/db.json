@@ -44,6 +44,8 @@
     "Latent Cold Rupture",
     "Latent Crack of the Heavens",
     "Latent Flame Rift",
+    "Latent Rotting Fissure",
+    "Latent Black Cleft",
     "M'avina's True Sight",
     "Mara's Kaleidoscope",
     "Measured Wrath",
@@ -350,6 +352,32 @@
           "unique_total_weight": 7
         },
         "Latent Flame Rift": {
+          "base_prob": 0.02254025044722719,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Rotting Fissure": {
+          "base_prob": 0.02254025044722719,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Black Cleft": {
           "base_prob": 0.02254025044722719,
           "quality_params": {
             "base_chance": 400,
@@ -991,6 +1019,32 @@
           "unique_total_weight": 7
         },
         "Latent Flame Rift": {
+          "base_prob": 0.011819887429643528,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Rotting Fissure": {
+          "base_prob": 0.011819887429643528,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 983,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Black Cleft": {
           "base_prob": 0.011819887429643528,
           "quality_params": {
             "base_chance": 400,
@@ -1749,6 +1803,32 @@
           "unique_total_weight": 7
         },
         "Latent Flame Rift": {
+          "base_prob": 0.007211538461538462,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 800,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Rotting Fissure": {
+          "base_prob": 0.007211538461538462,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 800,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Black Cleft": {
           "base_prob": 0.007211538461538462,
           "quality_params": {
             "base_chance": 400,
