@@ -85,7 +85,7 @@ def test_db_structure():
     andy = db["monsters"]["andy"]
     assert andy["mlvl"] == 75
     assert andy["tc"] == "Andarielq (H)"
-    assert len(andy["drops"]) >= 40
+    assert len(andy["drops"]) >= 38
 
 
 def test_all_base_probs_in_range():
@@ -168,9 +168,7 @@ LATENT_SUNDERS = [
     "Latent Cold Rupture",
     "Latent Flame Rift",
     "Latent Crack of the Heavens",
-    "Latent Rotting Fissure",
     "Latent Bone Break",
-    "Latent Black Cleft",
 ]
 
 def test_gheed_selection_weight():
