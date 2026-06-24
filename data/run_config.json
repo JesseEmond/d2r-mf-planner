@@ -45,7 +45,7 @@
       "id": "travincal",
       "label": "Trav",
       "act": 3,
-      "teleports": 30,
+      "teleports": 10,
       "monsters": [
         {
           "id": "ismail",
