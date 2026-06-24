@@ -21,13 +21,14 @@ def load_targets() -> list[dict]:
     seen: set[str] = set()
     targets: list[dict] = []
     for run in run_config["runs"]:
+        difficulty = run["difficulty"]
         for mon in run["monsters"]:
             if "monster_id" not in mon or mon["id"] in seen:
                 continue
             targets.append({
                 "key": mon["id"],
                 "monster_id": mon["monster_id"],
-                "difficulty": mon["difficulty"],
+                "difficulty": difficulty,
                 "superunique": mon["superunique"],
             })
             seen.add(mon["id"])
