@@ -17,7 +17,7 @@
       "id": "andy",
       "label": "Andy",
       "act": 1,
-      "teleports": 40,
+      "teleports_to": 40,
       "monster_packs": [
         {
           "probability": 1.0,
@@ -33,7 +33,7 @@
       "id": "cows",
       "label": "Cow Level",
       "act": 1,
-      "teleports": 70,
+      "teleports_to": 70,
       "monster_packs": [],
       "available": false,
       "difficulty": "hell"
@@ -42,7 +42,7 @@
       "id": "ancient_tunnels",
       "label": "Ancient Tunnels",
       "act": 2,
-      "teleports": 50,
+      "teleports_to": 50,
       "monster_packs": [],
       "available": false,
       "difficulty": "hell"
@@ -51,7 +51,8 @@
       "id": "travincal",
       "label": "Trav",
       "act": 3,
-      "teleports": 10,
+      "teleports_to": 5,
+      "teleports_back": 5,
       "monster_packs": [
         {
           "probability": 1.0,
@@ -81,7 +82,7 @@
       "id": "meph",
       "label": "Meph",
       "act": 3,
-      "teleports": 30,
+      "teleports_to": 30,
       "monster_packs": [
         {
           "probability": 1.0,
@@ -97,7 +98,8 @@
       "id": "pindle",
       "label": "Pindle",
       "act": 5,
-      "teleports": 3,
+      "teleports_to": 3,
+      "teleports_back": 3,
       "monster_packs": [
         {
           "probability": 1.0,

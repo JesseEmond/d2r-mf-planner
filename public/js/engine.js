@@ -245,8 +245,14 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
 
   for (const run of runConfigData) {
     if (!run.available) continue;
-    const travelSecs = (run.teleports ?? 0) * bp.frames / D2_FPS;
-    const travelDetail = `~${run.teleports ?? 0} teleports × ${bp.frames} frames/cast ÷ ${D2_FPS} FPS = ${travelSecs.toFixed(1)}s`;
+    const teleportsTo = run.teleports_to ?? run.teleports ?? 0;
+    const teleportsBack = run.teleports_back ?? 0;
+    const totalTeleports = teleportsTo + teleportsBack;
+    const travelSecs = totalTeleports * bp.frames / D2_FPS;
+    const teleportBreakdown = teleportsBack > 0
+      ? `~${teleportsTo} to reach + ${teleportsBack} to leave = ${totalTeleports} total`
+      : `~${totalTeleports}`;
+    const travelDetail = `${teleportBreakdown} teleports × ${bp.frames} frames/cast ÷ ${D2_FPS} FPS = ${travelSecs.toFixed(1)}s`;
     const packs = monsterDbData?.runs?.[run.id]?.monster_packs ?? [];
     const pierceCold = combat.enemyColdResPct ?? 0;
 
@@ -355,7 +361,9 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
       return `  · ${names.join(', ')}` + (prob < 100 ? ` (${prob}%)` : '');
     });
     const assumptions = [
-      `~${run.teleports ?? 0} teleports to reach`,
+      teleportsBack > 0
+        ? `~${teleportsTo} teleports to reach, ~${teleportsBack} to leave`
+        : `~${totalTeleports} teleports to reach`,
       packs.length > 0 ? 'Packs:\n' + packSummaryLines.join('\n') : null,
     ].filter(Boolean).join('\n');
 
