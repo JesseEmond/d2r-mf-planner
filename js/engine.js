@@ -298,9 +298,12 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
             ].filter(Boolean).join('\n'));
           }
         } else {
-          // Multi-monster pack: herd + blizzard throughput + stragglers
-          // Cold-immune named monsters skipped unless sundered; minions use boss CR, never immune
-          let totalEffHP = 0;
+          // Multi-monster pack: herd + blizzard throughput + stragglers.
+          // Blizzard hits all monsters simultaneously, so kill time is driven by the
+          // hardest single monster (max effHP), not the sum of all HP.
+          // Cold-immune named monsters skipped unless sundered; minions use boss CR, never immune.
+          let maxEffHP = 0;
+          let maxEffHPLabel = '';
           const packDetailLines = [];
 
           for (const m of packMonsters) {
@@ -308,8 +311,8 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
               const bossId     = m.id.replace(/_minion$/, '');
               const bossCombat = monsterDbData.monsters?.[bossId]?.combat ?? {};
               const minionMult = coldDmgMultiplier(bossCombat.cold_resist ?? 0, effCM, pierceCold);
-              const effHP      = minionMult > 0 ? (m.hp ?? 0) * m.amount / minionMult : 0;
-              totalEffHP += effHP;
+              const effHP      = minionMult > 0 ? (m.hp ?? 0) / minionMult : 0;
+              if (effHP > maxEffHP) { maxEffHP = effHP; maxEffHPLabel = m.label; }
               packDetailLines.push(`  ${m.label}${m.amount > 1 ? ` ×${m.amount}` : ''}: HP ${(m.hp ?? 0).toLocaleString()} (uses boss CR, no CI)`);
             } else {
               const monCombat  = monsterDbData.monsters?.[m.id]?.combat ?? {};
@@ -318,8 +321,8 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
               const pImmune    = hasColdSunder ? 0 : rawImmune;
               const mult       = coldDmgMultiplier(monCombat.cold_resist ?? 0, effCM, pierceCold);
               const amount     = m.amount ?? 1;
-              const effHP      = mult > 0 ? (1 - pImmune) * monCombat.hp * amount / mult : 0;
-              totalEffHP += effHP;
+              const effHP      = mult > 0 ? (1 - pImmune) * monCombat.hp / mult : 0;
+              if (effHP > maxEffHP) { maxEffHP = effHP; maxEffHPLabel = m.label; }
               const monResist  = monCombat.cold_resist ?? 0;
               const effRes     = Math.max(-100, monResist - cmResistReduction(effCM) - pierceCold);
               const immuneNote = rawImmune > 0
@@ -332,14 +335,14 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
           }
 
           const throughput = blizzPerShard * PACK_BLIZZ_HITS_PER_SEC;
-          const killTime   = totalEffHP > 0 ? PACK_HERD_SECS + totalEffHP / throughput + PACK_STRAGGLER_SECS : 0;
+          const killTime   = maxEffHP > 0 ? PACK_HERD_SECS + maxEffHP / throughput + PACK_STRAGGLER_SECS : 0;
           killSecs += pack.probability * killTime;
 
           const namedNames = namedMonsters.map(m => `${m.label}${(m.amount ?? 1) > 1 ? ` ×${m.amount}` : ''}`).join(', ');
           killLines.push([
             `Pack${spawnTag}: ${namedNames}`,
             ...packDetailLines,
-            `  ${PACK_HERD_SECS}s herd + ${(totalEffHP / throughput).toFixed(1)}s kill + ${PACK_STRAGGLER_SECS}s stragglers = ${killTime.toFixed(1)}s (expected: ${(killTime * pack.probability).toFixed(1)}s)`,
+            `  ${PACK_HERD_SECS}s herd + ${(maxEffHP / throughput).toFixed(1)}s kill (bottleneck: ${maxEffHPLabel}) + ${PACK_STRAGGLER_SECS}s stragglers = ${killTime.toFixed(1)}s (expected: ${(killTime * pack.probability).toFixed(1)}s)`,
           ].join('\n'));
         }
       }
