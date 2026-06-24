@@ -382,15 +382,23 @@ function makeBuild(getSlotStats) {
 
   const runTimeSummary = computed(() => {
     let travel = 0, kill = 0, overhead = 0;
+    const activeActs = new Set();
     for (const [id, s] of Object.entries(runStats.value)) {
       if (!state.run.bosses[id]) continue;
       travel   += s.travelSecs;
       kill     += s.killSecs;
       overhead += s.overheadSecs;
+      const run = runConfig.value?.find(r => r.id === id);
+      if (run) activeActs.add(String(run.act));
     }
     overhead += runConfigMeta.value.game_creation_secs ?? 0;
+    const spawnOverheadMap = runConfigMeta.value.spawn_act_overhead_secs ?? {};
+    const spawnOverhead = activeActs.size > 0
+      ? Math.min(...[...activeActs].map(a => spawnOverheadMap[a] ?? 0))
+      : 0;
+    overhead += spawnOverhead;
     const total = travel + kill + overhead;
-    return total > 0 ? { travel, kill, overhead, total } : null;
+    return total > 0 ? { travel, kill, overhead, total, spawnOverhead } : null;
   });
 
   const activeSetBonuses = computed(() => setBonuses.value.activeSets);
@@ -1028,7 +1036,7 @@ const app = createApp({
         ]);
         const [rc, db] = await Promise.all([rcRes.json(), dbRes.json()]);
         runConfig.value    = rc.runs;
-        runConfigMeta.value = { act_overhead_secs: rc.act_overhead_secs ?? {}, game_creation_secs: rc.game_creation_secs ?? 0 };
+        runConfigMeta.value = { act_overhead_secs: rc.act_overhead_secs ?? {}, spawn_act_overhead_secs: rc.spawn_act_overhead_secs ?? {}, game_creation_secs: rc.game_creation_secs ?? 0 };
         monsterDb.value = db;
         skillData.value  = db.skill_data ?? {};
         const itemsBySlot = db.gear.items_by_slot;
@@ -1370,7 +1378,7 @@ const app = createApp({
               <span>Kill</span><span>{{ runTimeSummary ? runTimeSummary.kill.toFixed(1) + 's' : '---' }}</span>
             </div>
             <div class="breakdown-row breakdown-sub">
-              <span>Overhead <tooltip-popup :text="runTimeSummary ? 'Game creation: ' + (runConfigMeta.game_creation_secs ?? 0) + 's · Town walks: ' + (runTimeSummary.overhead - (runConfigMeta.game_creation_secs ?? 0)).toFixed(1) + 's' : 'No run data'"><span class="info-icon">i</span></tooltip-popup></span>
+              <span>Overhead <tooltip-popup :text="runTimeSummary ? 'Game creation: ' + (runConfigMeta.game_creation_secs ?? 0) + 's · Town walks: ' + (runTimeSummary.overhead - (runConfigMeta.game_creation_secs ?? 0) - runTimeSummary.spawnOverhead).toFixed(1) + 's' + (runTimeSummary.spawnOverhead > 0 ? ' · Act spawn: ' + runTimeSummary.spawnOverhead + 's' : '') : 'No run data'"><span class="info-icon">i</span></tooltip-popup></span>
               <span>{{ runTimeSummary ? runTimeSummary.overhead.toFixed(1) + 's' : '---' }}</span>
             </div>
 

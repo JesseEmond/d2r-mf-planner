@@ -6,6 +6,9 @@
     "4": 1,
     "5": 4
   },
+  "spawn_act_overhead_secs": {
+    "3": 7
+  },
   "game_creation_secs": 5,
   "minion_monsters": [
     { "id": "pindle_minion", "monster_id": "reanimatedhorde5", "superunique": false, "difficulty": "hell" },
