@@ -2134,8 +2134,13 @@
       "monster_id": "Pindleskin",
       "difficulty": "hell",
       "combat": {
-        "hp": 7542,
-        "cold_resist": 50
+        "hp": 11314,
+        "cold_resist": 50,
+        "p_cold_immune": 0.15384615384615385,
+        "minions": {
+          "count": 6,
+          "hp": 8485
+        }
       }
     }
   },
