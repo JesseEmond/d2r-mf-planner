@@ -30,6 +30,25 @@ entirely — not to hardcode the value.
    - A reference (URL, file, community resource) that documents it
    - A note that it should be revisited if a data source is found later
 
+## Generated files are read-only
+
+Never edit generated files directly. Always fix the script that produces them and rerun it.
+
+| File | Produced by |
+|---|---|
+| `data/valuables.json` | `scripts/scrape_valuables.py` |
+| `data/drop_odds.json` | `scripts/calculate_drop_odds.py` |
+| `data/combat_stats.json` | `scripts/extract_combat_stats.py` |
+| `public/data/db.json` | `scripts/build_db.py` (orchestrates all of the above) |
+
+If a value is wrong in a generated file, trace it back to the script or the raw data file
+and fix it there. Editing the output directly breaks reproducibility — the next pipeline run
+will overwrite the change.
+
+The one exception is `scrape_valuables.py`: its `MANUAL_ADDITIONS` list is intentional
+human curation (items the scraper misses or that we deliberately include/exclude). Changes
+there are fine; changes to `data/valuables.json` directly are not.
+
 ## Script vs. d2r_data.py
 
 `d2r_data.py` owns all raw D2R file I/O. Any function that reads a `.txt` or `.json` file
