@@ -29,6 +29,11 @@ const ICE_BLAST_HIT_RATE      = 0.80;
 const D2_FPS                  = 25;
 export const BLIZZARD_BOLTS_VS_BOSS  = 4;
 
+// Pack combat model: blizzard-only coverage across a group of monsters
+const PACK_HERD_SECS       = 1.0;  // flat time to herd pack together
+const PACK_STRAGGLER_SECS  = 1.5;  // flat cleanup after main kill
+const PACK_BLIZZ_HITS_PER_SEC = 2.0; // avg blizzard shards landing per second across the group
+
 // Hard points (base-allocated skill levels, blvl) for each skill in the build.
 // +skills from gear does NOT boost synergy bonuses — synergies use blvl only.
 const SKILL_HARD_PTS = {
@@ -191,84 +196,253 @@ export function computeCombat(totals, effCM, skillData = {}) {
 }
 
 export function computeCombatAssumptions(_combat) {
-  return `Assumes:\n- Standard blizz sorc build\n- All Blizzard shards hit the target\n- ~${ICE_BLAST_HIT_RATE * 100}% of Ice Blasts hit the target`;
+  return [
+    'Assumes:',
+    `- Single isolated monster (no minions): ${BLIZZARD_BOLTS_VS_BOSS} Blizzard shards hit the target; ~${ICE_BLAST_HIT_RATE * 100}% of Ice Blasts land`,
+    `- Multi-monster packs (boss + minions, or groups): ${PACK_HERD_SECS}s herd + Blizzard at ~${PACK_BLIZZ_HITS_PER_SEC} shards/sec across the group + ${PACK_STRAGGLER_SECS}s straggler cleanup; Ice Blast not used`,
+    '- Cold-immune monsters fully skipped (kill time + drops) unless a Cold Sunder charm is equipped',
+    '- Pack minions use boss cold resist; no cold immunity roll applied to minions; minion drops counted separately (always killable)',
+  ].join('\n');
 }
 
-function fmtMonsterId(id) {
-  return id.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+function fmtP(p) {
+  if (!p || p <= 0) return 'N/A';
+  return `1 in ${Math.round(1 / p).toLocaleString()}`;
 }
 
-export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbData, runBosses) {
-  const { bp, effCM, blizzDmg, iceBlastDmg, iceBlastCasts } = combat;
+export function formatDropDetail(packDetails, key) {
+  if (!packDetails?.length) return '';
+  if (packDetails.length === 1 && packDetails[0].monsters.length === 1) {
+    const m = packDetails[0].monsters[0];
+    return `${m.label}: ${fmtP(m[key])}`;
+  }
+  const lines = [];
+  for (const pack of packDetails) {
+    const spawnNote = pack.spawnProb < 1 ? ` (${Math.round(pack.spawnProb * 100)}%)` : '';
+    if (pack.monsters.length === 1) {
+      const m = pack.monsters[0];
+      lines.push(`${m.label}${spawnNote}: ${fmtP(m[key])}`);
+    } else {
+      const bosses  = pack.monsters.filter(m => !m.is_minion);
+      const minions = pack.monsters.filter(m =>  m.is_minion);
+      const minionCount = minions.reduce((s, m) => s + (m.amount ?? 1), 0);
+      const packName = bosses.map(m => m.label).join(', ')
+        + (minionCount > 0 ? ` + ${minionCount} minion${minionCount !== 1 ? 's' : ''}` : '');
+      lines.push(`${packName}${spawnNote}`);
+      for (const m of pack.monsters) {
+        lines.push(`  ${m.label}: ${fmtP(m[key])}`);
+      }
+    }
+  }
+  return lines.join('\n');
+}
+
+
+export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbData, runBosses, hasColdSunder) {
+  const { bp, effCM, blizzDmg, blizzPerShard, iceBlastDmg, iceBlastCasts } = combat;
   const actOverhead = runConfigMeta.act_overhead_secs ?? {};
   const stats = {};
+
   for (const run of runConfigData) {
     if (!run.available) continue;
     const travelSecs = (run.teleports ?? 0) * bp.frames / D2_FPS;
-    let killSecs = 0;
-    const monCombat = monsterDbData?.monsters?.[run.id]?.combat ?? {};
-
-    const pierceCold = combat.enemyColdResPct ?? 0;
-    if (runBosses[run.id] && monCombat.hp) {
-      const mult   = coldDmgMultiplier(monCombat.cold_resist ?? 0, effCM, pierceCold);
-      const effDps = (blizzDmg / BLIZZARD_COOLDOWN_SECS + iceBlastCasts * iceBlastDmg / BLIZZARD_COOLDOWN_SECS) * mult;
-      const amount = (run.monsters ?? []).reduce((s, m) => s + (m.amount ?? 1), 0) || 1;
-      killSecs = (monCombat.hp / effDps) * amount;
-    }
-
     const travelDetail = `~${run.teleports ?? 0} teleports × ${bp.frames} frames/cast ÷ ${D2_FPS} FPS = ${travelSecs.toFixed(1)}s`;
+    const packs = monsterDbData?.runs?.[run.id]?.monster_packs ?? [];
+    const pierceCold = combat.enemyColdResPct ?? 0;
 
-    let killDetail = null;
-    if (monCombat.hp) {
-      const monResist  = monCombat.cold_resist ?? 0;
-      const cmRed      = cmResistReduction(effCM);
-      const effRes     = Math.max(-100, monResist - cmRed - pierceCold);
-      const mult       = coldDmgMultiplier(monResist, effCM, pierceCold);
-      const pierceLine = pierceCold ? ` − Enemy CR Pierce ${pierceCold}%` : '';
-      killDetail = [
-        `HP: ${monCombat.hp.toLocaleString()}`,
-        `Cold resist: ${monResist}% − Cold Mastery lv ${effCM} (−${cmRed}%)${pierceLine} → eff. resist: ${effRes}% → ${mult.toFixed(2)}× damage multiplier`,
-      ].join('\n');
+    let killSecs = 0;
+    const killLines = [];
+
+    if (runBosses[run.id] && packs.length > 0) {
+      for (const pack of packs) {
+        const packMonsters = pack.monsters ?? [];
+        const namedMonsters = packMonsters.filter(m => !m.is_minion);
+        // Single iff the pack is exactly one monster with no minions — any pack with minions
+        // uses multi-monster logic so all HP is counted.
+        const isSingle = packMonsters.length === 1 && (packMonsters[0].amount ?? 1) === 1;
+        const pct = Math.round(pack.probability * 100);
+        const spawnTag = pct < 100 ? ` (${pct}% spawn)` : '';
+
+        if (isSingle) {
+          // Single isolated monster (no minions): Blizzard + Ice Blast; cold immune → skip unless sundered
+          const m = namedMonsters[0];
+          const monCombat = monsterDbData.monsters?.[m.id]?.combat ?? {};
+          if (monCombat.hp) {
+            const rawImmune = monCombat.p_cold_immune ?? 0;
+            const pImmune   = hasColdSunder ? 0 : rawImmune;
+            const mult      = coldDmgMultiplier(monCombat.cold_resist ?? 0, effCM, pierceCold);
+            const effDps    = (blizzDmg / BLIZZARD_COOLDOWN_SECS + iceBlastCasts * iceBlastDmg / BLIZZARD_COOLDOWN_SECS) * mult;
+            const baseKill  = effDps > 0 ? monCombat.hp / effDps : 0;
+            killSecs += pack.probability * (1 - pImmune) * baseKill;
+
+            const monResist  = monCombat.cold_resist ?? 0;
+            const cmRed      = cmResistReduction(effCM);
+            const effRes     = Math.max(-100, monResist - cmRed - pierceCold);
+            const pierceLine = pierceCold ? ` − Pierce ${pierceCold}%` : '';
+            const immuneLine = rawImmune > 0
+              ? hasColdSunder
+                ? `  Cold immunity: ${(rawImmune * 100).toFixed(1)}% base chance — sundered, always killable`
+                : `  Cold immunity: ${(rawImmune * 100).toFixed(1)}% chance — skipped if immune`
+              : null;
+            killLines.push([
+              `${m.label}${spawnTag}`,
+              `  HP: ${monCombat.hp.toLocaleString()} · CR: ${monResist}% − CM(−${cmRed}%)${pierceLine} → ${effRes}% → ${mult.toFixed(2)}× dmg`,
+              immuneLine,
+              `  Expected kill: ${(baseKill * (1 - pImmune) * pack.probability).toFixed(1)}s`,
+            ].filter(Boolean).join('\n'));
+          }
+        } else {
+          // Multi-monster pack: herd + blizzard throughput + stragglers
+          // Cold-immune named monsters skipped unless sundered; minions use boss CR, never immune
+          let totalEffHP = 0;
+          const packDetailLines = [];
+
+          for (const m of packMonsters) {
+            if (m.is_minion) {
+              const bossId     = m.id.replace(/_minion$/, '');
+              const bossCombat = monsterDbData.monsters?.[bossId]?.combat ?? {};
+              const minionMult = coldDmgMultiplier(bossCombat.cold_resist ?? 0, effCM, pierceCold);
+              const effHP      = minionMult > 0 ? (m.hp ?? 0) * m.amount / minionMult : 0;
+              totalEffHP += effHP;
+              packDetailLines.push(`  ${m.label}${m.amount > 1 ? ` ×${m.amount}` : ''}: HP ${(m.hp ?? 0).toLocaleString()} (uses boss CR, no CI)`);
+            } else {
+              const monCombat  = monsterDbData.monsters?.[m.id]?.combat ?? {};
+              if (!monCombat.hp) continue;
+              const rawImmune  = monCombat.p_cold_immune ?? 0;
+              const pImmune    = hasColdSunder ? 0 : rawImmune;
+              const mult       = coldDmgMultiplier(monCombat.cold_resist ?? 0, effCM, pierceCold);
+              const amount     = m.amount ?? 1;
+              const effHP      = mult > 0 ? (1 - pImmune) * monCombat.hp * amount / mult : 0;
+              totalEffHP += effHP;
+              const monResist  = monCombat.cold_resist ?? 0;
+              const effRes     = Math.max(-100, monResist - cmResistReduction(effCM) - pierceCold);
+              const immuneNote = rawImmune > 0
+                ? hasColdSunder
+                  ? `, CI ${(rawImmune * 100).toFixed(1)}% (sundered)`
+                  : `, CI ${(rawImmune * 100).toFixed(1)}% → ${((1 - rawImmune) * 100).toFixed(1)}% eff.`
+                : '';
+              packDetailLines.push(`  ${m.label}${amount > 1 ? ` ×${amount}` : ''}: HP ${monCombat.hp.toLocaleString()}, CR ${monResist}%→${effRes}%${immuneNote}`);
+            }
+          }
+
+          const throughput = blizzPerShard * PACK_BLIZZ_HITS_PER_SEC;
+          const killTime   = totalEffHP > 0 ? PACK_HERD_SECS + totalEffHP / throughput + PACK_STRAGGLER_SECS : 0;
+          killSecs += pack.probability * killTime;
+
+          const namedNames = namedMonsters.map(m => `${m.label}${(m.amount ?? 1) > 1 ? ` ×${m.amount}` : ''}`).join(', ');
+          killLines.push([
+            `Pack${spawnTag}: ${namedNames}`,
+            ...packDetailLines,
+            `  ${PACK_HERD_SECS}s herd + ${(totalEffHP / throughput).toFixed(1)}s kill + ${PACK_STRAGGLER_SECS}s stragglers = ${killTime.toFixed(1)}s (expected: ${(killTime * pack.probability).toFixed(1)}s)`,
+          ].join('\n'));
+        }
+      }
     }
 
-    const monsterLines = (run.monsters ?? []).map(m =>
-      `${fmtMonsterId(m.monster_id ?? m.id)} ×${m.amount ?? 1}`
-    );
+    const killDetail = killLines.length > 0 ? killLines.join('\n\n') : null;
+
+    // Run assumptions tooltip: list packs with monster composition
+    const packSummaryLines = packs.map(pack => {
+      const named = (pack.monsters ?? []).filter(m => !m.is_minion);
+      const minionMap = Object.fromEntries(
+        (pack.monsters ?? []).filter(m => m.is_minion).map(m => [m.id, m.amount])
+      );
+      const names = named.map(m => {
+        const minionAmt = minionMap[m.id + '_minion'];
+        return `${m.label}${(m.amount ?? 1) > 1 ? ` ×${m.amount}` : ''}` + (minionAmt ? ` + ${minionAmt} minions` : '');
+      });
+      const prob = Math.round(pack.probability * 100);
+      return `  · ${names.join(', ')}` + (prob < 100 ? ` (${prob}%)` : '');
+    });
     const assumptions = [
       `~${run.teleports ?? 0} teleports to reach`,
-      monsterLines.length ? `Kills: ${monsterLines.join(', ')}` : null,
+      packs.length > 0 ? 'Packs:\n' + packSummaryLines.join('\n') : null,
     ].filter(Boolean).join('\n');
 
     const overheadSecs = actOverhead[run.act] ?? 0;
-    stats[run.id] = { travelSecs, killSecs, overheadSecs, totalSecs: travelSecs + killSecs + overheadSecs,
-      hasKillData: killSecs > 0, assumptions, travelDetail, killDetail };
+    stats[run.id] = {
+      travelSecs, killSecs, overheadSecs, totalSecs: travelSecs + killSecs + overheadSecs,
+      hasKillData: killSecs > 0, assumptions, travelDetail, killDetail,
+    };
   }
   return stats;
 }
 
-export function computeRunDropProbs(mf, runConfigData, monsterDbData, runBosses, valuableSet) {
+export function computeRunDropProbs(mf, runConfigData, monsterDbData, runBosses, valuableSet, hasColdSunder) {
   const uMF = effUniqueMF(mf);
   const sMF = effSetMF(mf);
   const result = {};
+
   for (const run of runConfigData) {
     if (!run.available || !runBosses[run.id]) continue;
-    const mon = monsterDbData.monsters[run.id];
-    if (!mon) continue;
+    const packs = monsterDbData?.runs?.[run.id]?.monster_packs ?? [];
+    if (packs.length === 0) continue;
 
-    let noValuableItem = 1;
-    for (const [name, item] of Object.entries(mon.drops)) {
-      if (!valuableSet.has(name)) continue;
-      const qp  = item.quality_params;
-      const mfV = qp.quality_type === 'set' ? sMF : uMF;
-      const prob = item.base_prob * qualityCheckProb(qp, mon.mlvl, mfV) * (item.unique_weight / item.unique_total_weight);
-      noValuableItem *= (1 - prob);
+    // Compound no-valuable probability across all packs.
+    // For a pack with spawn probability p:
+    //   P(no valuable) *= 1 - p × P(at least one valuable | pack spawned)
+    // Cold-immune monsters (p_cold_immune) contribute proportionally less.
+    let noValuableTotal = 1;
+    let runeProb = 0;
+    let skillerProb = 0;
+    let valuableScProb = 0;
+    const packDetails = [];
+
+    for (const pack of packs) {
+      let packNoValuable = 1;
+      let packRune = 0;
+      let packSkiller = 0;
+      let packValueSc = 0;
+      const monsterDetails = [];
+
+      for (const m of pack.monsters ?? []) {
+        // For minions, use drops_from to find the reference monster; skip if unknown
+        const mon = m.is_minion
+          ? (m.drops_from ? monsterDbData.monsters?.[m.drops_from] : null)
+          : monsterDbData.monsters?.[m.id];
+        if (!mon) continue;
+        const amount        = m.amount ?? 1;
+        // Minions have no cold immunity of their own — always killable (effectiveFrac=1)
+        const effectiveFrac = m.is_minion ? 1 : (hasColdSunder ? 1 : 1 - (mon.combat?.p_cold_immune ?? 0));
+
+        let monNoValuable = 1;
+        for (let i = 0; i < amount; i++) {
+          for (const [name, item] of Object.entries(mon.drops)) {
+            if (!valuableSet.has(name)) continue;
+            const qp   = item.quality_params;
+            const mfV  = qp.quality_type === 'set' ? sMF : uMF;
+            const prob = item.base_prob * qualityCheckProb(qp, mon.mlvl, mfV) * (item.unique_weight / item.unique_total_weight);
+            monNoValuable  *= 1 - effectiveFrac * prob;
+            packNoValuable *= 1 - effectiveFrac * prob;
+          }
+        }
+        const monRune     = (mon.good_rune_prob ?? 0) * amount * effectiveFrac;
+        const monSkiller  = (mon.gc_base_prob ?? 0) * (mon.gc_skiller_frac ?? 0) * amount * effectiveFrac;
+        const monValueSc  = (mon.sc_base_prob ?? 0) * (mon.sc_valuable_frac ?? 0) * amount * effectiveFrac;
+        packRune    += monRune;
+        packSkiller += monSkiller;
+        packValueSc += monValueSc;
+        monsterDetails.push({
+          label: m.label, amount, is_minion: !!m.is_minion,
+          itemProb: 1 - monNoValuable, runeProb: monRune,
+          skillerProb: monSkiller,     valuableScProb: monValueSc,
+        });
+      }
+
+      const p = pack.probability;
+      noValuableTotal *= 1 - p * (1 - packNoValuable);
+      runeProb        += p * packRune;
+      skillerProb     += p * packSkiller;
+      valuableScProb  += p * packValueSc;
+      packDetails.push({ spawnProb: p, monsters: monsterDetails });
     }
-    const itemProb       = 1 - noValuableItem;
-    const runeProb       = mon.good_rune_prob ?? 0;
-    const skillerProb    = (mon.gc_base_prob ?? 0) * (mon.gc_skiller_frac ?? 0);
-    const valuableScProb = (mon.sc_base_prob ?? 0) * (mon.sc_valuable_frac ?? 0);
-    result[run.id] = { itemProb, runeProb, skillerProb, valuableScProb,
-      total: 1 - (1 - itemProb) * (1 - runeProb) * (1 - skillerProb) * (1 - valuableScProb) };
+
+    const itemProb = 1 - noValuableTotal;
+    result[run.id] = {
+      itemProb, runeProb, skillerProb, valuableScProb,
+      total: 1 - (1 - itemProb) * (1 - runeProb) * (1 - skillerProb) * (1 - valuableScProb),
+      packDetails,
+    };
   }
   return result;
 }

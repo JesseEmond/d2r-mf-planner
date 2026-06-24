@@ -7,19 +7,23 @@
     "5": 4
   },
   "game_creation_secs": 5,
+  "minion_monsters": [
+    { "id": "pindle_minion", "monster_id": "reanimatedhorde5", "superunique": false, "difficulty": "hell" },
+    { "id": "geleb_minion_base", "monster_id": "councilmember2", "superunique": false, "difficulty": "hell" },
+    { "id": "bremm_minion_base", "monster_id": "councilmember3", "superunique": false, "difficulty": "hell" }
+  ],
   "runs": [
     {
       "id": "andy",
       "label": "Andy",
       "act": 1,
       "teleports": 40,
-      "monsters": [
+      "monster_packs": [
         {
-          "id": "andy",
-          "monster_id": "andariel",
-          "superunique": false,
-          "amount": 1,
-          "probability": 1.0
+          "probability": 1.0,
+          "monsters": [
+            { "id": "andy", "monster_id": "andariel", "superunique": false, "amount": 1 }
+          ]
         }
       ],
       "available": true,
@@ -30,7 +34,7 @@
       "label": "Cow Level",
       "act": 1,
       "teleports": 70,
-      "monsters": [],
+      "monster_packs": [],
       "available": false,
       "difficulty": "hell"
     },
@@ -39,7 +43,7 @@
       "label": "Ancient Tunnels",
       "act": 2,
       "teleports": 50,
-      "monsters": [],
+      "monster_packs": [],
       "available": false,
       "difficulty": "hell"
     },
@@ -48,37 +52,29 @@
       "label": "Trav",
       "act": 3,
       "teleports": 10,
-      "monsters": [
+      "monster_packs": [
         {
-          "id": "ismail",
-          "monster_id": "Ismail Vilehand",
-          "superunique": true,
-          "amount": 1,
-          "probability": 1.0
+          "probability": 1.0,
+          "monsters": [
+            { "id": "ismail", "monster_id": "Ismail Vilehand", "superunique": true, "amount": 1 }
+          ]
         },
         {
-          "id": "geleb",
-          "monster_id": "Geleb Flamefinger",
-          "superunique": true,
-          "amount": 1,
-          "probability": 1.0
+          "probability": 1.0,
+          "monsters": [
+            { "id": "geleb", "monster_id": "Geleb Flamefinger", "superunique": true, "amount": 1 },
+            { "id": "trav_extra", "monster_id": "councilmember1", "label": "Council Member", "superunique": false, "amount": 1 }
+          ]
         },
         {
-          "id": "bremm",
-          "monster_id": "Bremm Sparkfist",
-          "superunique": true,
-          "amount": 1,
-          "probability": 1.0
-        },
-        {
-          "id": "trav_extra",
-          "monster_id": "councilmember1",
-          "superunique": false,
-          "amount": 2,
-          "probability": 1.0
+          "probability": 1.0,
+          "monsters": [
+            { "id": "bremm", "monster_id": "Bremm Sparkfist", "superunique": true, "amount": 1 },
+            { "id": "trav_extra", "monster_id": "councilmember1", "label": "Council Member", "superunique": false, "amount": 1 }
+          ]
         }
       ],
-      "available": false,
+      "available": true,
       "difficulty": "hell"
     },
     {
@@ -86,13 +82,12 @@
       "label": "Meph",
       "act": 3,
       "teleports": 30,
-      "monsters": [
+      "monster_packs": [
         {
-          "id": "meph",
-          "monster_id": "mephisto",
-          "superunique": false,
-          "amount": 1,
-          "probability": 1.0
+          "probability": 1.0,
+          "monsters": [
+            { "id": "meph", "monster_id": "mephisto", "superunique": false, "amount": 1 }
+          ]
         }
       ],
       "available": true,
@@ -103,13 +98,12 @@
       "label": "Pindle",
       "act": 5,
       "teleports": 3,
-      "monsters": [
+      "monster_packs": [
         {
-          "id": "pindle",
-          "monster_id": "Pindleskin",
-          "superunique": true,
-          "amount": 1,
-          "probability": 1.0
+          "probability": 1.0,
+          "monsters": [
+            { "id": "pindle", "monster_id": "Pindleskin", "superunique": true, "amount": 1 }
+          ]
         }
       ],
       "available": true,

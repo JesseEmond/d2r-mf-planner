@@ -84,6 +84,7 @@ def _get_combat_stats(monster_id: str, difficulty: str, superunique: bool) -> di
                 'minions': {
                     'count': minion_count,
                     'hp': int(base_hp * _SU_MINION_HP_MULT),
+                    'monster_id': monstats_id,  # class of the minion (= SU's own class)
                 },
             }
 

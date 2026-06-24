@@ -5,3 +5,5 @@ venv/
 *.egg-info/
 dist/
 .DS_Store
+prd.md
+todos.txt

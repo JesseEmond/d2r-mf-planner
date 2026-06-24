@@ -20,18 +20,29 @@ def load_targets() -> list[dict]:
     run_config = json.loads(RUN_CONFIG_PATH.read_text())
     seen: set[str] = set()
     targets: list[dict] = []
+    for mon in run_config.get("minion_monsters", []):
+        if "monster_id" not in mon or mon["id"] in seen:
+            continue
+        targets.append({
+            "key": mon["id"],
+            "monster_id": mon["monster_id"],
+            "difficulty": mon["difficulty"],
+            "superunique": mon.get("superunique", False),
+        })
+        seen.add(mon["id"])
     for run in run_config["runs"]:
         difficulty = run["difficulty"]
-        for mon in run["monsters"]:
-            if "monster_id" not in mon or mon["id"] in seen:
-                continue
-            targets.append({
-                "key": mon["id"],
-                "monster_id": mon["monster_id"],
-                "difficulty": difficulty,
-                "superunique": mon["superunique"],
-            })
-            seen.add(mon["id"])
+        for pack in run.get("monster_packs", []):
+            for mon in pack["monsters"]:
+                if "monster_id" not in mon or mon["id"] in seen:
+                    continue
+                targets.append({
+                    "key": mon["id"],
+                    "monster_id": mon["monster_id"],
+                    "difficulty": difficulty,
+                    "superunique": mon["superunique"],
+                })
+                seen.add(mon["id"])
     return targets
 
 

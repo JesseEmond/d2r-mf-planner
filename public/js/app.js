@@ -1,5 +1,5 @@
 import { createApp, defineComponent, reactive, computed, watch, ref, onMounted, onUnmounted } from './vendor/vue.esm-browser.prod.js';
-import { GEAR_SLOTS, BLIZZARD_BOLTS_VS_BOSS, Stats, effUniqueMF, effSetMF, computeFcrBreakpoint, computeFcrTooltip, computeFcrBadgeClass, computeGearTotals, computeCombat, computeCombatAssumptions, computeRunStats, computeRunDropProbs, aggregateDropProbs, computeEttvd } from './engine.js';
+import { GEAR_SLOTS, BLIZZARD_BOLTS_VS_BOSS, Stats, effUniqueMF, effSetMF, computeFcrBreakpoint, computeFcrTooltip, computeFcrBadgeClass, computeGearTotals, computeCombat, computeCombatAssumptions, computeRunStats, computeRunDropProbs, aggregateDropProbs, computeEttvd, formatDropDetail } from './engine.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -355,21 +355,23 @@ function makeBuild(getSlotStats) {
   const totalDps          = computed(() => combat.value?.totalDps ?? null);
   const combatAssumptions = computed(() => combat.value ? computeCombatAssumptions(combat.value) : '');
   const blizzTooltip    = computed(() => combat.value
-    ? `Blizzard Lv ${combat.value.blizzSlvl} — ${Math.round(combat.value.blizzPerShard).toLocaleString()} avg damage per shard (×${BLIZZARD_BOLTS_VS_BOSS} shards vs boss)`
+    ? `Blizzard Lv ${combat.value.blizzSlvl} — ${Math.round(combat.value.blizzPerShard).toLocaleString()} avg damage per shard (×${BLIZZARD_BOLTS_VS_BOSS} shards for single isolated targets; ~2 shards/sec for packs)`
     : 'Loading…');
   const iceBlastTooltip = computed(() => combat.value
-    ? `Ice Blast Lv ${combat.value.iceBlastSlvl} — ${Math.round(combat.value.iceBlastDmg).toLocaleString()} damage per cast (assumes 80% hit rate)`
+    ? `Ice Blast Lv ${combat.value.iceBlastSlvl} — ${Math.round(combat.value.iceBlastDmg).toLocaleString()} damage per cast (single targets only; ~80% hit rate assumed)`
     : 'Loading…');
 
   const runStats = computed(() => {
     if (!runConfig.value.length || !monsterDb.value || !combat.value) return {};
-    return computeRunStats(combat.value, runConfig.value, runConfigMeta.value, monsterDb.value, state.run.bosses);
+    const hasColdSunder = state.gear.charms.some(c => charmSunder(c) === 'cold');
+    return computeRunStats(combat.value, runConfig.value, runConfigMeta.value, monsterDb.value, state.run.bosses, hasColdSunder);
   });
 
   const runDropProbs = computed(() => {
     if (!monsterDb.value) return {};
+    const hasColdSunder = state.gear.charms.some(c => charmSunder(c) === 'cold');
     const valuableSet = new Set(monsterDb.value.valuables);
-    return computeRunDropProbs(totalMF.value, runConfig.value, monsterDb.value, state.run.bosses, valuableSet);
+    return computeRunDropProbs(totalMF.value, runConfig.value, monsterDb.value, state.run.bosses, valuableSet, hasColdSunder);
   });
 
   const totalDropProbs = computed(() => aggregateDropProbs(runDropProbs.value));
@@ -1070,6 +1072,26 @@ const app = createApp({
       return `1/${Math.round(1 / prob).toLocaleString()}`;
     }
 
+    // Static descriptions for each drop-odds category (defined here to keep apostrophes
+    // out of Vue template expressions, where backslash escapes inside attribute strings
+    // are unreliable across HTML parsers).
+    const DROP_CATEGORY_DESC = {
+      itemProb:      "Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll.",
+      runeProb:      "Any rune Pul (r21) or better — tradeable for meaningful gear upgrades.",
+      skillerProb:   "A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction.",
+      valuableScProb:"A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution.",
+    };
+
+    // Returns a tooltip string for a drop-odds category: static description followed by
+    // per-pack/per-monster breakdown from packDetails.
+    const _runDropProbsRef = currentBuild.runDropProbs;
+    function runDropDetail(runId, key) {
+      const desc  = DROP_CATEGORY_DESC[key] ?? '';
+      const drops = _runDropProbsRef.value?.[runId];
+      if (!drops?.packDetails) return desc;
+      const detail = formatDropDetail(drops.packDetails, key);
+      return detail ? `${desc}\n\n${detail}` : desc;
+    }
 
     const showResetConfirm = ref(false);
 
@@ -1098,6 +1120,7 @@ const app = createApp({
       targetPreset,
       targetSlots,
       fmtOneIn,
+      runDropDetail,
       effUniqueMF,
       effSetMF,
 
@@ -1269,7 +1292,7 @@ const app = createApp({
             <div class="fold-section">
               <button class="fold-header" @click="state.ui.folds.dropOddsBoss = !state.ui.folds.dropOddsBoss">
                 <span class="fold-arrow">{{ state.ui.folds.dropOddsBoss ? '▶' : '▼' }}</span>
-                Per-boss breakdown
+                Drop odds by run
               </button>
               <div v-if="!state.ui.folds.dropOddsBoss" class="breakdown-content">
                 <template v-if="totalDropProbs">
@@ -1281,19 +1304,19 @@ const app = createApp({
                         <span>{{ fmtOneIn(runDropProbs[run.id].total) }}</span>
                       </div>
                       <div class="breakdown-row breakdown-sub">
-                        <span>Good Unique / Set Item <tooltip-popup text="Any item from the Maxroll Med/High trade-value list (maxroll.gg/d2/items/valuable-unique-set-items) — Shako, Oculus, Mara's Kaleidoscope, etc. Accounts for MF diminishing returns and the quality roll."><span class="info-icon">i</span></tooltip-popup></span>
+                        <span>Good Unique / Set Item <tooltip-popup :text="runDropDetail(run.id, 'itemProb')"><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ fmtOneIn(runDropProbs[run.id].itemProb) }}</span>
                       </div>
                       <div class="breakdown-row breakdown-sub">
-                        <span>Good Rune <tooltip-popup text="Any rune Pul (r21) or better — tradeable for meaningful gear upgrades."><span class="info-icon">i</span></tooltip-popup></span>
+                        <span>Good Rune <tooltip-popup :text="runDropDetail(run.id, 'runeProb')"><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ fmtOneIn(runDropProbs[run.id].runeProb) }}</span>
                       </div>
                       <div class="breakdown-row breakdown-sub">
-                        <span>Any Skiller GC <tooltip-popup text="A magic Grand Charm with any class skill tab prefix (e.g. +1 Cold Skills, +1 Combat Skills, etc.) — all 8 classes, 3 tabs each. Accounts for magic quality roll, P(has a prefix), and the skiller affix fraction."><span class="info-icon">i</span></tooltip-popup></span>
+                        <span>Any Skiller GC <tooltip-popup :text="runDropDetail(run.id, 'skillerProb')"><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ fmtOneIn(runDropProbs[run.id].skillerProb) }}</span>
                       </div>
                       <div class="breakdown-row breakdown-sub">
-                        <span>Valuable SC <tooltip-popup text="A magic Small Charm with exactly +5 all res (Shimmering), +7% MF (of Good Luck), or +20 life (of Vita). Only the max roll counts. Accounts for P(has prefix/suffix) per the magic item layout distribution."><span class="info-icon">i</span></tooltip-popup></span>
+                        <span>Valuable SC <tooltip-popup :text="runDropDetail(run.id, 'valuableScProb')"><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ fmtOneIn(runDropProbs[run.id].valuableScProb) }}</span>
                       </div>
                     </template>
@@ -1354,7 +1377,7 @@ const app = createApp({
             <div class="fold-section">
               <button class="fold-header" @click="state.ui.folds.breakdown = !state.ui.folds.breakdown">
                 <span class="fold-arrow">{{ state.ui.folds.breakdown ? '▶' : '▼' }}</span>
-                Per-boss breakdown
+                Time breakdown by run
               </button>
               <div v-if="!state.ui.folds.breakdown" class="breakdown-content">
                 <template v-if="Object.values(runStats).some(s => s.hasKillData)">
