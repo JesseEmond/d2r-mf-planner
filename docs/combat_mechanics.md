@@ -142,13 +142,30 @@ entirely and proceed to the kill calculation with sunder-adjusted resist.
 Monster actual HP on Hell is derived from two files:
 
 1. **`monstats.txt`**: `MinHP(H)` and `MaxHP(H)` — base HP range before level scaling
-2. **`monlvl.txt`**: `HP(H)` column at the monster's `Level(H)` — a multiplier (divide by 100)
+2. **`monlvl.txt`**: level-scaling multiplier (divide by 100) — **column depends on monster type**
+
+`monlvl.txt` has two Hell HP columns per level:
+- `HP(H)` — used for regular monsters (and as the pre-elite base for super-uniques / random uniques)
+- `L-HP(H)` — used for dedicated act bosses (Andy, Meph, etc.) whose MinHP/MaxHP already
+  represent their fully-designed boss values; no additional elite multiplier is applied
+
+### Act bosses (Andariel, Mephisto, …)
 
 ```
-actual_hp = avg(MinHP(H), MaxHP(H)) × monlvl[Level(H)].HP(H) / 100
+actual_hp = avg(MinHP(H), MaxHP(H)) × monlvl[Level(H)].L-HP(H) / 100
 ```
 
-Apply the elite HP multiplier (2.0× for unique boss, 1.5× for minions) on top of this.
+No elite multiplier on top — L-HP(H) is the boss-level scale, and their MinHP/MaxHP
+already represent their intended boss HP range.
+
+### Regular monsters that become elite (super-uniques, random uniques, champions)
+
+```
+base_hp     = avg(MinHP(H), MaxHP(H)) × monlvl[Level(H)].HP(H) / 100
+boss_hp     = base_hp × 2.0   (super-unique or random unique boss)
+minion_hp   = base_hp × 1.5   (minions of the above)
+champion_hp = base_hp × champion_mult  (varies by champion state; see Champions section)
+```
 
 *Sources: `data/raw/monstats.txt`, `data/raw/monlvl.txt`*
 
@@ -177,15 +194,17 @@ DS1 binary map tiles, not derivable from txt data.
 
 ### Base stats (Hell, all council member types)
 
-| Stat         | councilmember1        | councilmember2        | councilmember3        |
-|--------------|-----------------------|-----------------------|-----------------------|
-| Level(H)     | 88                    | 88                    | 88                    |
-| Avg base HP  | 275 (MinHP=200, MaxHP=350) | ← same           | ← same                |
-| Scaled HP    | 275 × 4895 / 100 ≈ **13,461** | ← same       | ← same                |
-| ResCo(H)     | 33%                   | 33%                   | 33%                   |
-| ResFi(H)     | 120% (**fire immune**) | 33%                  | 33%                   |
-| ResLi(H)     | 33%                   | 100% (**light immune**) | 100% (**light immune**) |
-| monprop (H)  | extra-fire +100       | extra-fire +100       | extra-fire +100       |
+| Stat              | councilmember1             | councilmember2             | councilmember3             |
+|-------------------|----------------------------|----------------------------|----------------------------|
+| Level(H)          | 88                         | 88                         | 88                         |
+| Avg base HP       | 275 (MinHP=200, MaxHP=350) | ← same                     | ← same                     |
+| Base scaled HP    | 275 × HP(H)[88]/100 = 275 × 4895/100 ≈ **13,461** | ← same | ← same  |
+| Super-unique HP   | 13,461 × 2.0 = **26,922** | ← same                     | ← same                     |
+| Minion HP         | 13,461 × 1.5 = **20,191** | ← same                     | ← same                     |
+| ResCo(H)          | 33%                        | 33%                        | 33%                        |
+| ResFi(H)          | 120% (**fire immune**)     | 33%                        | 33%                        |
+| ResLi(H)          | 33%                        | 100% (**light immune**)    | 100% (**light immune**)    |
+| monprop (H)       | extra-fire +100            | extra-fire +100            | extra-fire +100            |
 
 *Sources: `data/raw/monstats.txt`, `data/raw/monlvl.txt`, `data/raw/monprop.txt`,
 `data/raw/superuniques.txt`, `data/raw/monumod.txt`*
@@ -198,3 +217,18 @@ All three can randomly roll it as one of their 2 Hell random mods:
 - **P(cold immune) ≈ 15.4%** per super-unique (2/13)
 - If a super-unique rolls cold, its 2 minions are also cold immune (`xfer=1` on `cold` mod
   in `monumod.txt`)
+
+### Group variant model
+
+The three super-unique bosses are independent, so there are 2³ = 8 possible configurations.
+The pipeline (`extract_combat_stats.py`) pre-enumerates these as `variants` in `db.json`:
+
+| Configuration          | Probability       | Notes |
+|------------------------|-------------------|-------|
+| No boss cold immune    | (11/13)³ ≈ 60.6%  | All 11 members killable |
+| Exactly 1 boss immune  | 3×(2/13)(11/13)² ≈ 33.1% | Boss + 2 minions cold immune (3 members skip) |
+| Exactly 2 bosses immune| 3×(2/13)²(11/13) ≈ 6.0% | 6 members cold immune |
+| All 3 bosses immune    | (2/13)³ ≈ 0.4%    | 9 of 11 members cold immune |
+
+The 2 extra non-super-unique members (from DS1 binary tiles) are never cold immune
+(base cold resist 33%, no elite mods).

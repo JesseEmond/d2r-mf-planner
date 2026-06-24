@@ -38,7 +38,6 @@ Never edit generated files directly. Always fix the script that produces them an
 |---|---|
 | `data/valuables.json` | `scripts/scrape_valuables.py` |
 | `data/drop_odds.json` | `scripts/calculate_drop_odds.py` |
-| `data/combat_stats.json` | `scripts/extract_combat_stats.py` |
 | `public/data/db.json` | `scripts/build_db.py` (orchestrates all of the above) |
 
 If a value is wrong in a generated file, trace it back to the script or the raw data file
@@ -73,3 +72,25 @@ in the script.
   +40 from Magic Resistant, number of random mods per difficulty) are hardcoded with
   references to maxroll.gg/d2/resources/elite-monster and documented in
   `docs/combat_mechanics.md`.
+
+## docs/ — living reference documentation
+
+The `docs/` directory contains human-readable reference documents that capture
+discovered mechanics, formulas, and data-source decisions. These are **not** generated
+files — they are maintained by hand and serve as the authoritative record of what we
+know and how we know it.
+
+**Update `docs/` whenever you:**
+- Discover or verify a formula (HP, resistances, drop probabilities, elite mod effects, etc.)
+- Identify a new data source or cross-file relationship
+- Confirm or correct a value against a community resource
+- Add a hardcoded constant (document it in the relevant `docs/` file as well as in code)
+- Find that a previous `docs/` entry was wrong and correct it
+
+Current docs files:
+
+| File | Contents |
+|---|---|
+| `docs/combat_mechanics.md` | Elite mod counts, cold immunity math, HP formula, Trav council stats |
+
+If the relevant information doesn't fit an existing file, create a new one and list it here.

@@ -84,6 +84,16 @@ class UniqueEntry:
     rarity: int
 
 
+@dataclass
+class MonumodEntry:
+    id: int
+    name: str        # e.g. 'cold', 'resist', 'fast'
+    xfer: bool       # whether minions inherit this mod
+    upick_normal: int
+    upick_nightmare: int
+    upick_hell: int
+
+
 # ---------------------------------------------------------------------------
 # Loaders
 # ---------------------------------------------------------------------------
@@ -197,6 +207,14 @@ def _load_superuniques() -> dict[str, dict]:
         name = row.get('Superunique', '').strip()
         if not name:
             continue
+
+        def _int(col: str, r: dict = row) -> int:
+            v = r.get(col, '').strip()
+            return int(v) if v else 0
+
+        # Mod1/Mod2/Mod3 are monumod IDs (0 = none)
+        preset_mods = [m for m in [_int('Mod1'), _int('Mod2'), _int('Mod3')] if m]
+
         sus[name] = {
             'class': row.get('Class', '').strip(),
             'tc': {
@@ -204,6 +222,9 @@ def _load_superuniques() -> dict[str, dict]:
                 'nightmare': row.get('TC(N)', '').strip(),
                 'hell': row.get('TC(H)', '').strip(),
             },
+            'preset_mods': preset_mods,
+            'min_grp': _int('MinGrp'),
+            'max_grp': _int('MaxGrp'),
         }
     return sus
 
@@ -382,6 +403,7 @@ def _get_group_index() -> dict[int, list[TreasureClass]]:
 
 _ITEM_NAMES: dict[str, str] | None = None
 _MONLVL: dict[int, dict[str, int]] | None = None
+_MONUMOD: dict[int, MonumodEntry] | None = None
 
 
 def get_item_names() -> dict[str, str]:
@@ -406,6 +428,38 @@ def get_monlvl() -> dict[int, dict[str, int]]:
                 continue
             _MONLVL[lvl] = {k: int(v) for k, v in row.items() if v.strip().lstrip('-').isdigit()}
     return _MONLVL
+
+
+def get_monumod() -> dict[int, MonumodEntry]:
+    """Return {mod_id: MonumodEntry} from monumod.txt.
+
+    Mod IDs match the Mod1/Mod2/Mod3 columns in superuniques.txt.
+    """
+    global _MONUMOD
+    if _MONUMOD is None:
+        _MONUMOD = {}
+        for row in csv_rows('monumod.txt'):
+            id_s = row.get('id', '').strip()
+            if not id_s:
+                continue
+            try:
+                mod_id = int(id_s)
+            except ValueError:
+                continue
+
+            def _pick(col: str, r: dict = row) -> int:
+                v = r.get(col, '').strip()
+                return int(v) if v else 0
+
+            _MONUMOD[mod_id] = MonumodEntry(
+                id=mod_id,
+                name=row.get('uniquemod', '').strip(),
+                xfer=row.get('xfer', '0').strip() == '1',
+                upick_normal=_pick('upick'),
+                upick_nightmare=_pick('upick (N)'),
+                upick_hell=_pick('upick (H)'),
+            )
+    return _MONUMOD
 
 
 # ---------------------------------------------------------------------------

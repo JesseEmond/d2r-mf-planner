@@ -32,3 +32,5 @@ def load_targets() -> list[dict]:
             })
             seen.add(mon["id"])
     return targets
+
+
