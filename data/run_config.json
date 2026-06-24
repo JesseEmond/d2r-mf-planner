@@ -17,13 +17,13 @@
         {
           "id": "andy",
           "monster_id": "andariel",
-          "difficulty": "hell",
           "superunique": false,
           "amount": 1,
           "probability": 1.0
         }
       ],
-      "available": true
+      "available": true,
+      "difficulty": "hell"
     },
     {
       "id": "cows",
@@ -31,7 +31,8 @@
       "act": 1,
       "teleports": 70,
       "monsters": [],
-      "available": false
+      "available": false,
+      "difficulty": "hell"
     },
     {
       "id": "ancient_tunnels",
@@ -39,7 +40,8 @@
       "act": 2,
       "teleports": 50,
       "monsters": [],
-      "available": false
+      "available": false,
+      "difficulty": "hell"
     },
     {
       "id": "travincal",
@@ -50,7 +52,6 @@
         {
           "id": "ismail",
           "monster_id": "Ismail Vilehand",
-          "difficulty": "hell",
           "superunique": true,
           "amount": 1,
           "probability": 1.0
@@ -58,7 +59,6 @@
         {
           "id": "geleb",
           "monster_id": "Geleb Flamefinger",
-          "difficulty": "hell",
           "superunique": true,
           "amount": 1,
           "probability": 1.0
@@ -66,7 +66,6 @@
         {
           "id": "bremm",
           "monster_id": "Bremm Sparkfist",
-          "difficulty": "hell",
           "superunique": true,
           "amount": 1,
           "probability": 1.0
@@ -74,13 +73,13 @@
         {
           "id": "trav_extra",
           "monster_id": "councilmember1",
-          "difficulty": "hell",
           "superunique": false,
           "amount": 2,
           "probability": 1.0
         }
       ],
-      "available": false
+      "available": false,
+      "difficulty": "hell"
     },
     {
       "id": "meph",
@@ -91,13 +90,13 @@
         {
           "id": "meph",
           "monster_id": "mephisto",
-          "difficulty": "hell",
           "superunique": false,
           "amount": 1,
           "probability": 1.0
         }
       ],
-      "available": true
+      "available": true,
+      "difficulty": "hell"
     },
     {
       "id": "pindle",
@@ -108,13 +107,13 @@
         {
           "id": "pindle",
           "monster_id": "Pindleskin",
-          "difficulty": "hell",
           "superunique": true,
           "amount": 1,
           "probability": 1.0
         }
       ],
-      "available": true
+      "available": true,
+      "difficulty": "hell"
     }
   ]
 }
