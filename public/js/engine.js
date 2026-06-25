@@ -253,7 +253,8 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
       ? `~${teleportsTo} to reach + ${teleportsBack} to leave = ${totalTeleports} total`
       : `~${totalTeleports}`;
     const travelDetail = `${teleportBreakdown} teleports × ${bp.frames} frames/cast ÷ ${D2_FPS} FPS = ${travelSecs.toFixed(1)}s`;
-    const packs = monsterDbData?.runs?.[run.id]?.monster_packs ?? [];
+    const allPacks = monsterDbData?.runs?.[run.id]?.monster_packs ?? [];
+    const packs = allPacks.filter(p => !p.room_pack || run.kill_room_packs !== false);
     const pierceCold = combat.enemyColdResPct ?? 0;
 
     let killSecs = 0;
@@ -386,7 +387,8 @@ export function computeRunDropProbs(mf, runConfigData, monsterDbData, runBosses,
 
   for (const run of runConfigData) {
     if (!run.available || !runBosses[run.id]) continue;
-    const packs = monsterDbData?.runs?.[run.id]?.monster_packs ?? [];
+    const allPacks = monsterDbData?.runs?.[run.id]?.monster_packs ?? [];
+    const packs = allPacks.filter(p => !p.room_pack || run.kill_room_packs !== false);
     if (packs.length === 0) continue;
 
     // Compound no-valuable probability across all packs.
@@ -417,15 +419,15 @@ export function computeRunDropProbs(mf, runConfigData, monsterDbData, runBosses,
         const effectiveFrac = m.is_minion ? 1 : (hasColdSunder ? 1 : 1 - (mon.combat?.p_cold_immune ?? 0));
 
         let monNoValuable = 1;
-        for (let i = 0; i < amount; i++) {
-          for (const [name, item] of Object.entries(mon.drops)) {
-            if (!valuableSet.has(name)) continue;
-            const qp   = item.quality_params;
-            const mfV  = qp.quality_type === 'set' ? sMF : uMF;
-            const prob = item.base_prob * qualityCheckProb(qp, mon.mlvl, mfV) * (item.unique_weight / item.unique_total_weight);
-            monNoValuable  *= 1 - effectiveFrac * prob;
-            packNoValuable *= 1 - effectiveFrac * prob;
-          }
+        for (const [name, item] of Object.entries(mon.drops)) {
+          if (!valuableSet.has(name)) continue;
+          const qp   = item.quality_params;
+          const mfV  = qp.quality_type === 'set' ? sMF : uMF;
+          const prob = item.base_prob * qualityCheckProb(qp, mon.mlvl, mfV) * (item.unique_weight / item.unique_total_weight);
+          // Math.pow supports fractional amounts (e.g. 2.5 for averaged champion/unique packs).
+          const pNone = Math.pow(1 - effectiveFrac * prob, amount);
+          monNoValuable  *= pNone;
+          packNoValuable *= pNone;
         }
         const monRune     = (mon.good_rune_prob ?? 0) * amount * effectiveFrac;
         const monSkiller  = (mon.gc_base_prob ?? 0) * (mon.gc_skiller_frac ?? 0) * amount * effectiveFrac;

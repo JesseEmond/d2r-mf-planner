@@ -45,6 +45,8 @@ def _build_runs(run_config_data: dict, monsters: dict, minion_id_to_key: dict) -
             for m in pack["monsters"]:
                 raw = m.get("label") or m.get("monster_id", m["id"])
                 label = raw if raw != raw.lower() else raw.replace("_", " ").title()
+                if m.get("elite"):
+                    label = f"Elite {label}"
                 pack_monsters.append({"id": m["id"], "label": label, "amount": m.get("amount", 1)})
                 # Expand minions inline, deriving drops_from via the minion's monstats class
                 mon_combat = monsters.get(m["id"], {}).get("combat", {})
@@ -61,7 +63,10 @@ def _build_runs(run_config_data: dict, monsters: dict, minion_id_to_key: dict) -
                     if drops_key:
                         minion_entry["drops_from"] = drops_key
                     pack_monsters.append(minion_entry)
-            packs.append({"probability": pack["probability"], "monsters": pack_monsters})
+            entry: dict = {"probability": pack["probability"], "monsters": pack_monsters}
+            if pack.get("room_pack"):
+                entry["room_pack"] = True
+            packs.append(entry)
         runs[run["id"]] = {"monster_packs": packs}
     return runs
 

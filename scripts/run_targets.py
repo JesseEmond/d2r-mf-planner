@@ -28,6 +28,7 @@ def load_targets() -> list[dict]:
             "monster_id": mon["monster_id"],
             "difficulty": mon["difficulty"],
             "superunique": mon.get("superunique", False),
+            "elite": mon.get("elite", False),
         })
         seen.add(mon["id"])
     for run in run_config["runs"]:
@@ -41,6 +42,7 @@ def load_targets() -> list[dict]:
                     "monster_id": mon["monster_id"],
                     "difficulty": difficulty,
                     "superunique": mon["superunique"],
+                    "elite": mon.get("elite", False),
                 })
                 seen.add(mon["id"])
     return targets

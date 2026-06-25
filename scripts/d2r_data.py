@@ -513,6 +513,7 @@ def resolve_tc(monster_id: str, difficulty: str) -> str:
 def walk_tc(
     tc_name: str,
     _quality_factor: int = 0,
+    _nodrop_override: int | None = None,
 ) -> Generator[tuple[str, float, int], None, None]:
     """
     Recursively walk a TC tree, yielding leaf item drops.
@@ -524,6 +525,10 @@ def walk_tc(
       quality_factor — max TC Unique quality bonus (out of 1024) seen along the
                        path; used in the quality-check formula in calculate_drop_odds.py
     Gold entries ('gld,...') are silently skipped.
+
+    _nodrop_override: if set, replaces the top-level TC's NoDrop value only.
+    Used for elite monsters (champion/unique) which the engine forces to always drop
+    (NoDrop=0), even though their TC data still carries the normal-monster NoDrop.
     """
     tcs = _get_tcs()
     tc = tcs.get(tc_name)
@@ -533,7 +538,8 @@ def walk_tc(
         return
 
     qf = max(_quality_factor, tc.unique)
-    total_weight = tc.nodrop + sum(w for _, w in tc.items)
+    nodrop = _nodrop_override if _nodrop_override is not None else tc.nodrop
+    total_weight = nodrop + sum(w for _, w in tc.items)
     if total_weight == 0:
         return
 
@@ -546,6 +552,8 @@ def walk_tc(
         p_total = p_per_pick * picks
 
         if item_name in tcs:
+            # Don't propagate _nodrop_override into sub-TCs — only the top-level
+            # activation is guaranteed for elites; sub-TCs use their own NoDrop.
             for sub_item, sub_p, sub_qf in walk_tc(item_name, qf):
                 yield (sub_item, p_total * sub_p, sub_qf)
         else:

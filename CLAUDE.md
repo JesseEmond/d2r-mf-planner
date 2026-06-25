@@ -40,6 +40,9 @@ Never edit generated files directly. Always fix the script that produces them an
 | `data/drop_odds.json` | `scripts/calculate_drop_odds.py` |
 | `public/data/db.json` | `scripts/build_db.py` (orchestrates all of the above) |
 
+After any pipeline change, run `scripts/rebuild.sh` — it regenerates `drop_odds.json`,
+rebuilds `db.json`, and runs all tests in one step. Do not run the scripts individually.
+
 If a value is wrong in a generated file, trace it back to the script or the raw data file
 and fix it there. Editing the output directly breaks reproducibility — the next pipeline run
 will overwrite the change.

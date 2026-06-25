@@ -21,11 +21,33 @@
       "label": "Andy",
       "act": 1,
       "teleports_to": 40,
+      "kill_room_packs": true,
       "monster_packs": [
         {
           "probability": 1.0,
           "monsters": [
             { "id": "andy", "monster_id": "andariel", "superunique": false, "amount": 1 }
+          ]
+        },
+        {
+          "probability": 0.75,
+          "room_pack": true,
+          "monsters": [
+            { "id": "andy_room_ghoul_1", "monster_id": "zombie3", "label": "Ghoul", "superunique": false, "amount": 2.5, "elite": true }
+          ]
+        },
+        {
+          "probability": 0.75,
+          "room_pack": true,
+          "monsters": [
+            { "id": "andy_room_ghoul_2", "monster_id": "zombie3", "label": "Ghoul", "superunique": false, "amount": 2.5, "elite": true }
+          ]
+        },
+        {
+          "probability": 0.45,
+          "room_pack": true,
+          "monsters": [
+            { "id": "andy_room_aff", "monster_id": "bighead1", "label": "Afflicted", "superunique": false, "amount": 2.5, "elite": true }
           ]
         }
       ],

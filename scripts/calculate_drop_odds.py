@@ -177,10 +177,10 @@ def _get_mlvl(target: dict) -> int:
     return mon.level.get(target["difficulty"], 0)
 
 
-def _walk_grouped(tc_name: str) -> dict[str, tuple[float, float]]:
+def _walk_grouped(tc_name: str, nodrop_override: int | None = None) -> dict[str, tuple[float, float]]:
     """Walk TC and accumulate per item code: (total_prob, prob-weighted avg quality_factor)."""
     acc: dict[str, list[float]] = defaultdict(lambda: [0.0, 0.0])
-    for code, prob, qf in d2r_data.walk_tc(tc_name):
+    for code, prob, qf in d2r_data.walk_tc(tc_name, _nodrop_override=nodrop_override):
         acc[code][0] += prob
         acc[code][1] += prob * qf
     return {
@@ -193,7 +193,10 @@ def _compute(target: dict, name_to_entry: dict, valuables: list[str]) -> dict:
     tc_name = d2r_data.resolve_tc(target["monster_id"], target["difficulty"])
     mlvl = _get_mlvl(target)
     ilvl = min(mlvl, 99)
-    grouped = _walk_grouped(tc_name)
+    # Elite monsters (champion/unique) are forced to always drop by the engine (NoDrop=0).
+    # The TC data still carries the normal-monster NoDrop, so we override it here.
+    nodrop_override = 0 if target.get("elite") else None
+    grouped = _walk_grouped(tc_name, nodrop_override=nodrop_override)
 
     unique_items = d2r_data.get_unique_items()
     set_items = d2r_data.get_set_items()
