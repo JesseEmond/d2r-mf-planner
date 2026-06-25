@@ -195,6 +195,30 @@ body {
   border-color: var(--color-unique);
   color: var(--color-unique);
 }
+.share-btn {
+  padding: 0.3rem 0.75rem;
+  font-size: 0.75rem;
+  font-family: inherit;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  color: var(--color-text-muted);
+  border-radius: 4px;
+  cursor: pointer;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  transition: border-color 0.15s, color 0.15s;
+}
+.share-btn:hover {
+  border-color: var(--color-magic);
+  color: var(--color-magic);
+}
+.share-btn.is-saved {
+  color: var(--color-text-dim);
+}
+.share-btn.is-copied {
+  border-color: var(--color-rune);
+  color: var(--color-rune);
+}
 .app-grid {
   display: grid;
   grid-template-columns: 1fr 320px;
