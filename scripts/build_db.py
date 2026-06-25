@@ -66,6 +66,8 @@ def _build_runs(run_config_data: dict, monsters: dict, minion_id_to_key: dict) -
             entry: dict = {"probability": pack["probability"], "monsters": pack_monsters}
             if pack.get("room_pack"):
                 entry["room_pack"] = True
+            if pack.get("count"):
+                entry["count"] = pack["count"]
             named = [m for m in pack["monsters"] if not m.get("is_minion")]
             if named and all(m.get("elite") for m in named):
                 entry["elite_group"] = True

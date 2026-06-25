@@ -57,9 +57,33 @@
       "id": "cows",
       "label": "Cow Level",
       "act": 1,
-      "teleports_to": 70,
-      "monster_packs": [],
-      "available": false,
+      "teleports_to": 25,
+      "teleports_back": 0,
+      "teleports_within": 50,
+      "setup_overhead_secs": 8,
+      "monster_packs": [
+        {
+          "probability": 1.0,
+          "count": 60,
+          "monsters": [
+            { "id": "cow_regular", "monster_id": "hellbovine", "label": "Hell Bovine", "superunique": false, "amount": 8 }
+          ]
+        },
+        {
+          "probability": 1.0,
+          "count": 6,
+          "monsters": [
+            { "id": "cow_champion", "monster_id": "hellbovine", "label": "Hell Bovine", "superunique": false, "amount": 4, "elite": true }
+          ]
+        },
+        {
+          "probability": 1.0,
+          "monsters": [
+            { "id": "cowking", "monster_id": "The Cow King", "superunique": true, "amount": 1 }
+          ]
+        }
+      ],
+      "available": true,
       "difficulty": "hell"
     },
     {

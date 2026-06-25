@@ -232,3 +232,44 @@ The pipeline (`extract_combat_stats.py`) pre-enumerates these as `variants` in `
 
 The 2 extra non-super-unique members (from DS1 binary tiles) are never cold immune
 (base cold resist 33%, no elite mods).
+
+---
+
+## Cow Level (Moo Moo Farm)
+
+### Cow King
+
+Sourced from `superuniques.txt`: `"The Cow King" / "The Cow King" / cowking / hcIdx 39`,
+preset mods `resist` (id=8) and `lightning` (id=17), `MinGrp = MaxGrp = 6` → 6 fixed
+minions. HP/minion scaling uses the same super-unique path as Trav's council
+(base × 2.0 for the boss, base × 1.5 for minions; see Base HP Calculation above).
+Base stats come from `monstats.txt` row `cowking` (identical to `hellbovine`'s
+Level(H)/MinHP/MaxHP/ResCo(H) columns — the boss class only differs via the
+superunique modifiers and HP multiplier).
+
+Regular cows spawn as monstats `hellbovine` (not the unused dummy `cow` row).
+Treasure classes `Cow (H)` and `Cow King (H)` (`treasureclassex.txt`) already
+resolve to real item pools, so no special-casing is needed in
+`calculate_drop_odds.py`.
+
+### Pack composition — user-supplied farming assumptions
+
+Unlike Travincal's fixed council layout, cow level has no enumerable "rooms" —
+players roam an open field and choose how many packs to clear before reaching
+the Cow King. The pack counts/sizes below are **not derived from any data
+file**; they are the run owner's own farming habits (analogous to Andy's
+existing room-pack spawn probabilities, which are likewise not data-derived).
+Modeled in `run_config.json`'s `cows` run via the `count` field (a pack
+composition repeated `count` times per run):
+
+| Pack type | Count/run | Monsters/pack | Notes |
+|---|---|---|---|
+| Regular   | 60 | 8 hellbovine        | ~480 total cows/run, close to the commonly cited ~510/map |
+| Champion  | 6  | 4 hellbovine, elite | Champion-modded packs, no herd/straggler overhead (see Elite Monster Types) |
+| Cow King  | 1  | Cow King + 6 minions | — |
+
+Teleport counts (`teleports_to: 25`, `teleports_within: 50`) and
+`setup_overhead_secs: 8` are likewise the run owner's own estimates for the
+one-time leg-quest (find Cairn Stones, grab Wirt's Leg, return to Akara, buy a
+Tome of Town Portal, open the Cow Portal) and in-level pack-to-pack hopping.
+Adjust these directly in `run_config.json` to match actual playstyle.
