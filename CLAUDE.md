@@ -95,6 +95,7 @@ Current docs files:
 | File | Contents |
 |---|---|
 | `docs/combat_mechanics.md` | Elite mod counts, cold immunity math, HP formula, Trav council stats |
+| `docs/gear_data.md` | Sunder Charm random bonus stat ranges (propertygroups.txt derivation) |
 
 If the relevant information doesn't fit an existing file, create a new one and list it here.
 
