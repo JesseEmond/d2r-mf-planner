@@ -225,16 +225,17 @@ export function formatDropDetail(packDetails, key) {
   const lines = [];
   for (const pack of packDetails) {
     const spawnNote = pack.spawnProb < 1 ? ` (${Math.round(pack.spawnProb * 100)}%)` : '';
+    const countNote = (pack.count ?? 1) > 1 ? ` ×${pack.count}` : '';
     if (pack.monsters.length === 1) {
       const m = pack.monsters[0];
-      lines.push(`${m.label}${spawnNote}: ${fmtMonDrop(m, key)}`);
+      lines.push(`${m.label}${countNote}${spawnNote}: ${fmtMonDrop(m, key)}`);
     } else {
       const bosses  = pack.monsters.filter(m => !m.is_minion);
       const minions = pack.monsters.filter(m =>  m.is_minion);
       const minionCount = minions.reduce((s, m) => s + (m.amount ?? 1), 0);
       const packName = bosses.map(m => m.label).join(', ')
         + (minionCount > 0 ? ` + ${minionCount} minion${minionCount !== 1 ? 's' : ''}` : '');
-      lines.push(`${packName}${spawnNote}`);
+      lines.push(`${packName}${countNote}${spawnNote}`);
       for (const m of pack.monsters) {
         lines.push(`  ${m.label}: ${fmtMonDrop(m, key)}`);
       }
@@ -253,11 +254,16 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
     if (!run.available) continue;
     const teleportsTo = run.teleports_to ?? run.teleports ?? 0;
     const teleportsBack = run.teleports_back ?? 0;
-    const totalTeleports = teleportsTo + teleportsBack;
+    const teleportsWithin = run.teleports_within ?? 0;
+    const totalTeleports = teleportsTo + teleportsBack + teleportsWithin;
     const travelSecs = totalTeleports * bp.frames / D2_FPS;
-    const teleportBreakdown = teleportsBack > 0
-      ? `~${teleportsTo} to reach + ${teleportsBack} to leave = ${totalTeleports} total`
-      : `~${totalTeleports}`;
+    const teleportLines = [
+      teleportsBack > 0
+        ? `~${teleportsTo} to reach + ${teleportsBack} to leave`
+        : `~${teleportsTo} to reach`,
+    ];
+    if (teleportsWithin > 0) teleportLines.push(`~${teleportsWithin} hopping between packs in-area`);
+    const teleportBreakdown = `${teleportLines.join(' + ')} = ${totalTeleports} total`;
     const travelDetail = `${teleportBreakdown} teleports × ${bp.frames} frames/cast ÷ ${D2_FPS} FPS = ${travelSecs.toFixed(1)}s`;
     const allPacks = monsterDbData?.runs?.[run.id]?.monster_packs ?? [];
     const packs = allPacks.filter(p => !p.room_pack || run.kill_room_packs !== false);
@@ -275,6 +281,8 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
         const isSingle = packMonsters.length === 1 && (packMonsters[0].amount ?? 1) === 1;
         const pct = Math.round(pack.probability * 100);
         const spawnTag = pct < 100 ? ` (${pct}% spawn)` : '';
+        const count = pack.count ?? 1;
+        const countTag = count > 1 ? ` ×${count}` : '';
 
         if (isSingle) {
           // Single isolated monster (no minions): Blizzard + Ice Blast; cold immune → skip unless sundered
@@ -286,7 +294,7 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
             const mult      = coldDmgMultiplier(monCombat.cold_resist ?? 0, effCM, pierceCold);
             const effDps    = (blizzDmg / BLIZZARD_COOLDOWN_SECS + iceBlastCasts * iceBlastDmg / BLIZZARD_COOLDOWN_SECS) * mult;
             const baseKill  = effDps > 0 ? monCombat.hp / effDps : 0;
-            killSecs += pack.probability * (1 - pImmune) * baseKill;
+            killSecs += pack.probability * (1 - pImmune) * baseKill * count;
 
             const monResist  = monCombat.cold_resist ?? 0;
             const cmRed      = cmResistReduction(effCM);
@@ -299,12 +307,12 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
               : null;
             const alwaysSkipped = pImmune === 1;
             killLines.push([
-              `${m.label}${spawnTag}`,
+              `${m.label}${countTag}${spawnTag}`,
               `  HP: ${monCombat.hp.toLocaleString()} · CR: ${monResist}% − CM(−${cmRed}%)${pierceLine} → ${effRes}% → ${mult.toFixed(2)}× dmg`,
               immuneLine,
               alwaysSkipped
                 ? `  skipped (cold immune, no sunder)`
-                : `  Expected kill: ${(baseKill * (1 - pImmune) * pack.probability).toFixed(1)}s`,
+                : `  Expected kill: ${(baseKill * (1 - pImmune) * pack.probability * count).toFixed(1)}s`,
             ].filter(Boolean).join('\n'));
           }
         } else {
@@ -349,16 +357,16 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
           const herdSecs      = pack.elite_group ? 0 : PACK_HERD_SECS;
           const stragglerSecs = pack.elite_group ? 0 : PACK_STRAGGLER_SECS;
           const killTime      = maxEffHP > 0 ? herdSecs + maxEffHP / throughput + stragglerSecs : 0;
-          killSecs += pack.probability * killTime;
+          killSecs += pack.probability * killTime * count;
 
           const namedNames = namedMonsters.map(m => `${m.label}${(m.amount ?? 1) > 1 ? ` ×${m.amount}` : ''}`).join(', ');
           const overheadDetail = pack.elite_group
             ? `${(maxEffHP / throughput).toFixed(1)}s kill (bottleneck: ${maxEffHPLabel})`
             : `${herdSecs}s herd + ${(maxEffHP / throughput).toFixed(1)}s kill (bottleneck: ${maxEffHPLabel}) + ${stragglerSecs}s stragglers`;
           killLines.push([
-            `Pack${spawnTag}: ${namedNames}`,
+            `Pack${countTag}${spawnTag}: ${namedNames}`,
             ...packDetailLines,
-            `  ${overheadDetail} = ${killTime.toFixed(1)}s (expected: ${(killTime * pack.probability).toFixed(1)}s)`,
+            `  ${overheadDetail} = ${killTime.toFixed(1)}s/pack (expected: ${(killTime * pack.probability * count).toFixed(1)}s)`,
           ].join('\n'));
         }
       }
@@ -377,19 +385,23 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
         return `${m.label}${(m.amount ?? 1) > 1 ? ` ×${m.amount}` : ''}` + (minionAmt ? ` + ${minionAmt} minions` : '');
       });
       const prob = Math.round(pack.probability * 100);
-      return `  · ${names.join(', ')}` + (prob < 100 ? ` (${prob}%)` : '');
+      const countTag = (pack.count ?? 1) > 1 ? ` ×${pack.count}` : '';
+      return `  · ${names.join(', ')}${countTag}` + (prob < 100 ? ` (${prob}%)` : '');
     });
     const assumptions = [
       teleportsBack > 0
         ? `~${teleportsTo} teleports to reach, ~${teleportsBack} to leave`
-        : `~${totalTeleports} teleports to reach`,
+        : `~${teleportsTo} teleports to reach`,
+      teleportsWithin > 0 ? `~${teleportsWithin} teleports hopping between packs in-area` : null,
       packs.length > 0 ? 'Packs:\n' + packSummaryLines.join('\n') : null,
     ].filter(Boolean).join('\n');
 
-    const overheadSecs = actOverhead[run.act] ?? 0;
+    const setupSecs = run.setup_overhead_secs ?? 0;
+    const setupDetail = setupSecs > 0 ? `One-time setup (quest/leg/portal): ${setupSecs.toFixed(1)}s` : null;
+    const overheadSecs = (actOverhead[run.act] ?? 0) + setupSecs;
     stats[run.id] = {
-      travelSecs, killSecs, overheadSecs, totalSecs: travelSecs + killSecs + overheadSecs,
-      hasKillData: killSecs > 0, assumptions, travelDetail, killDetail,
+      travelSecs, killSecs, overheadSecs, setupSecs, totalSecs: travelSecs + killSecs + overheadSecs,
+      hasKillData: killSecs > 0, assumptions, travelDetail, killDetail, setupDetail,
     };
   }
   return stats;
@@ -459,11 +471,13 @@ export function computeRunDropProbs(mf, runConfigData, monsterDbData, runBosses,
       }
 
       const p = pack.probability;
-      noValuableTotal *= 1 - p * (1 - packNoValuable);
-      runeProb        += p * packRune;
-      skillerProb     += p * packSkiller;
-      valuableScProb  += p * packValueSc;
-      packDetails.push({ spawnProb: p, monsters: monsterDetails });
+      const count = pack.count ?? 1;
+      // count independent repeats of this pack composition (e.g. many identical cow packs)
+      noValuableTotal *= Math.pow(1 - p * (1 - packNoValuable), count);
+      runeProb        += p * packRune * count;
+      skillerProb     += p * packSkiller * count;
+      valuableScProb  += p * packValueSc * count;
+      packDetails.push({ spawnProb: p, count, monsters: monsterDetails });
     }
 
     const itemProb = 1 - noValuableTotal;

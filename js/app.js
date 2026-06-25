@@ -1428,6 +1428,10 @@ const app = createApp({
                   <template v-for="run in runConfig" :key="run.id">
                     <template v-if="state.run.bosses[run.id] && runStats[run.id]?.hasKillData">
                       <div class="breakdown-run-label">{{ run.label }}</div>
+                      <div v-if="runStats[run.id].setupSecs > 0" class="breakdown-row">
+                        <span>Setup <tooltip-popup :text="runStats[run.id].setupDetail"><span class="info-icon">i</span></tooltip-popup></span>
+                        <span>{{ runStats[run.id].setupSecs.toFixed(1) }}s</span>
+                      </div>
                       <div class="breakdown-row">
                         <span>Travel <tooltip-popup :text="runStats[run.id].travelDetail"><span class="info-icon">i</span></tooltip-popup></span>
                         <span>{{ runStats[run.id].travelSecs.toFixed(1) }}s</span>

@@ -4715,6 +4715,2131 @@
         "cold_resist": 0
       }
     },
+    "cow_regular": {
+      "mlvl": 81,
+      "tc": "Cow (H)",
+      "drops": {
+        "Arreat's Face": {
+          "base_prob": 8.761094113919667e-05,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Bloodpact Shard": {
+          "base_prob": 0.00017592221125334074,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 73,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 2
+        },
+        "Bul-Kathos' Wedding Band": {
+          "base_prob": 0.0034615384615384616,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 66,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Chance Guards": {
+          "base_prob": 0.00022294544605109122,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 20,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Death's Fathom": {
+          "base_prob": 1.5475538874553653e-05,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 81,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Death's Web": {
+          "base_prob": 3.0951077749107305e-06,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 74,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Dreadfang": {
+          "base_prob": 0.00047807653819637047,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 2
+        },
+        "Entropy Locket": {
+          "base_prob": 0.0017307692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 60,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 74
+        },
+        "Eschuta's Temper": {
+          "base_prob": 0.0003455690315503124,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 80,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Gheed's Fortune": {
+          "base_prob": 0.0008653846153846154,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 70,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Gheed's Wager": {
+          "base_prob": 5.259981758801314e-05,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 79,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Gore Rider": {
+          "base_prob": 0.00017522188227839334,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 55,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Griswold's Honor": {
+          "base_prob": 5.61704744335651e-06,
+          "quality_params": {
+            "base_chance": 120,
+            "divisor": 3,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 44,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Guillaume's Face": {
+          "base_prob": 0.0001260424580018557,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 41,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Hand of Blessed Light": {
+          "base_prob": 0.00022123726163506008,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Harlequin Crest": {
+          "base_prob": 8.216940500250117e-05,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Hellwarden's Will": {
+          "base_prob": 0.00035265548498166697,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 55,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 3
+        },
+        "Herald of Zakarum": {
+          "base_prob": 6.302122900092784e-05,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Highlord's Wrath": {
+          "base_prob": 0.0017307692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 73,
+            "quality_type": "unique"
+          },
+          "unique_weight": 5,
+          "unique_total_weight": 74
+        },
+        "Homunculus": {
+          "base_prob": 4.3805470569598334e-05,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Horazon's Countenance": {
+          "base_prob": 0.00023833822604483546,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Dominion": {
+          "base_prob": 0.0001260424580018557,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Hold": {
+          "base_prob": 0.00013245282819690605,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Legacy": {
+          "base_prob": 0.00011780508213326285,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Secrets": {
+          "base_prob": 8.231590237681529e-05,
+          "quality_params": {
+            "base_chance": 120,
+            "divisor": 3,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Immortal King's Soul Cage": {
+          "base_prob": 1.123409488671302e-05,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 37,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Lacerator": {
+          "base_prob": 0.00011937581656170637,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 76,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Latent Bone Break": {
+          "base_prob": 0.0008653846153846154,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Cold Rupture": {
+          "base_prob": 0.0008653846153846154,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Crack of the Heavens": {
+          "base_prob": 0.0008653846153846154,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Flame Rift": {
+          "base_prob": 0.0008653846153846154,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "M'avina's True Sight": {
+          "base_prob": 2.808523721678255e-06,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 21,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Mara's Kaleidoscope": {
+          "base_prob": 0.0017307692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 80,
+            "quality_type": "unique"
+          },
+          "unique_weight": 5,
+          "unique_total_weight": 74
+        },
+        "Measured Wrath": {
+          "base_prob": 0.00013245282819690605,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 3,
+          "unique_total_weight": 3
+        },
+        "Nightwing's Veil": {
+          "base_prob": 0.00015707344284435047,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 75,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 2
+        },
+        "Ondal's Wisdom": {
+          "base_prob": 0.0002145044034403519,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 74,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Opalvein": {
+          "base_prob": 0.0034615384615384616,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Raven Frost": {
+          "base_prob": 0.0034615384615384616,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 53,
+            "quality_type": "unique"
+          },
+          "unique_weight": 10,
+          "unique_total_weight": 60
+        },
+        "Shadow Dancer": {
+          "base_prob": 1.123409488671302e-05,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 79,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Skin of the Vipermagi": {
+          "base_prob": 0.0002921143113471794,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 37,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Skullder's Ire": {
+          "base_prob": 0.0001260424580018557,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Sling": {
+          "base_prob": 0.0034615384615384616,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Tal Rasha's Adjudication": {
+          "base_prob": 0.0017307692307692308,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 26,
+            "quality_type": "set"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 45
+        },
+        "Tal Rasha's Horadric Crest": {
+          "base_prob": 0.00035265548498166697,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 26,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Tal Rasha's Lidless Eye": {
+          "base_prob": 0.00027691146076165265,
+          "quality_params": {
+            "base_chance": 120,
+            "divisor": 3,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 26,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "The Oculus": {
+          "base_prob": 0.00027691146076165265,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "The Stone of Jordan": {
+          "base_prob": 0.0034615384615384616,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 39,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Thundergod's Vigor": {
+          "base_prob": 0.00013141641170879496,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 55,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Thunderstroke": {
+          "base_prob": 0.00028810565831885357,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 77,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Titan's Revenge": {
+          "base_prob": 0.00030018995398032667,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Trang-Oul's Claws": {
+          "base_prob": 8.296397311314754e-05,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 32,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Trang-Oul's Girth": {
+          "base_prob": 5.259981758801314e-05,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 32,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Vampire Gaze": {
+          "base_prob": 6.302122900092784e-05,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 49,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Verdungo's Hearty Cord": {
+          "base_prob": 0.00011916911302241773,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 71,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "War Traveler": {
+          "base_prob": 9.453184350139176e-05,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Waterwalk": {
+          "base_prob": 6.515472285991032e-05,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Windforce": {
+          "base_prob": 6.190215549821461e-06,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 80,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Wizardspike": {
+          "base_prob": 0.00023903826909818523,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Wraithstep": {
+          "base_prob": 0.00011780508213326285,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 73,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 2
+        }
+      },
+      "good_rune_prob": 4.066120139205241e-05,
+      "gc_base_prob": 0.0008653846153846154,
+      "gc_skiller_frac": 0.04897959183673469,
+      "sc_base_prob": 0.0008653846153846154,
+      "sc_valuable_frac": 0.05627165627165627,
+      "monster_id": "hellbovine",
+      "difficulty": "hell",
+      "combat": {
+        "hp": 14018,
+        "cold_resist": 50
+      }
+    },
+    "cow_champion": {
+      "mlvl": 81,
+      "tc": "Cow (H)",
+      "drops": {
+        "Arreat's Face": {
+          "base_prob": 0.00023362917637119107,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Bloodpact Shard": {
+          "base_prob": 0.00046912589667557524,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 73,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 2
+        },
+        "Bul-Kathos' Wedding Band": {
+          "base_prob": 0.009230769230769232,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 66,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Chance Guards": {
+          "base_prob": 0.0005945211894695766,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 20,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Death's Fathom": {
+          "base_prob": 4.126810366547641e-05,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 81,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Death's Web": {
+          "base_prob": 8.25362073309528e-06,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 74,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Dreadfang": {
+          "base_prob": 0.0012748707685236544,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 2
+        },
+        "Entropy Locket": {
+          "base_prob": 0.004615384615384616,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 60,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 74
+        },
+        "Eschuta's Temper": {
+          "base_prob": 0.0009215174174674995,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 80,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Gheed's Fortune": {
+          "base_prob": 0.002307692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 70,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Gheed's Wager": {
+          "base_prob": 0.0001402661802347017,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 79,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Gore Rider": {
+          "base_prob": 0.00046725835274238214,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 55,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Griswold's Honor": {
+          "base_prob": 1.4978793182284028e-05,
+          "quality_params": {
+            "base_chance": 120,
+            "divisor": 3,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 44,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Guillaume's Face": {
+          "base_prob": 0.0003361132213382818,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 41,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Hand of Blessed Light": {
+          "base_prob": 0.0005899660310268269,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Harlequin Crest": {
+          "base_prob": 0.0002191184133400031,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Hellwarden's Will": {
+          "base_prob": 0.0009404146266177786,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 55,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 3
+        },
+        "Herald of Zakarum": {
+          "base_prob": 0.0001680566106691409,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Highlord's Wrath": {
+          "base_prob": 0.004615384615384616,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 73,
+            "quality_type": "unique"
+          },
+          "unique_weight": 5,
+          "unique_total_weight": 74
+        },
+        "Homunculus": {
+          "base_prob": 0.00011681458818559554,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Horazon's Countenance": {
+          "base_prob": 0.0006355686027862279,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Dominion": {
+          "base_prob": 0.0003361132213382818,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Hold": {
+          "base_prob": 0.0003532075418584162,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Legacy": {
+          "base_prob": 0.00031414688568870094,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Secrets": {
+          "base_prob": 0.00021950907300484078,
+          "quality_params": {
+            "base_chance": 120,
+            "divisor": 3,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Immortal King's Soul Cage": {
+          "base_prob": 2.9957586364568057e-05,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 37,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Lacerator": {
+          "base_prob": 0.000318335510831217,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 76,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Latent Bone Break": {
+          "base_prob": 0.002307692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Cold Rupture": {
+          "base_prob": 0.002307692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Crack of the Heavens": {
+          "base_prob": 0.002307692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Flame Rift": {
+          "base_prob": 0.002307692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "M'avina's True Sight": {
+          "base_prob": 7.489396591142014e-06,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 21,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Mara's Kaleidoscope": {
+          "base_prob": 0.004615384615384616,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 80,
+            "quality_type": "unique"
+          },
+          "unique_weight": 5,
+          "unique_total_weight": 74
+        },
+        "Measured Wrath": {
+          "base_prob": 0.0003532075418584162,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 3,
+          "unique_total_weight": 3
+        },
+        "Nightwing's Veil": {
+          "base_prob": 0.00041886251425160125,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 75,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 2
+        },
+        "Ondal's Wisdom": {
+          "base_prob": 0.0005720117425076051,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 74,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Opalvein": {
+          "base_prob": 0.009230769230769232,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Raven Frost": {
+          "base_prob": 0.009230769230769232,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 53,
+            "quality_type": "unique"
+          },
+          "unique_weight": 10,
+          "unique_total_weight": 60
+        },
+        "Shadow Dancer": {
+          "base_prob": 2.9957586364568057e-05,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 79,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Skin of the Vipermagi": {
+          "base_prob": 0.0007789714969258119,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 37,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Skullder's Ire": {
+          "base_prob": 0.0003361132213382818,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Sling": {
+          "base_prob": 0.009230769230769232,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Tal Rasha's Adjudication": {
+          "base_prob": 0.004615384615384616,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 26,
+            "quality_type": "set"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 45
+        },
+        "Tal Rasha's Horadric Crest": {
+          "base_prob": 0.0009404146266177786,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 26,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Tal Rasha's Lidless Eye": {
+          "base_prob": 0.0007384305620310737,
+          "quality_params": {
+            "base_chance": 120,
+            "divisor": 3,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 26,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "The Oculus": {
+          "base_prob": 0.0007384305620310737,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "The Stone of Jordan": {
+          "base_prob": 0.009230769230769232,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 39,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Thundergod's Vigor": {
+          "base_prob": 0.00035044376455678657,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 55,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Thunderstroke": {
+          "base_prob": 0.0007682817555169428,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 77,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Titan's Revenge": {
+          "base_prob": 0.0008005065439475376,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Trang-Oul's Claws": {
+          "base_prob": 0.00022123726163506008,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 32,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Trang-Oul's Girth": {
+          "base_prob": 0.0001402661802347017,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 0,
+            "qlvl": 32,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Vampire Gaze": {
+          "base_prob": 0.0001680566106691409,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 49,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Verdungo's Hearty Cord": {
+          "base_prob": 0.00031778430139311396,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 71,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "War Traveler": {
+          "base_prob": 0.0002520849160037114,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Waterwalk": {
+          "base_prob": 0.00017374592762642755,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 40,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Windforce": {
+          "base_prob": 1.650724146619056e-05,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 80,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Wizardspike": {
+          "base_prob": 0.0006374353842618272,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Wraithstep": {
+          "base_prob": 0.00031414688568870094,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 0,
+            "qlvl": 73,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 2
+        }
+      },
+      "good_rune_prob": 0.00010842987037880644,
+      "gc_base_prob": 0.002307692307692308,
+      "gc_skiller_frac": 0.04897959183673469,
+      "sc_base_prob": 0.002307692307692308,
+      "sc_valuable_frac": 0.05627165627165627,
+      "monster_id": "hellbovine",
+      "difficulty": "hell",
+      "combat": {
+        "hp": 14018,
+        "cold_resist": 50,
+        "p_cold_immune": 0.15384615384615385
+      }
+    },
+    "cowking": {
+      "mlvl": 81,
+      "tc": "Cow King (H)",
+      "drops": {
+        "Arreat's Face": {
+          "base_prob": 0.004800805997035529,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Bul-Kathos' Wedding Band": {
+          "base_prob": 0.019230769230769232,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 66,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Chance Guards": {
+          "base_prob": 0.00905623480100998,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 20,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Dreadfang": {
+          "base_prob": 0.02143311569449576,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 2
+        },
+        "Entropy Locket": {
+          "base_prob": 0.009615384615384616,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 60,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 74
+        },
+        "Gheed's Fortune": {
+          "base_prob": 0.004807692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 70,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Gore Rider": {
+          "base_prob": 0.009601611994071058,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 55,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Guillaume's Face": {
+          "base_prob": 0.008178822523924234,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 850,
+            "qlvl": 41,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Hand of Blessed Light": {
+          "base_prob": 0.011171904133391036,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Harlequin Crest": {
+          "base_prob": 0.003683816759991458,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Hellwarden's Will": {
+          "base_prob": 0.016337776609197715,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 55,
+            "quality_type": "unique"
+          },
+          "unique_weight": 2,
+          "unique_total_weight": 3
+        },
+        "Herald of Zakarum": {
+          "base_prob": 0.004089411261962117,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Highlord's Wrath": {
+          "base_prob": 0.009615384615384616,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 73,
+            "quality_type": "unique"
+          },
+          "unique_weight": 5,
+          "unique_total_weight": 74
+        },
+        "Homunculus": {
+          "base_prob": 0.0024004029985177644,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Horazon's Dominion": {
+          "base_prob": 0.008178822523924234,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 850,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Hold": {
+          "base_prob": 0.008254664326486305,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 850,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Horazon's Secrets": {
+          "base_prob": 0.0002209336799854041,
+          "quality_params": {
+            "base_chance": 120,
+            "divisor": 3,
+            "min_chance": 5600,
+            "quality_factor": 850,
+            "qlvl": 40,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Latent Bone Break": {
+          "base_prob": 0.004807692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Cold Rupture": {
+          "base_prob": 0.004807692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Crack of the Heavens": {
+          "base_prob": 0.004807692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Latent Flame Rift": {
+          "base_prob": 0.004807692307692308,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 7
+        },
+        "Mara's Kaleidoscope": {
+          "base_prob": 0.009615384615384616,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 80,
+            "quality_type": "unique"
+          },
+          "unique_weight": 5,
+          "unique_total_weight": 74
+        },
+        "Measured Wrath": {
+          "base_prob": 0.008254664326486305,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 3,
+          "unique_total_weight": 3
+        },
+        "Opalvein": {
+          "base_prob": 0.019230769230769232,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Raven Frost": {
+          "base_prob": 0.019230769230769232,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 53,
+            "quality_type": "unique"
+          },
+          "unique_weight": 10,
+          "unique_total_weight": 60
+        },
+        "Skin of the Vipermagi": {
+          "base_prob": 0.016947090452896944,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 37,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Skullder's Ire": {
+          "base_prob": 0.008178822523924234,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Sling": {
+          "base_prob": 0.019230769230769232,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 58,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Tal Rasha's Adjudication": {
+          "base_prob": 0.009615384615384616,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 850,
+            "qlvl": 26,
+            "quality_type": "set"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 45
+        },
+        "Tal Rasha's Horadric Crest": {
+          "base_prob": 0.016337776609197715,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 850,
+            "qlvl": 26,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Tal Rasha's Lidless Eye": {
+          "base_prob": 0.017968625241954757,
+          "quality_params": {
+            "base_chance": 120,
+            "divisor": 3,
+            "min_chance": 5600,
+            "quality_factor": 850,
+            "qlvl": 26,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "The Oculus": {
+          "base_prob": 0.017968625241954757,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "The Stone of Jordan": {
+          "base_prob": 0.019230769230769232,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 39,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 60
+        },
+        "Thundergod's Vigor": {
+          "base_prob": 0.007201208995553295,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 55,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Thunderstroke": {
+          "base_prob": 0.0007732678799489144,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 77,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Titan's Revenge": {
+          "base_prob": 0.006547068994165679,
+          "quality_params": {
+            "base_chance": 240,
+            "divisor": 3,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Trang-Oul's Claws": {
+          "base_prob": 0.004189464050021639,
+          "quality_params": {
+            "base_chance": 160,
+            "divisor": 2,
+            "min_chance": 5600,
+            "quality_factor": 850,
+            "qlvl": 32,
+            "quality_type": "set"
+          },
+          "unique_weight": 7,
+          "unique_total_weight": 7
+        },
+        "Vampire Gaze": {
+          "base_prob": 0.004089411261962117,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 49,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "War Traveler": {
+          "base_prob": 0.006134116892943177,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 50,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Waterwalk": {
+          "base_prob": 0.003092982255826425,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 40,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        },
+        "Wizardspike": {
+          "base_prob": 0.01071655784724788,
+          "quality_params": {
+            "base_chance": 400,
+            "divisor": 1,
+            "min_chance": 6400,
+            "quality_factor": 850,
+            "qlvl": 69,
+            "quality_type": "unique"
+          },
+          "unique_weight": 1,
+          "unique_total_weight": 1
+        }
+      },
+      "good_rune_prob": 0.00016575519142959368,
+      "gc_base_prob": 0.004807692307692308,
+      "gc_skiller_frac": 0.04897959183673469,
+      "sc_base_prob": 0.004807692307692308,
+      "sc_valuable_frac": 0.05627165627165627,
+      "monster_id": "The Cow King",
+      "difficulty": "hell",
+      "combat": {
+        "hp": 21030,
+        "cold_resist": 50,
+        "p_cold_immune": 0.15384615384615385,
+        "minions": {
+          "count": 6,
+          "hp": 15772,
+          "monster_id": "cowking"
+        }
+      }
+    },
     "ismail": {
       "mlvl": 88,
       "tc": "Council (H)",
@@ -12597,7 +14722,48 @@
       ]
     },
     "cows": {
-      "monster_packs": []
+      "monster_packs": [
+        {
+          "probability": 1.0,
+          "monsters": [
+            {
+              "id": "cow_regular",
+              "label": "Hell Bovine",
+              "amount": 8
+            }
+          ],
+          "count": 60
+        },
+        {
+          "probability": 1.0,
+          "monsters": [
+            {
+              "id": "cow_champion",
+              "label": "Elite Hell Bovine",
+              "amount": 4
+            }
+          ],
+          "count": 6,
+          "elite_group": true
+        },
+        {
+          "probability": 1.0,
+          "monsters": [
+            {
+              "id": "cowking",
+              "label": "The Cow King",
+              "amount": 1
+            },
+            {
+              "id": "cowking_minion",
+              "label": "The Cow King Minion",
+              "amount": 6,
+              "hp": 15772,
+              "is_minion": true
+            }
+          ]
+        }
+      ]
     },
     "ancient_tunnels": {
       "monster_packs": []

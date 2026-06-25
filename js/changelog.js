@@ -1,5 +1,6 @@
 // UNRELEASED: add entries here while developing. Must be empty before running gh-deploy.sh.
 export const UNRELEASED = [
+  'Cow Level run added — models regular and champion cow packs plus the Cow King, with one-time leg-quest setup time and in-level teleports tracked separately from travel',
 ];
 
 // RELEASES: most recent first. Each entry is one deploy.
