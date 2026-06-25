@@ -684,6 +684,8 @@ body {
   cursor: pointer;
 }
 .run-disabled { color: var(--color-text-faint); cursor: default; }
+.run-option-row { padding: 0.1rem 0 0.1rem 2rem; }
+.run-option-label { display: flex; align-items: center; gap: 0.5rem; font-size: 0.78rem; color: var(--color-text-muted); cursor: pointer; }
 .run-checkbox { accent-color: var(--color-unique); }
 .coming-soon {
   font-size: 0.7rem;

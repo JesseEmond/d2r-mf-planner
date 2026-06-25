@@ -4,6 +4,7 @@ import { GEAR_SLOTS, BLIZZARD_BOLTS_VS_BOSS, Stats, effUniqueMF, effSetMF, compu
 // ── Constants ──────────────────────────────────────────────────────────────
 
 const DEFAULT_BOSSES = { andy: true, meph: true };
+const DEFAULT_RUN_OPTIONS = { andy: { kill_room_packs: true }, meph: { kill_room_packs: true } };
 
 const CUSTOM_ITEM   = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 };
 const CUSTOM_CHARM  = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0, unique: false };
@@ -41,7 +42,7 @@ function makeDefaultState() {
   return {
     gear: makeGear(),
     coldMasteryBase: DEFAULT_COLD_MASTERY,
-    run: { bosses: { ...DEFAULT_BOSSES } },
+    run: { bosses: { ...DEFAULT_BOSSES }, options: { andy: { kill_room_packs: true }, meph: { kill_room_packs: true } } },
     ui: { folds: { ...DEFAULT_FOLDS } },
     targetPresetId: DEFAULT_TARGET_PRESET_ID,
   };
@@ -111,6 +112,16 @@ function buildStateObject(state) {
     bosses[k] = v ? 1 : 0;
   }
   if (Object.keys(bosses).length) out.bosses = bosses;
+  const ro = {};
+  for (const [runId, opts] of Object.entries(state.run.options)) {
+    const defaults = DEFAULT_RUN_OPTIONS[runId] ?? {};
+    const diff = {};
+    for (const [k, v] of Object.entries(opts)) {
+      if (v !== (defaults[k] ?? true)) diff[k] = v ? 1 : 0;
+    }
+    if (Object.keys(diff).length) ro[runId] = diff;
+  }
+  if (Object.keys(ro).length) out.ro = ro;
   const uf = Object.entries(state.ui.folds).filter(([, v]) => !v).map(([k]) => k);
   if (uf.length) out.uf = uf;
   if (state.targetPresetId !== DEFAULT_TARGET_PRESET_ID) out.tp = state.targetPresetId;
@@ -185,6 +196,12 @@ async function decodeState(encoded, state) {
     if (out.cm != null) state.coldMasteryBase = out.cm;
     if (out.bosses) {
       for (const [k, v] of Object.entries(out.bosses)) state.run.bosses[k] = !!v;
+    }
+    if (out.ro) {
+      for (const [runId, opts] of Object.entries(out.ro)) {
+        if (!state.run.options[runId]) state.run.options[runId] = {};
+        for (const [k, v] of Object.entries(opts)) state.run.options[runId][k] = !!v;
+      }
     }
     if (out.uf) {
       for (const key of out.uf) { if (key in state.ui.folds) state.ui.folds[key] = false; }
@@ -280,6 +297,12 @@ const stateError = ref(null);
 
 const runConfig    = ref([]);
 const runConfigMeta = ref({});
+const effectiveRunConfig = computed(() =>
+  runConfig.value.map(run => {
+    const opts = state.run.options[run.id];
+    return opts ? { ...run, ...opts } : run;
+  })
+);
 
 const runsByAct = computed(() => {
   const seen = new Map();
@@ -362,16 +385,16 @@ function makeBuild(getSlotStats) {
     : 'Loading…');
 
   const runStats = computed(() => {
-    if (!runConfig.value.length || !monsterDb.value || !combat.value) return {};
+    if (!effectiveRunConfig.value.length || !monsterDb.value || !combat.value) return {};
     const hasColdSunder = state.gear.charms.some(c => charmSunder(c) === 'cold');
-    return computeRunStats(combat.value, runConfig.value, runConfigMeta.value, monsterDb.value, state.run.bosses, hasColdSunder);
+    return computeRunStats(combat.value, effectiveRunConfig.value, runConfigMeta.value, monsterDb.value, state.run.bosses, hasColdSunder);
   });
 
   const runDropProbs = computed(() => {
     if (!monsterDb.value) return {};
     const hasColdSunder = state.gear.charms.some(c => charmSunder(c) === 'cold');
     const valuableSet = new Set(monsterDb.value.valuables);
-    return computeRunDropProbs(totalMF.value, runConfig.value, monsterDb.value, state.run.bosses, valuableSet, hasColdSunder);
+    return computeRunDropProbs(totalMF.value, effectiveRunConfig.value, monsterDb.value, state.run.bosses, valuableSet, hasColdSunder);
   });
 
   const totalDropProbs = computed(() => aggregateDropProbs(runDropProbs.value));
@@ -388,7 +411,7 @@ function makeBuild(getSlotStats) {
       travel   += s.travelSecs;
       kill     += s.killSecs;
       overhead += s.overheadSecs;
-      const run = runConfig.value?.find(r => r.id === id);
+      const run = effectiveRunConfig.value?.find(r => r.id === id);
       if (run) activeActs.add(String(run.act));
     }
     overhead += runConfigMeta.value.game_creation_secs ?? 0;
@@ -1355,21 +1378,29 @@ const app = createApp({
 
             <template v-for="group in runsByAct" :key="group.act">
               <div class="run-act-header">ACT {{ group.act === 1 ? 'I' : group.act === 2 ? 'II' : group.act === 3 ? 'III' : group.act === 4 ? 'IV' : 'V' }}</div>
-              <div v-for="run in group.runs" :key="run.id" class="run-row">
-                <label :class="['run-label', !run.available && 'run-disabled']">
-                  <input
-                    type="checkbox"
-                    :disabled="!run.available"
-                    v-model="state.run.bosses[run.id]"
-                    class="run-checkbox"
-                  />
-                  {{ run.label }}
-                  <span v-if="!run.available" class="coming-soon">coming soon</span>
-                </label>
-                <tooltip-popup v-if="run.available && runStats[run.id]" :text="runStats[run.id].assumptions">
-                  <span class="info-icon">i</span>
-                </tooltip-popup>
-              </div>
+              <template v-for="run in group.runs" :key="run.id">
+                <div class="run-row">
+                  <label :class="['run-label', !run.available && 'run-disabled']">
+                    <input
+                      type="checkbox"
+                      :disabled="!run.available"
+                      v-model="state.run.bosses[run.id]"
+                      class="run-checkbox"
+                    />
+                    {{ run.label }}
+                    <span v-if="!run.available" class="coming-soon">coming soon</span>
+                  </label>
+                  <tooltip-popup v-if="run.available && runStats[run.id]" :text="runStats[run.id].assumptions">
+                    <span class="info-icon">i</span>
+                  </tooltip-popup>
+                </div>
+                <div v-if="run.kill_room_packs_label && state.run.bosses[run.id]" class="run-option-row">
+                  <label class="run-option-label">
+                    <input type="checkbox" v-model="state.run.options[run.id].kill_room_packs" class="run-checkbox" />
+                    {{ run.kill_room_packs_label }}
+                  </label>
+                </div>
+              </template>
             </template>
 
             <div class="breakdown-run-label">Per run cycle</div>

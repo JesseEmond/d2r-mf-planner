@@ -40,7 +40,13 @@ def _p_cold_immune_su(preset_mod_ids: list[int]) -> float:
     return _N_RANDOM_HELL_SU / len(pool) if pool else 0.0
 
 
-def _get_combat_stats(monster_id: str, difficulty: str, superunique: bool) -> dict:
+def _p_cold_immune_elite() -> float:
+    """P(cold immune) for a Hell elite (champion/unique) via 2 random mods."""
+    pool = [m for m in d2r_data.get_monumod().values() if m.upick_hell > 0]
+    return _N_RANDOM_HELL_SU / len(pool) if pool else 0.0
+
+
+def _get_combat_stats(monster_id: str, difficulty: str, superunique: bool, elite: bool = False) -> dict:
     suffix = {'normal': '', 'nightmare': '(N)', 'hell': '(H)'}[difficulty]
     lvl_col = {'normal': 'Level', 'nightmare': 'Level(N)', 'hell': 'Level(H)'}[difficulty]
     # Act bosses use L-HP; SU bosses (treated as regular base + elite mult) use HP.
@@ -77,18 +83,23 @@ def _get_combat_stats(monster_id: str, difficulty: str, superunique: bool) -> di
         if superunique and su_data:
             preset_mods = su_data.get('preset_mods', [])
             minion_count = su_data.get('min_grp', 0)  # min_grp == max_grp for all Trav SUs
-            return {
+            result: dict = {
                 'hp': int(base_hp * _SU_BOSS_HP_MULT),
                 'cold_resist': cold_resist,
                 'p_cold_immune': _p_cold_immune_su(preset_mods),
-                'minions': {
+            }
+            if minion_count > 0:
+                result['minions'] = {
                     'count': minion_count,
                     'hp': int(base_hp * _SU_MINION_HP_MULT),
                     'monster_id': monstats_id,  # class of the minion (= SU's own class)
-                },
-            }
+                }
+            return result
 
-        return {'hp': base_hp, 'cold_resist': cold_resist}
+        base_result = {'hp': base_hp, 'cold_resist': cold_resist}
+        if elite and cold_resist + 75 >= 100:
+            base_result['p_cold_immune'] = _p_cold_immune_elite()
+        return base_result
 
     return {'hp': 0, 'cold_resist': 0}
 
@@ -103,6 +114,7 @@ def extract(targets: list[dict]) -> dict[str, dict]:
             target['monster_id'],
             target['difficulty'],
             target.get('superunique', False),
+            target.get('elite', False),
         )
         if stats['hp']:
             result[target['key']] = stats
