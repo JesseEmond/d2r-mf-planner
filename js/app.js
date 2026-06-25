@@ -514,11 +514,15 @@ const targetBuild = makeBuild((slotId) => {
   return { ...item, ...Stats.from(item).add(sockStats) };
 });
 
-// ── URL sync ───────────────────────────────────────────────────────────────
+// ── URL + localStorage sync ────────────────────────────────────────────────
+
+const LS_KEY = 'mf-planner-state';
 
 watch(state, async () => {
   const encoded = await encodeState(state);
   history.replaceState(null, '', encoded ? `?s=${encoded}` : location.pathname);
+  if (encoded) localStorage.setItem(LS_KEY, encoded);
+  else localStorage.removeItem(LS_KEY);
 }, { deep: true });
 
 // ── TooltipPopup component ─────────────────────────────────────────────────
@@ -1107,6 +1111,7 @@ const app = createApp({
       Object.assign(state, makeDefaultState());
       stateError.value = null;
       window.history.replaceState(null, '', window.location.pathname);
+      localStorage.removeItem(LS_KEY);
       showResetConfirm.value = false;
     }
 
@@ -1561,10 +1566,26 @@ const app = createApp({
     if (!ok) {
       Object.assign(state, makeDefaultState());
       stateError.value = 'Saved state could not be loaded (it may be from an older version). Starting fresh.';
-    } else if (!encoded.startsWith('.')) {
-      // Auto-upgrade legacy (non-gzip) URL to gzip format
-      const reencoded = await encodeState(state);
-      history.replaceState(null, '', reencoded ? `?s=${reencoded}` : location.pathname);
+    } else {
+      if (!encoded.startsWith('.')) {
+        // Auto-upgrade legacy (non-gzip) URL to gzip format
+        const reencoded = await encodeState(state);
+        history.replaceState(null, '', reencoded ? `?s=${reencoded}` : location.pathname);
+        localStorage.setItem(LS_KEY, reencoded);
+      } else {
+        localStorage.setItem(LS_KEY, encoded);
+      }
+    }
+  } else {
+    const saved = localStorage.getItem(LS_KEY);
+    if (saved) {
+      const ok = await decodeState(saved, state);
+      if (ok) {
+        const reencoded = await encodeState(state);
+        history.replaceState(null, '', reencoded ? `?s=${reencoded}` : location.pathname);
+      } else {
+        localStorage.removeItem(LS_KEY);
+      }
     }
   }
   app.mount('#app');
