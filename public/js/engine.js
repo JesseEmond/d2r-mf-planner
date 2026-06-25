@@ -297,11 +297,14 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
                 ? `  Cold immunity: ${(rawImmune * 100).toFixed(1)}% base chance — sundered, always killable`
                 : `  Cold immunity: ${(rawImmune * 100).toFixed(1)}% chance — skipped if immune`
               : null;
+            const alwaysSkipped = pImmune === 1;
             killLines.push([
               `${m.label}${spawnTag}`,
               `  HP: ${monCombat.hp.toLocaleString()} · CR: ${monResist}% − CM(−${cmRed}%)${pierceLine} → ${effRes}% → ${mult.toFixed(2)}× dmg`,
               immuneLine,
-              `  Expected kill: ${(baseKill * (1 - pImmune) * pack.probability).toFixed(1)}s`,
+              alwaysSkipped
+                ? `  skipped (cold immune, no sunder)`
+                : `  Expected kill: ${(baseKill * (1 - pImmune) * pack.probability).toFixed(1)}s`,
             ].filter(Boolean).join('\n'));
           }
         } else {
