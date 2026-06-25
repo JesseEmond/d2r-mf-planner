@@ -1378,29 +1378,21 @@ const app = createApp({
 
             <template v-for="group in runsByAct" :key="group.act">
               <div class="run-act-header">ACT {{ group.act === 1 ? 'I' : group.act === 2 ? 'II' : group.act === 3 ? 'III' : group.act === 4 ? 'IV' : 'V' }}</div>
-              <template v-for="run in group.runs" :key="run.id">
-                <div class="run-row">
-                  <label :class="['run-label', !run.available && 'run-disabled']">
-                    <input
-                      type="checkbox"
-                      :disabled="!run.available"
-                      v-model="state.run.bosses[run.id]"
-                      class="run-checkbox"
-                    />
-                    {{ run.label }}
-                    <span v-if="!run.available" class="coming-soon">coming soon</span>
-                  </label>
-                  <tooltip-popup v-if="run.available && runStats[run.id]" :text="runStats[run.id].assumptions">
-                    <span class="info-icon">i</span>
-                  </tooltip-popup>
-                </div>
-                <div v-if="run.kill_room_packs_label && state.run.bosses[run.id]" class="run-option-row">
-                  <label class="run-option-label">
-                    <input type="checkbox" v-model="state.run.options[run.id].kill_room_packs" class="run-checkbox" />
-                    {{ run.kill_room_packs_label }}
-                  </label>
-                </div>
-              </template>
+              <div v-for="run in group.runs" :key="run.id" class="run-row">
+                <label :class="['run-label', !run.available && 'run-disabled']">
+                  <input
+                    type="checkbox"
+                    :disabled="!run.available"
+                    v-model="state.run.bosses[run.id]"
+                    class="run-checkbox"
+                  />
+                  {{ run.label }}
+                  <span v-if="!run.available" class="coming-soon">coming soon</span>
+                </label>
+                <tooltip-popup v-if="run.available && runStats[run.id]" :text="runStats[run.id].assumptions">
+                  <span class="info-icon">i</span>
+                </tooltip-popup>
+              </div>
             </template>
 
             <div class="breakdown-run-label">Per run cycle</div>

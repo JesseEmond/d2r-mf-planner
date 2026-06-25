@@ -21,7 +21,6 @@
       "label": "Andy",
       "act": 1,
       "teleports_to": 40,
-      "kill_room_packs_label": "Kill room packs",
       "monster_packs": [
         {
           "probability": 1.0,
@@ -108,7 +107,6 @@
       "label": "Meph",
       "act": 3,
       "teleports_to": 30,
-      "kill_room_packs_label": "Kill council",
       "monster_packs": [
         {
           "probability": 1.0,
