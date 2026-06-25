@@ -2,6 +2,7 @@
 export const UNRELEASED = [
   'Cow Level run added — models regular and champion cow packs plus the Cow King, with one-time leg-quest setup time and in-level teleports tracked separately from travel',
   'Added a Share button that copies your build/settings link to the clipboard, with a "Saved." flash whenever changes are autosaved',
+  'Fixed Cold Rupture (MF) charm: Magic Find now correctly shows 25% (was 7%) for its max roll',
 ];
 
 // RELEASES: most recent first. Each entry is one deploy.

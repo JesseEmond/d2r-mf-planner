@@ -15461,7 +15461,7 @@
           "unique": true,
           "max_sockets": 0,
           "fcr": 0,
-          "mf": 7,
+          "mf": 25,
           "allSkills": 0,
           "coldSkills": 0,
           "coldDmgPct": 0,
