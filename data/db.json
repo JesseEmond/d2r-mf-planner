@@ -9427,7 +9427,8 @@
               "amount": 2.5
             }
           ],
-          "room_pack": true
+          "room_pack": true,
+          "elite_group": true
         },
         {
           "probability": 0.75,
@@ -9438,7 +9439,8 @@
               "amount": 2.5
             }
           ],
-          "room_pack": true
+          "room_pack": true,
+          "elite_group": true
         },
         {
           "probability": 0.45,
@@ -9449,7 +9451,8 @@
               "amount": 2.5
             }
           ],
-          "room_pack": true
+          "room_pack": true,
+          "elite_group": true
         }
       ]
     },

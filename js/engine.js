@@ -30,8 +30,8 @@ const D2_FPS                  = 25;
 export const BLIZZARD_BOLTS_VS_BOSS  = 4;
 
 // Pack combat model: blizzard-only coverage across a group of monsters
-const PACK_HERD_SECS       = 1.0;  // flat time to herd pack together
-const PACK_STRAGGLER_SECS  = 1.5;  // flat cleanup after main kill
+const PACK_HERD_SECS       = 0.5;  // flat time to herd pack together
+const PACK_STRAGGLER_SECS  = 1.0;  // flat cleanup after main kill
 const PACK_BLIZZ_HITS_PER_SEC = 2.0; // avg blizzard shards landing per second across the group
 
 // Hard points (base-allocated skill levels, blvl) for each skill in the build.
@@ -200,6 +200,7 @@ export function computeCombatAssumptions(_combat) {
     'Assumes:',
     `- Single isolated monster (no minions): ${BLIZZARD_BOLTS_VS_BOSS} Blizzard shards hit the target; ~${ICE_BLAST_HIT_RATE * 100}% of Ice Blasts land`,
     `- Multi-monster packs (boss + minions, or groups): ${PACK_HERD_SECS}s herd + Blizzard at ~${PACK_BLIZZ_HITS_PER_SEC} shards/sec across the group + ${PACK_STRAGGLER_SECS}s straggler cleanup; Ice Blast not used`,
+    `- Elite packs (champion/unique groups): no herd or straggler overhead — kill time only`,
     '- Cold-immune monsters fully skipped (kill time + drops) unless a Cold Sunder charm is equipped',
     '- Pack minions use boss cold resist; no cold immunity roll applied to minions; minion drops counted separately (always killable)',
   ].join('\n');
@@ -335,15 +336,21 @@ export function computeRunStats(combat, runConfigData, runConfigMeta, monsterDbD
             }
           }
 
-          const throughput = blizzPerShard * PACK_BLIZZ_HITS_PER_SEC;
-          const killTime   = maxEffHP > 0 ? PACK_HERD_SECS + maxEffHP / throughput + PACK_STRAGGLER_SECS : 0;
+          const throughput    = blizzPerShard * PACK_BLIZZ_HITS_PER_SEC;
+          // Elite packs (champion/unique groups) need no herding or straggler cleanup.
+          const herdSecs      = pack.elite_group ? 0 : PACK_HERD_SECS;
+          const stragglerSecs = pack.elite_group ? 0 : PACK_STRAGGLER_SECS;
+          const killTime      = maxEffHP > 0 ? herdSecs + maxEffHP / throughput + stragglerSecs : 0;
           killSecs += pack.probability * killTime;
 
           const namedNames = namedMonsters.map(m => `${m.label}${(m.amount ?? 1) > 1 ? ` ×${m.amount}` : ''}`).join(', ');
+          const overheadDetail = pack.elite_group
+            ? `${(maxEffHP / throughput).toFixed(1)}s kill (bottleneck: ${maxEffHPLabel})`
+            : `${herdSecs}s herd + ${(maxEffHP / throughput).toFixed(1)}s kill (bottleneck: ${maxEffHPLabel}) + ${stragglerSecs}s stragglers`;
           killLines.push([
             `Pack${spawnTag}: ${namedNames}`,
             ...packDetailLines,
-            `  ${PACK_HERD_SECS}s herd + ${(maxEffHP / throughput).toFixed(1)}s kill (bottleneck: ${maxEffHPLabel}) + ${PACK_STRAGGLER_SECS}s stragglers = ${killTime.toFixed(1)}s (expected: ${(killTime * pack.probability).toFixed(1)}s)`,
+            `  ${overheadDetail} = ${killTime.toFixed(1)}s (expected: ${(killTime * pack.probability).toFixed(1)}s)`,
           ].join('\n'));
         }
       }
