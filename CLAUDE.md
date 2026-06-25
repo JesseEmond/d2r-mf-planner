@@ -102,6 +102,9 @@ If the relevant information doesn't fit an existing file, create a new one and l
 
 `public/js/changelog.js` contains `UNRELEASED` (pending changes) and `RELEASES` (dated history).
 
+**Before making any commit, check whether the change warrants an UNRELEASED entry** —
+this is the natural touchpoint to catch it, since it's easy to forget once the commit lands.
+
 ### When to add an UNRELEASED entry
 
 Add an entry whenever you make a change **a user of the site would notice and care about**:
