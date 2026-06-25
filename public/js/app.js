@@ -542,11 +542,50 @@ const targetBuild = makeBuild((slotId) => {
 
 const LS_KEY = 'mf-planner-state';
 
+// Suppressed while the initial decode (from the URL or localStorage) runs on
+// load, so the Share button doesn't flash "Saved." before the user has done
+// anything. Cleared via a macrotask (see bottom-of-file IIFE) so it only
+// flips after any watcher jobs queued by that initial decode have flushed.
+let suppressSaveFlash = true;
+
+const shareLabel = ref('Share');
+const shareStatus = ref('');
+const shareBtnHover = ref(false);
+const shareDisplayLabel = computed(() => shareBtnHover.value ? 'Share' : shareLabel.value);
+let shareLabelTimeout = null;
+let saveFlashDebounce = null;
+
+function flashShareLabel(label, status) {
+  shareLabel.value = label;
+  shareStatus.value = status;
+  clearTimeout(shareLabelTimeout);
+  shareLabelTimeout = setTimeout(() => {
+    shareLabel.value = 'Share';
+    shareStatus.value = '';
+  }, 1500);
+}
+
+async function shareUrl() {
+  try {
+    await navigator.clipboard.writeText(location.href);
+    flashShareLabel('Copied!', 'is-copied');
+  } catch (e) {
+    console.error('Failed to copy URL', e);
+  }
+}
+
 watch(state, async () => {
   const encoded = await encodeState(state);
   history.replaceState(null, '', encoded ? `?s=${encoded}` : location.pathname);
   if (encoded) localStorage.setItem(LS_KEY, encoded);
   else localStorage.removeItem(LS_KEY);
+  if (!suppressSaveFlash) {
+    // Debounce the flash itself (separate from the save above, which always
+    // runs immediately) so a burst of rapid edits shows "Saved." once after
+    // things settle, rather than re-flashing on every keystroke.
+    clearTimeout(saveFlashDebounce);
+    saveFlashDebounce = setTimeout(() => flashShareLabel('Saved.', 'is-saved'), 600);
+  }
 }, { deep: true });
 
 // ── TooltipPopup component ─────────────────────────────────────────────────
@@ -1145,6 +1184,10 @@ const app = createApp({
       stateError,
       showResetConfirm,
       showChangelog,
+      shareDisplayLabel,
+      shareStatus,
+      shareBtnHover,
+      shareUrl,
       UNRELEASED,
       RELEASES,
       resetState,
@@ -1223,6 +1266,13 @@ const app = createApp({
         <h1>D2R Blizzard Sorc — <tooltip-popup text="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine"><abbr>ETTVD</abbr></tooltip-popup> Optimizer</h1>
         <div style="display:flex;gap:0.5rem;align-items:center;">
           <button class="changelog-btn" @click="showChangelog = true">Changelog</button>
+          <button
+            class="share-btn"
+            :class="shareBtnHover ? '' : shareStatus"
+            @click="shareUrl"
+            @mouseenter="shareBtnHover = true"
+            @mouseleave="shareBtnHover = false"
+          >{{ shareDisplayLabel }}</button>
           <button class="reset-btn" @click="showResetConfirm = true">Reset</button>
         </div>
       </header>
@@ -1647,4 +1697,5 @@ const app = createApp({
     }
   }
   app.mount('#app');
+  setTimeout(() => { suppressSaveFlash = false; }, 0);
 })();
