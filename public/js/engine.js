@@ -211,18 +211,23 @@ function fmtP(p) {
   return `1 in ${Math.round(1 / p).toLocaleString()}`;
 }
 
+function fmtMonDrop(m, key) {
+  if (m.skipped) return 'skipped (cold immune, no sunder)';
+  return fmtP(m[key]);
+}
+
 export function formatDropDetail(packDetails, key) {
   if (!packDetails?.length) return '';
   if (packDetails.length === 1 && packDetails[0].monsters.length === 1) {
     const m = packDetails[0].monsters[0];
-    return `${m.label}: ${fmtP(m[key])}`;
+    return `${m.label}: ${fmtMonDrop(m, key)}`;
   }
   const lines = [];
   for (const pack of packDetails) {
     const spawnNote = pack.spawnProb < 1 ? ` (${Math.round(pack.spawnProb * 100)}%)` : '';
     if (pack.monsters.length === 1) {
       const m = pack.monsters[0];
-      lines.push(`${m.label}${spawnNote}: ${fmtP(m[key])}`);
+      lines.push(`${m.label}${spawnNote}: ${fmtMonDrop(m, key)}`);
     } else {
       const bosses  = pack.monsters.filter(m => !m.is_minion);
       const minions = pack.monsters.filter(m =>  m.is_minion);
@@ -231,7 +236,7 @@ export function formatDropDetail(packDetails, key) {
         + (minionCount > 0 ? ` + ${minionCount} minion${minionCount !== 1 ? 's' : ''}` : '');
       lines.push(`${packName}${spawnNote}`);
       for (const m of pack.monsters) {
-        lines.push(`  ${m.label}: ${fmtP(m[key])}`);
+        lines.push(`  ${m.label}: ${fmtMonDrop(m, key)}`);
       }
     }
   }
@@ -444,6 +449,7 @@ export function computeRunDropProbs(mf, runConfigData, monsterDbData, runBosses,
         packValueSc += monValueSc;
         monsterDetails.push({
           label: m.label, amount, is_minion: !!m.is_minion,
+          skipped: !m.is_minion && effectiveFrac === 0,
           itemProb: 1 - monNoValuable, runeProb: monRune,
           skillerProb: monSkiller,     valuableScProb: monValueSc,
         });
