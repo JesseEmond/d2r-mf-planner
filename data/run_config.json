@@ -21,7 +21,7 @@
       "label": "Andy",
       "act": 1,
       "teleports_to": 40,
-      "kill_room_packs": true,
+      "kill_room_packs_label": "Kill room packs",
       "monster_packs": [
         {
           "probability": 1.0,
@@ -108,11 +108,40 @@
       "label": "Meph",
       "act": 3,
       "teleports_to": 30,
+      "kill_room_packs_label": "Kill council",
       "monster_packs": [
         {
           "probability": 1.0,
           "monsters": [
             { "id": "meph", "monster_id": "mephisto", "superunique": false, "amount": 1 }
+          ]
+        },
+        {
+          "probability": 1.0,
+          "room_pack": true,
+          "monsters": [
+            { "id": "meph_council", "monster_id": "councilmember1", "label": "Council Member", "superunique": false, "amount": 3, "elite": true }
+          ]
+        },
+        {
+          "probability": 1.0,
+          "room_pack": true,
+          "monsters": [
+            { "id": "toorc", "monster_id": "Toorc Icefist", "superunique": true, "amount": 1 }
+          ]
+        },
+        {
+          "probability": 1.0,
+          "room_pack": true,
+          "monsters": [
+            { "id": "wyand", "monster_id": "Wyand Voidfinger", "superunique": true, "amount": 1 }
+          ]
+        },
+        {
+          "probability": 1.0,
+          "room_pack": true,
+          "monsters": [
+            { "id": "maffer", "monster_id": "Maffer Dragonhand", "superunique": true, "amount": 1 }
           ]
         }
       ],
