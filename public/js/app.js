@@ -1,5 +1,6 @@
 import { createApp, defineComponent, reactive, computed, watch, ref, onMounted, onUnmounted } from './vendor/vue.esm-browser.prod.js';
 import { GEAR_SLOTS, BLIZZARD_BOLTS_VS_BOSS, Stats, effUniqueMF, effSetMF, computeFcrBreakpoint, computeFcrTooltip, computeFcrBadgeClass, computeGearTotals, computeCombat, computeCombatAssumptions, computeRunStats, computeRunDropProbs, aggregateDropProbs, computeEttvd, formatDropDetail } from './engine.js';
+import { UNRELEASED, RELEASES } from './changelog.js';
 
 // ── Constants ──────────────────────────────────────────────────────────────
 
@@ -1129,6 +1130,7 @@ const app = createApp({
     }
 
     const showResetConfirm = ref(false);
+    const showChangelog = ref(false);
 
     function resetState() {
       Object.assign(state, makeDefaultState());
@@ -1142,6 +1144,9 @@ const app = createApp({
       state,
       stateError,
       showResetConfirm,
+      showChangelog,
+      UNRELEASED,
+      RELEASES,
       resetState,
       GEAR_SLOTS,
       PRESET_ITEMS,
@@ -1216,7 +1221,10 @@ const app = createApp({
     <div class="app-root">
       <header class="app-header sticky-header">
         <h1>D2R Blizzard Sorc — <tooltip-popup text="Expected Time To Valuable Drop — estimated average runs until a desirable item drops, given your MF and run routine"><abbr>ETTVD</abbr></tooltip-popup> Optimizer</h1>
-        <button class="reset-btn" @click="showResetConfirm = true">Reset</button>
+        <div style="display:flex;gap:0.5rem;align-items:center;">
+          <button class="changelog-btn" @click="showChangelog = true">Changelog</button>
+          <button class="reset-btn" @click="showResetConfirm = true">Reset</button>
+        </div>
       </header>
 
       <div v-if="stateError" class="error-banner" role="alert">
@@ -1563,6 +1571,29 @@ const app = createApp({
         </div>
 
       </main>
+
+      <teleport to="body">
+        <div v-if="showChangelog" class="modal-backdrop" @click.self="showChangelog = false">
+          <div class="modal-dialog changelog-dialog" role="dialog" aria-modal="true" aria-labelledby="changelog-title">
+            <div class="changelog-header">
+              <h2 id="changelog-title" class="modal-title" style="margin:0;">Changelog</h2>
+              <button class="changelog-close" @click="showChangelog = false" aria-label="Close">&times;</button>
+            </div>
+            <div class="changelog-body">
+              <template v-if="UNRELEASED.length > 0">
+                <div class="changelog-unreleased">
+                  <div class="changelog-date-label">Unreleased</div>
+                  <div v-for="item in UNRELEASED" :key="item" class="changelog-item">{{ item }}</div>
+                </div>
+              </template>
+              <template v-for="release in RELEASES" :key="release.date">
+                <div class="changelog-date-label">{{ release.date }}</div>
+                <div v-for="item in release.changes" :key="item" class="changelog-item">{{ item }}</div>
+              </template>
+            </div>
+          </div>
+        </div>
+      </teleport>
 
       <teleport to="body">
         <div v-if="showResetConfirm" class="modal-backdrop" @click.self="showResetConfirm = false">

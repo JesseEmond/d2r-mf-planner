@@ -97,3 +97,37 @@ Current docs files:
 | `docs/combat_mechanics.md` | Elite mod counts, cold immunity math, HP formula, Trav council stats |
 
 If the relevant information doesn't fit an existing file, create a new one and list it here.
+
+## Changelog
+
+`public/js/changelog.js` contains `UNRELEASED` (pending changes) and `RELEASES` (dated history).
+
+### When to add an UNRELEASED entry
+
+Add an entry whenever you make a change **a user of the site would notice and care about**:
+
+- New runs, bosses, or items added
+- New stats, calculations, or formulas that affect results
+- New UI sections or features
+- Bug fixes that visibly affected numbers or behavior
+- Meaningful QoL (e.g. state persistence, alphabetical sorting)
+
+**Skip** (do not add entries for):
+- Tooltip additions or wording tweaks
+- Visual polish, layout moves, CSS changes
+- Internal refactors with no visible effect
+- Pipeline-only changes (scripts, data extraction)
+- Display-only fixes (e.g. changing "0.0s" to "skipped")
+
+### How to write entries
+
+Write from the player's perspective in plain language — not commit-message style.
+
+- Good: `'Trav run: full council kill time and drop odds now modeled'`
+- Bad: `'feat(config): add Trav to run_config with group combat stats'`
+
+A sentence like "can now see X in the Y tooltip" is fine if X is genuinely useful info to a player. Keep entries concise — one clause is usually enough.
+
+### Releasing
+
+Run `/release` before deploying. It surfaces UNRELEASED entries and recent commits, then curates them into a dated release entry (rephrasing and filtering as needed). `gh-deploy.sh` will refuse to run if `UNRELEASED` is non-empty.
