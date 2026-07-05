@@ -17,9 +17,16 @@ Returns a dict with keys:
 """
 
 import json
+from dataclasses import dataclass
 from pathlib import Path
 
 import d2r_data
+
+@dataclass(frozen=True)
+class PresetItem:
+    name: str          # internal key used in items_config.json
+    display_name: str  # enUS display name for searches (may differ, e.g. "Fathom" → "Death's Fathom")
+
 
 ROOT = Path(__file__).parent.parent
 CONFIG = ROOT / "data" / "items_config.json"
@@ -504,6 +511,45 @@ def extract() -> dict:
     return {"items_by_slot": items_by_slot, "presets": presets,
             "set_level_bonuses": set_level_bonuses, "set_sizes": set_sizes,
             "socket_items": socket_items}
+
+
+
+def get_preset_items() -> list[PresetItem]:
+    """Return deduplicated items referenced by all gear presets."""
+    gear = extract()
+
+    # Build id → display_name from all items already resolved by extract().
+    id_to_display: dict[str, str] = {}
+    for slot_items in gear["items_by_slot"].values():
+        for item in slot_items:
+            id_to_display[item["id"]] = item["name"]
+    for item in gear["socket_items"]:
+        id_to_display[item["id"]] = item["name"]
+
+    slot_keys = {"head", "amulet", "weapon", "shield", "armor",
+                 "gloves", "belt", "boots", "ring1", "ring2"}
+    seen: set[str] = set()
+    items: list[PresetItem] = []
+
+    def _add(item_id: str) -> None:
+        if item_id not in seen:
+            seen.add(item_id)
+            items.append(PresetItem(
+                name=item_id,
+                display_name=id_to_display.get(item_id, item_id),
+            ))
+
+    for preset in gear["presets"].values():
+        for slot, item_id in preset.items():
+            if slot in slot_keys:
+                _add(item_id)
+        for sock_list in preset.get("sockets", {}).values():
+            for sock_id in sock_list:
+                _add(sock_id)
+        for charm in preset.get("charms", []):
+            _add(charm["id"])
+
+    return items
 
 
 if __name__ == "__main__":

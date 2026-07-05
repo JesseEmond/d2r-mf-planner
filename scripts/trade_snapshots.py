@@ -1,7 +1,7 @@
 """
-trade_snapshots.py — library for querying Traderie rune price snapshots.
+trade_snapshots.py — library for querying Traderie price snapshots.
 
-Snapshots live in data/trade_snapshots/runes-YYYY-MM-DD.json and are produced
+Snapshots live in data/trade_snapshots/snapshot-YYYY-MM-DD.json and are produced
 by scripts/fetch_trade_snapshot.py.  All IST values are floats representing
 the "typical" trade price in Ist Runes.
 
@@ -37,11 +37,11 @@ RUNE_ORDER = ["Pul", "Um", "Mal", "Ist", "Gul", "Vex", "Ohm", "Lo", "Sur", "Ber"
 def load_latest_snapshot(date: Optional[str] = None) -> dict:
     """Load the most recent snapshot, or a specific one by YYYY-MM-DD date string."""
     if date:
-        path = SNAPSHOTS_DIR / f"runes-{date}.json"
+        path = SNAPSHOTS_DIR / f"snapshot-{date}.json"
         if not path.exists():
             raise FileNotFoundError(f"No snapshot for date {date!r} at {path}")
     else:
-        candidates = sorted(SNAPSHOTS_DIR.glob("runes-????-??-??.json"))
+        candidates = sorted(SNAPSHOTS_DIR.glob("snapshot-????-??-??.json"))
         if not candidates:
             raise FileNotFoundError(
                 f"No rune snapshots found in {SNAPSHOTS_DIR}.\n"
