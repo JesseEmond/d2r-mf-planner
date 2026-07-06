@@ -1,6 +1,12 @@
 #!/bin/bash
 set -e
 
+if ! git diff --quiet || ! git diff --cached --quiet; then
+    echo "ERROR: uncommitted changes — commit or stash before deploying." >&2
+    git status --short >&2
+    exit 1
+fi
+
 python3 - << 'PYEOF'
 import re, sys
 
