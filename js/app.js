@@ -597,28 +597,34 @@ const potentialUpgrades = computed(() => {
   // TODO: add charm upgrade rows — compare targetPresetCharms vs. state.gear.charms for
   //   any charm entries in target not already present in current gear.
 
-  // Split into priced (known value) and unpriced (no price entry) groups.
-  const priced   = rows.filter(r => r.priceIst !== null);
-  const unpriced = rows.filter(r => r.priceIst === null);
+  // Partition rows into four buckets for display order and grading.
+  const improving = rows.filter(r => r.priceIst !== null && r.ettvdDelta < 0);
+  const worsening = rows.filter(r => r.priceIst !== null && r.ettvdDelta >= 0);
+  const unpriced  = rows.filter(r => r.priceIst === null);
 
-  // Priced: best value (most negative ettvdDelta / priceIst) first.
-  priced.sort((a, b) => a.valueScore - b.valueScore);
-
-  // Assign letter grades across priced rows only.
-  if (priced.length > 1) {
-    const min = priced[0].valueScore;
-    const max = priced[priced.length - 1].valueScore;
+  // Improving: sort by value score, assign S+ through D- (F is reserved for worsening).
+  improving.sort((a, b) => a.valueScore - b.valueScore);
+  const IMPROVING_GRADE_COUNT = UPGRADE_GRADES.length - 1; // all except F
+  if (improving.length > 1) {
+    const min = improving[0].valueScore;
+    const max = improving[improving.length - 1].valueScore;
     const range = max - min;
-    const n = UPGRADE_GRADES.length;
-    for (const row of priced) {
+    for (const row of improving) {
       const t = range > 0 ? (row.valueScore - min) / range : 0;
-      const idx = Math.min(n - 1, Math.floor(t * n));
+      const idx = Math.min(IMPROVING_GRADE_COUNT - 1, Math.floor(t * IMPROVING_GRADE_COUNT));
       row.grade     = UPGRADE_GRADES[idx];
       row.gradeTier = UPGRADE_GRADE_TIER[idx];
     }
-  } else if (priced.length === 1) {
-    priced[0].grade = 'S+';
-    priced[0].gradeTier = 0;
+  } else if (improving.length === 1) {
+    improving[0].grade = 'S+';
+    improving[0].gradeTier = 0;
+  }
+
+  // Worsening: always F, sorted least-bad (smallest positive ettvdDelta) first.
+  worsening.sort((a, b) => a.ettvdDelta - b.ettvdDelta);
+  for (const row of worsening) {
+    row.grade     = 'F';
+    row.gradeTier = 5;
   }
 
   // Unpriced: sort by ettvdDelta ascending (most negative first), grade as '?' (gray).
@@ -628,7 +634,7 @@ const potentialUpgrades = computed(() => {
     row.gradeTier = 6;
   }
 
-  return [...priced, ...unpriced];
+  return [...improving, ...worsening, ...unpriced];
 });
 
 const totalUpgradeEttvdDelta = computed(() => {
