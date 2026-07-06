@@ -1163,10 +1163,25 @@ function _fmtEttvd(secs) {
   return m > 0 ? `${h}h ${m}min` : `${h}h`;
 }
 
+function _fmtEttvdSeconds(secs) {
+  const s = Math.round(Math.abs(secs));
+  const sec = s % 60;
+  const totalMins = Math.floor(s / 60);
+  const min = totalMins % 60;
+  const h = Math.floor(totalMins / 60);
+  if (h > 0) {
+    const parts = [`${h}h`, `${min}min`];
+    if (sec > 0) parts.push(`${sec}sec`);
+    return parts.join(' ');
+  }
+  if (min > 0) return sec > 0 ? `${min}min ${sec}sec` : `${min}min`;
+  return `${sec}sec`;
+}
+
 function fmtEttvdDelta(secs) {
   if (secs === 0) return '0';
   const sign = secs < 0 ? '-' : '+';
-  return sign + _fmtEttvd(Math.abs(secs));
+  return sign + _fmtEttvdSeconds(secs);
 }
 
 // relEttvdPerIstValue = % ETTVD improvement per ~Ist-rune-equivalent cost. Positive = good deal.
