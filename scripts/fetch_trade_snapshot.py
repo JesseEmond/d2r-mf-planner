@@ -29,6 +29,7 @@ import time
 from dataclasses import dataclass, field
 from datetime import date
 from pathlib import Path
+from urllib.parse import quote, urlencode
 
 import requests
 
@@ -57,6 +58,15 @@ PRICE_CHECK_PARAMS: dict[str, object] = {
     "prop_Ladder": "true",
     "prop_Game version": "reign of the warlock",
 }
+
+TRADERIE_PRICE_CHECK_BASE = "https://traderie.com/diablo2resurrected/price-check"
+
+
+def _price_check_url(search_term: str) -> str:
+    slug = quote(search_term.lower().replace(" ", "-"), safe="-")
+    params = {k: v for k, v in PRICE_CHECK_PARAMS.items() if k != "limit"}
+    return f"{TRADERIE_PRICE_CHECK_BASE}/{slug}?{urlencode(params, quote_via=quote)}"
+
 
 # Self-throttle to avoid hammering Traderie's backend.
 _THROTTLE_SECONDS = 3.0
@@ -252,6 +262,7 @@ def _fetch_items_section(
     exceptions: dict[str, GearItemException] | None = None,
     existing: dict | None = None,
     force: bool = False,
+    trade_urls: dict[str, str] | None = None,
 ) -> dict:
     """Fetch price-check data for a list of named items; return snapshot section dict.
 
@@ -302,7 +313,9 @@ def _fetch_items_section(
                 f"floor={tiers.get('floor')}  typical={tiers.get('typical')}"
                 f"  good={tiers.get('good')}  high={tiers.get('high')}"
             )
-            section[name] = {"item_id": item_ids[name], "tiers": tiers, "raw_response": raw}
+            trade_url = (trade_urls or {}).get(name)
+            section[name] = {"item_id": item_ids[name], "tiers": tiers, "raw_response": raw,
+                             **({"trade_url": trade_url} if trade_url else {})}
         except requests.HTTPError as e:
             status = e.response.status_code
             print(f"HTTP {status} — {e}")
@@ -431,14 +444,23 @@ def main() -> None:
     if args.skip_runes:
         print("\nSkipping runes (--skip-runes).")
     else:
+        rune_trade_urls = {rune: _price_check_url(f"{rune} Rune") for rune in RUNES_PUL_PLUS}
         snapshot["runes"] = _fetch_items_section(
             "runes", RUNES_PUL_PLUS, item_ids, session,
             existing=existing_snapshot.get("runes", {}), force=args.refetch_all,
+            trade_urls=rune_trade_urls,
         )
+    gear_trade_urls = {
+        item.name: _price_check_url(
+            (GEAR_ITEM_EXCEPTIONS.get(item.name) or GearItemException()).search_term or item.display_name
+        )
+        for item in preset_items
+    }
     snapshot["gear_items"] = _fetch_items_section(
         "gear items", [item.name for item in preset_items], item_ids, session,
         exceptions=GEAR_ITEM_EXCEPTIONS,
         existing=existing_snapshot.get("gear_items", {}), force=args.refetch_all,
+        trade_urls=gear_trade_urls,
     )
 
     with open(output_path, "w") as f:

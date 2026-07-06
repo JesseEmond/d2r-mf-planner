@@ -88,93 +88,100 @@
           "newest": "2026-07-05T23:47:17.069Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/pul-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Um": {
       "item_id": "2654038235",
       "tiers": {
-        "floor": 0.375,
+        "floor": 0.5,
         "typical": 0.6666666666666666,
         "good": 0.75,
-        "high": 0.75
+        "high": 1.0
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 28,
-        "excludedTrades": 72,
-        "average": 0.6214285714285713,
+        "valuedTrades": 31,
+        "excludedTrades": 69,
+        "average": 0.6567204301075268,
         "percentiles": {
-          "floor": 0.375,
+          "floor": 0.5,
           "typical": 0.6666666666666666,
           "good": 0.75,
-          "high": 0.75
+          "high": 1
         },
         "distribution": [
           {
             "name": "8x Perfect Amethyst",
-            "count": 11,
+            "count": 13,
             "istValue": 0.6666666666666666,
-            "percentage": 39
+            "percentage": 42
           },
           {
             "name": "15x Ral Rune",
-            "count": 5,
+            "count": 6,
             "istValue": 0.75,
-            "percentage": 18
-          },
-          {
-            "name": "Pul Rune + Lem Rune",
-            "count": 3,
-            "istValue": 0.375,
-            "percentage": 11
+            "percentage": 19
           },
           {
             "name": "9x Perfect Amethyst",
             "count": 2,
             "istValue": 0.75,
-            "percentage": 7
+            "percentage": 6
+          },
+          {
+            "name": "Pul Rune + Lem Rune",
+            "count": 2,
+            "istValue": 0.375,
+            "percentage": 6
+          },
+          {
+            "name": "Gul Rune",
+            "count": 1,
+            "istValue": 1.25,
+            "percentage": 3
           },
           {
             "name": "3x Lem Rune",
             "count": 1,
             "istValue": 0.375,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "6x Ral Rune",
             "count": 1,
             "istValue": 0.30000000000000004,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "Ist Rune",
             "count": 1,
             "istValue": 1,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "2x Perfect Amethyst + 7x Ral Rune",
             "count": 1,
             "istValue": 0.5166666666666667,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "2x Pul Rune",
             "count": 1,
             "istValue": 0.5,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "Pul Rune + 2x Lem Rune",
             "count": 1,
             "istValue": 0.5,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "Mal Rune",
             "count": 1,
             "istValue": 0.5,
-            "percentage": 4
+            "percentage": 3
           }
         ],
         "runeValues": {
@@ -202,11 +209,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-03T14:20:54.399Z",
-          "newest": "2026-07-05T23:46:31.393Z"
+          "oldest": "2026-07-03T14:30:28.935Z",
+          "newest": "2026-07-06T02:44:00.954Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/um-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Mal": {
       "item_id": "2401638276",
@@ -220,7 +228,7 @@
         "totalTrades": 100,
         "valuedTrades": 16,
         "excludedTrades": 84,
-        "average": 1.0135416666666666,
+        "average": 1.0104166666666665,
         "percentiles": {
           "floor": 0.8500000000000001,
           "typical": 1,
@@ -230,9 +238,9 @@
         "distribution": [
           {
             "name": "Ist Rune",
-            "count": 5,
+            "count": 4,
             "istValue": 1,
-            "percentage": 31
+            "percentage": 25
           },
           {
             "name": "14x Perfect Amethyst",
@@ -251,6 +259,12 @@
             "count": 3,
             "istValue": 0.8500000000000001,
             "percentage": 19
+          },
+          {
+            "name": "19x Ral Rune",
+            "count": 1,
+            "istValue": 0.9500000000000001,
+            "percentage": 6
           },
           {
             "name": "12x Perfect Amethyst",
@@ -284,11 +298,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-04T17:51:19.058Z",
-          "newest": "2026-07-05T15:24:03.434Z"
+          "oldest": "2026-07-04T21:52:27.782Z",
+          "newest": "2026-07-06T02:16:10.164Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/mal-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Ist": {
       "item_id": "2290642411",
@@ -388,7 +403,8 @@
           "newest": "2026-07-05T23:41:56.773Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/ist-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Gul": {
       "item_id": "4160776515",
@@ -400,9 +416,9 @@
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 31,
-        "excludedTrades": 69,
-        "average": 1.2655913978494624,
+        "valuedTrades": 32,
+        "excludedTrades": 68,
+        "average": 1.2572916666666667,
         "percentiles": {
           "floor": 1,
           "typical": 1.125,
@@ -414,16 +430,16 @@
             "name": "18x Perfect Amethyst",
             "count": 7,
             "istValue": 1.5,
-            "percentage": 23
-          },
-          {
-            "name": "Ist Rune",
-            "count": 5,
-            "istValue": 1,
-            "percentage": 16
+            "percentage": 22
           },
           {
             "name": "2x Mal Rune",
+            "count": 6,
+            "istValue": 1,
+            "percentage": 19
+          },
+          {
+            "name": "Ist Rune",
             "count": 5,
             "istValue": 1,
             "percentage": 16
@@ -503,10 +519,11 @@
         },
         "dateRange": {
           "oldest": "2026-07-01T09:10:18.165Z",
-          "newest": "2026-07-05T17:17:38.062Z"
+          "newest": "2026-07-06T01:29:41.650Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/gul-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Vex": {
       "item_id": "3806138905",
@@ -630,7 +647,8 @@
           "newest": "2026-07-05T21:42:11.387Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/vex-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Ohm": {
       "item_id": "3896329590",
@@ -760,25 +778,26 @@
           "newest": "2026-07-05T23:21:28.776Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/ohm-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Lo": {
       "item_id": "3632079454",
       "tiers": {
         "floor": 7.5,
         "typical": 8.0,
-        "good": 8.5,
+        "good": 9.0,
         "high": 9.0
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 25,
-        "excludedTrades": 75,
-        "average": 8.74,
+        "valuedTrades": 24,
+        "excludedTrades": 76,
+        "average": 8.78125,
         "percentiles": {
           "floor": 7.5,
           "typical": 8,
-          "good": 8.5,
+          "good": 9,
           "high": 9
         },
         "distribution": [
@@ -786,13 +805,13 @@
             "name": "8x Ist Rune",
             "count": 5,
             "istValue": 8,
-            "percentage": 20
+            "percentage": 21
           },
           {
             "name": "2x Ohm Rune",
             "count": 4,
             "istValue": 9,
-            "percentage": 16
+            "percentage": 17
           },
           {
             "name": "Vex Rune + 6x Ist Rune",
@@ -871,12 +890,6 @@
             "count": 1,
             "istValue": 24,
             "percentage": 4
-          },
-          {
-            "name": "Vex Rune + Gul Rune + 4x Ist Rune",
-            "count": 1,
-            "istValue": 7.75,
-            "percentage": 4
           }
         ],
         "runeValues": {
@@ -904,11 +917,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-04T10:38:59.997Z",
+          "oldest": "2026-07-04T12:54:43.291Z",
           "newest": "2026-07-05T20:10:39.138Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/lo-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Sur": {
       "item_id": "3382986705",
@@ -1062,24 +1076,25 @@
           "newest": "2026-07-05T16:35:56.096Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/sur-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Ber": {
       "item_id": "4149485449",
       "tiers": {
-        "floor": 18.0,
-        "typical": 22.0,
+        "floor": 16.0,
+        "typical": 21.5,
         "good": 24.25,
         "high": 40.0
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 31,
-        "excludedTrades": 69,
-        "average": 23.830645161290324,
+        "valuedTrades": 32,
+        "excludedTrades": 68,
+        "average": 23.3984375,
         "percentiles": {
-          "floor": 18,
-          "typical": 22,
+          "floor": 16,
+          "typical": 21.5,
           "good": 24.25,
           "high": 40
         },
@@ -1089,6 +1104,12 @@
             "count": 5,
             "istValue": 40,
             "percentage": 16
+          },
+          {
+            "name": "Cham Rune + Lo Rune",
+            "count": 3,
+            "istValue": 16,
+            "percentage": 9
           },
           {
             "name": "Sur Rune + Lo Rune",
@@ -1106,12 +1127,6 @@
             "name": "5x Ohm Rune",
             "count": 2,
             "istValue": 22.5,
-            "percentage": 6
-          },
-          {
-            "name": "22x Ist Rune",
-            "count": 2,
-            "istValue": 22,
             "percentage": 6
           },
           {
@@ -1193,9 +1208,9 @@
             "percentage": 3
           },
           {
-            "name": "Cham Rune + Lo Rune",
+            "name": "22x Ist Rune",
             "count": 1,
-            "istValue": 16,
+            "istValue": 22,
             "percentage": 3
           },
           {
@@ -1248,11 +1263,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-04T04:39:28.411Z",
-          "newest": "2026-07-05T23:48:46.552Z"
+          "oldest": "2026-07-04T07:18:12.438Z",
+          "newest": "2026-07-06T02:44:08.195Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/ber-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Jah": {
       "item_id": "2552039455",
@@ -1264,9 +1280,9 @@
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 26,
-        "excludedTrades": 74,
-        "average": 26.471153846153847,
+        "valuedTrades": 25,
+        "excludedTrades": 75,
+        "average": 26.51,
         "percentiles": {
           "floor": 25,
           "typical": 26.5,
@@ -1275,16 +1291,16 @@
         },
         "distribution": [
           {
+            "name": "Ber Rune + Vex Rune",
+            "count": 5,
+            "istValue": 26.5,
+            "percentage": 20
+          },
+          {
             "name": "Ber Rune + Ohm Rune",
             "count": 5,
             "istValue": 28.5,
-            "percentage": 19
-          },
-          {
-            "name": "Ber Rune + Vex Rune",
-            "count": 4,
-            "istValue": 26.5,
-            "percentage": 15
+            "percentage": 20
           },
           {
             "name": "Ber Rune + Vex Rune + Ist Rune",
@@ -1363,18 +1379,6 @@
             "count": 1,
             "istValue": 27,
             "percentage": 4
-          },
-          {
-            "name": "Ber Rune + 2x Ist Rune + Mal Rune",
-            "count": 1,
-            "istValue": 26.5,
-            "percentage": 4
-          },
-          {
-            "name": "Sur Rune + Lo Rune + Vex Rune + 3x Ist Rune",
-            "count": 1,
-            "istValue": 25.5,
-            "percentage": 4
           }
         ],
         "runeValues": {
@@ -1402,27 +1406,28 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-04T18:16:36.074Z",
-          "newest": "2026-07-05T22:33:45.061Z"
+          "oldest": "2026-07-04T21:22:48.020Z",
+          "newest": "2026-07-05T23:37:14.619Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/jah-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Cham": {
       "item_id": "3191411278",
       "tiers": {
-        "floor": 12.0,
+        "floor": 11.75,
         "typical": 12.5,
         "good": 20.0,
         "high": 40.0
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 40,
-        "excludedTrades": 60,
-        "average": 16.732499999999998,
+        "valuedTrades": 39,
+        "excludedTrades": 61,
+        "average": 16.828205128205127,
         "percentiles": {
-          "floor": 12,
+          "floor": 11.75,
           "typical": 12.5,
           "good": 20,
           "high": 40
@@ -1432,7 +1437,7 @@
             "name": "Lo Rune + Ohm Rune",
             "count": 10,
             "istValue": 12.5,
-            "percentage": 25
+            "percentage": 26
           },
           {
             "name": "Ber Rune",
@@ -1451,12 +1456,6 @@
             "count": 4,
             "istValue": 40,
             "percentage": 10
-          },
-          {
-            "name": "Sur Rune + Ist Rune",
-            "count": 2,
-            "istValue": 13,
-            "percentage": 5
           },
           {
             "name": "Lo Rune + 2x Vex Rune",
@@ -1492,6 +1491,12 @@
             "name": "8x Ist Rune",
             "count": 1,
             "istValue": 8,
+            "percentage": 3
+          },
+          {
+            "name": "Sur Rune + Ist Rune",
+            "count": 1,
+            "istValue": 13,
             "percentage": 3
           },
           {
@@ -1568,11 +1573,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-06-30T05:08:36.277Z",
+          "oldest": "2026-06-30T13:48:30.542Z",
           "newest": "2026-07-05T17:26:57.521Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/cham-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Zod": {
       "item_id": "4067651730",
@@ -1584,9 +1590,9 @@
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 15,
-        "excludedTrades": 85,
-        "average": 29.8,
+        "valuedTrades": 16,
+        "excludedTrades": 84,
+        "average": 29.5,
         "percentiles": {
           "floor": 23,
           "typical": 28.5,
@@ -1598,7 +1604,13 @@
             "name": "Jah Rune",
             "count": 3,
             "istValue": 40,
-            "percentage": 20
+            "percentage": 19
+          },
+          {
+            "name": "Ber Rune + Ist Rune",
+            "count": 2,
+            "istValue": 25,
+            "percentage": 13
           },
           {
             "name": "Ber Rune",
@@ -1616,49 +1628,43 @@
             "name": "23x Ist Rune",
             "count": 1,
             "istValue": 23,
-            "percentage": 7
+            "percentage": 6
           },
           {
             "name": "20x Ist Rune",
             "count": 1,
             "istValue": 20,
-            "percentage": 7
-          },
-          {
-            "name": "Ber Rune + Ist Rune",
-            "count": 1,
-            "istValue": 25,
-            "percentage": 7
+            "percentage": 6
           },
           {
             "name": "Ber Rune + Lo Rune",
             "count": 1,
             "istValue": 32,
-            "percentage": 7
+            "percentage": 6
           },
           {
             "name": "2x Sur Rune + 2x Ohm Rune",
             "count": 1,
             "istValue": 33,
-            "percentage": 7
+            "percentage": 6
           },
           {
             "name": "Ber Rune + Vex Rune",
             "count": 1,
             "istValue": 26.5,
-            "percentage": 7
+            "percentage": 6
           },
           {
             "name": "Sur Rune + Cham Rune",
             "count": 1,
             "istValue": 20,
-            "percentage": 7
+            "percentage": 6
           },
           {
             "name": "Jah Rune + Vex Rune",
             "count": 1,
             "istValue": 42.5,
-            "percentage": 7
+            "percentage": 6
           }
         ],
         "runeValues": {
@@ -1687,10 +1693,11 @@
         },
         "dateRange": {
           "oldest": "2026-07-02T08:13:48.985Z",
-          "newest": "2026-07-05T21:57:00.607Z"
+          "newest": "2026-07-06T01:03:42.958Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/zod-rune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     }
   },
   "gear_items": {
@@ -1888,7 +1895,8 @@
           "newest": "2026-07-05T13:52:40.133Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/nightwing%27s-veil?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Mara's Kaleidoscope": {
       "item_id": "3797106309",
@@ -1900,9 +1908,9 @@
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 34,
-        "excludedTrades": 66,
-        "average": 3.6568627450980395,
+        "valuedTrades": 31,
+        "excludedTrades": 69,
+        "average": 3.7849462365591395,
         "percentiles": {
           "floor": 1,
           "typical": 1.5,
@@ -1911,34 +1919,34 @@
         },
         "distribution": [
           {
-            "name": "Ist Rune",
-            "count": 6,
-            "istValue": 1,
-            "percentage": 18
-          },
-          {
             "name": "Ohm Rune",
             "count": 5,
             "istValue": 4.5,
-            "percentage": 15
+            "percentage": 16
+          },
+          {
+            "name": "Ist Rune",
+            "count": 4,
+            "istValue": 1,
+            "percentage": 13
           },
           {
             "name": "25x Ral Rune",
             "count": 3,
             "istValue": 1.25,
-            "percentage": 9
+            "percentage": 10
           },
           {
             "name": "Gul Rune",
             "count": 3,
             "istValue": 1.25,
-            "percentage": 9
+            "percentage": 10
           },
           {
             "name": "Sur Rune",
             "count": 3,
             "istValue": 12,
-            "percentage": 9
+            "percentage": 10
           },
           {
             "name": "30x Ral Rune",
@@ -1950,12 +1958,6 @@
             "name": "17x Perfect Amethyst",
             "count": 2,
             "istValue": 1.4166666666666665,
-            "percentage": 6
-          },
-          {
-            "name": "2x Vex Rune",
-            "count": 2,
-            "istValue": 5,
             "percentage": 6
           },
           {
@@ -2005,6 +2007,12 @@
             "count": 1,
             "istValue": 0.8333333333333333,
             "percentage": 3
+          },
+          {
+            "name": "2x Vex Rune",
+            "count": 1,
+            "istValue": 5,
+            "percentage": 3
           }
         ],
         "runeValues": {
@@ -2032,11 +2040,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-05T00:21:35.400Z",
+          "oldest": "2026-07-05T02:27:11.537Z",
           "newest": "2026-07-05T23:44:22.310Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/mara%27s-kaleidoscope?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Fathom": {
       "item_id": "3811006898",
@@ -2202,7 +2211,8 @@
           "newest": "2026-07-05T17:35:44.092Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/death%27s-fathom?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Spirit": {
       "skipped": true,
@@ -2212,18 +2222,18 @@
       "item_id": "3982688299",
       "tiers": {
         "floor": 0.5,
-        "typical": 4.5,
+        "typical": 3.0,
         "good": 12.0,
         "high": 40.0
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 40,
-        "excludedTrades": 60,
-        "average": 8.927916666666667,
+        "valuedTrades": 39,
+        "excludedTrades": 61,
+        "average": 8.097008547008546,
         "percentiles": {
           "floor": 0.5,
-          "typical": 4.5,
+          "typical": 3,
           "good": 12,
           "high": 40
         },
@@ -2253,12 +2263,6 @@
             "percentage": 8
           },
           {
-            "name": "Jah Rune",
-            "count": 3,
-            "istValue": 40,
-            "percentage": 8
-          },
-          {
             "name": "Sur Rune",
             "count": 3,
             "istValue": 12,
@@ -2277,16 +2281,22 @@
             "percentage": 8
           },
           {
+            "name": "2x Perfect Amethyst",
+            "count": 2,
+            "istValue": 0.16666666666666666,
+            "percentage": 5
+          },
+          {
+            "name": "Jah Rune",
+            "count": 2,
+            "istValue": 40,
+            "percentage": 5
+          },
+          {
             "name": "3x Perfect Amethyst",
             "count": 2,
             "istValue": 0.25,
             "percentage": 5
-          },
-          {
-            "name": "2x Perfect Amethyst",
-            "count": 1,
-            "istValue": 0.16666666666666666,
-            "percentage": 3
           },
           {
             "name": "2x Pul Rune",
@@ -2335,12 +2345,6 @@
             "count": 1,
             "istValue": 3,
             "percentage": 3
-          },
-          {
-            "name": "Gul Rune + Pul Rune",
-            "count": 1,
-            "istValue": 1.5,
-            "percentage": 3
           }
         ],
         "runeValues": {
@@ -2368,11 +2372,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-06-29T13:27:58.885Z",
-          "newest": "2026-07-05T14:58:04.906Z"
+          "oldest": "2026-06-29T15:43:48.101Z",
+          "newest": "2026-07-06T03:07:31.317Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/ormus%27-robes?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Trang-Oul's Claws": {
       "item_id": "2765902985",
@@ -2466,7 +2471,8 @@
           "newest": "2026-07-05T18:28:36.846Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/trang-oul%27s-claws?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Arachnid Mesh": {
       "item_id": "3527553014",
@@ -2478,9 +2484,9 @@
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 28,
-        "excludedTrades": 72,
-        "average": 1.5261904761904763,
+        "valuedTrades": 30,
+        "excludedTrades": 70,
+        "average": 1.5244444444444443,
         "percentiles": {
           "floor": 1,
           "typical": 1,
@@ -2490,7 +2496,7 @@
         "distribution": [
           {
             "name": "Ist Rune",
-            "count": 12,
+            "count": 13,
             "istValue": 1,
             "percentage": 43
           },
@@ -2498,13 +2504,13 @@
             "name": "Mal Rune",
             "count": 3,
             "istValue": 0.5,
-            "percentage": 11
+            "percentage": 10
           },
           {
             "name": "Vex Rune",
             "count": 3,
             "istValue": 2.5,
-            "percentage": 11
+            "percentage": 10
           },
           {
             "name": "2x Ist Rune",
@@ -2513,52 +2519,58 @@
             "percentage": 7
           },
           {
+            "name": "40x Ral Rune",
+            "count": 1,
+            "istValue": 2,
+            "percentage": 3
+          },
+          {
             "name": "4x Ist Rune + Um Rune",
             "count": 1,
             "istValue": 4.4,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "Ist Rune + 2x Pul Rune",
             "count": 1,
             "istValue": 1.5,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "Gul Rune",
             "count": 1,
             "istValue": 1.25,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "Mal Rune + 7x Perfect Amethyst",
             "count": 1,
             "istValue": 1.0833333333333333,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "Ohm Rune",
             "count": 1,
             "istValue": 4.5,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "20x Ral Rune",
             "count": 1,
             "istValue": 1,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "2x Ist Rune + Mal Rune",
             "count": 1,
             "istValue": 2.5,
-            "percentage": 4
+            "percentage": 3
           },
           {
             "name": "Ist Rune + Mal Rune",
             "count": 1,
             "istValue": 1.5,
-            "percentage": 4
+            "percentage": 3
           }
         ],
         "runeValues": {
@@ -2587,10 +2599,11 @@
         },
         "dateRange": {
           "oldest": "2026-07-05T05:48:44.493Z",
-          "newest": "2026-07-05T19:47:24.869Z"
+          "newest": "2026-07-06T02:42:21.364Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/arachnid-mesh?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Rare MF Boots": {
       "skipped": true,
@@ -2601,18 +2614,18 @@
       "tiers": {
         "floor": 4.5,
         "typical": 4.5,
-        "good": 5.5,
+        "good": 5.0,
         "high": 9.0
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 38,
-        "excludedTrades": 62,
-        "average": 5.567543859649123,
+        "valuedTrades": 35,
+        "excludedTrades": 65,
+        "average": 5.273333333333333,
         "percentiles": {
           "floor": 4.5,
           "typical": 4.5,
-          "good": 5.5,
+          "good": 5,
           "high": 9
         },
         "distribution": [
@@ -2620,43 +2633,37 @@
             "name": "Ohm Rune",
             "count": 16,
             "istValue": 4.5,
-            "percentage": 42
+            "percentage": 46
           },
           {
             "name": "Lo Rune + Ist Rune",
-            "count": 4,
+            "count": 3,
             "istValue": 9,
-            "percentage": 11
+            "percentage": 9
           },
           {
             "name": "4x Ist Rune",
             "count": 2,
             "istValue": 4,
-            "percentage": 5
-          },
-          {
-            "name": "9x Ist Rune",
-            "count": 2,
-            "istValue": 9,
-            "percentage": 5
+            "percentage": 6
           },
           {
             "name": "2x Vex Rune",
             "count": 2,
             "istValue": 5,
-            "percentage": 5
+            "percentage": 6
           },
           {
             "name": "Cham Rune",
             "count": 2,
             "istValue": 8,
-            "percentage": 5
+            "percentage": 6
           },
           {
             "name": "4x Ist Rune + Mal Rune",
             "count": 2,
             "istValue": 4.5,
-            "percentage": 5
+            "percentage": 6
           },
           {
             "name": "Vex Rune",
@@ -2736,7 +2743,8 @@
           "newest": "2026-07-05T19:59:11.191Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/the-stone-of-jordan?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Cold Facet (+5/-5)": {
       "skipped": true,
@@ -2906,7 +2914,8 @@
           "newest": "2026-07-05T12:13:39.019Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/protector%27s-frost?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Sorc Torch": {
       "skipped": true,
@@ -2924,7 +2933,7 @@
         "totalTrades": 100,
         "valuedTrades": 29,
         "excludedTrades": 71,
-        "average": 6.469540229885058,
+        "average": 5.995402298850575,
         "percentiles": {
           "floor": 0.4,
           "typical": 1,
@@ -2963,12 +2972,6 @@
             "percentage": 7
           },
           {
-            "name": "Ber Rune",
-            "count": 2,
-            "istValue": 24,
-            "percentage": 7
-          },
-          {
             "name": "6x Perfect Amethyst",
             "count": 2,
             "istValue": 0.5,
@@ -2981,9 +2984,27 @@
             "percentage": 7
           },
           {
+            "name": "10x Ist Rune",
+            "count": 1,
+            "istValue": 10,
+            "percentage": 3
+          },
+          {
+            "name": "Um Rune + Pul Rune",
+            "count": 1,
+            "istValue": 0.65,
+            "percentage": 3
+          },
+          {
             "name": "Vex Rune",
             "count": 1,
             "istValue": 2.5,
+            "percentage": 3
+          },
+          {
+            "name": "Ber Rune",
+            "count": 1,
+            "istValue": 24,
             "percentage": 3
           },
           {
@@ -3008,12 +3029,6 @@
             "name": "9x Perfect Amethyst",
             "count": 1,
             "istValue": 0.75,
-            "percentage": 3
-          },
-          {
-            "name": "8x Ral Rune",
-            "count": 1,
-            "istValue": 0.4,
             "percentage": 3
           }
         ],
@@ -3042,11 +3057,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-05T07:13:14.456Z",
-          "newest": "2026-07-05T22:18:10.775Z"
+          "oldest": "2026-07-05T08:58:14.536Z",
+          "newest": "2026-07-06T02:36:50.602Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/annihilus?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Cold Rupture (MF)": {
       "skipped": true,
@@ -3061,44 +3077,50 @@
       "tiers": {
         "floor": 0.4,
         "typical": 0.5,
-        "good": 0.8333333333333333,
-        "high": 1.0
+        "good": 1.0,
+        "high": 2.0
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 19,
-        "excludedTrades": 81,
-        "average": 0.6070175438596491,
+        "valuedTrades": 20,
+        "excludedTrades": 80,
+        "average": 0.6766666666666666,
         "percentiles": {
           "floor": 0.4,
           "typical": 0.5,
-          "good": 0.8333333333333333,
-          "high": 1
+          "good": 1,
+          "high": 2
         },
         "distribution": [
           {
             "name": "Mal Rune",
             "count": 5,
             "istValue": 0.5,
-            "percentage": 26
+            "percentage": 25
           },
           {
             "name": "Ist Rune",
             "count": 4,
             "istValue": 1,
-            "percentage": 21
+            "percentage": 20
           },
           {
             "name": "Um Rune",
             "count": 4,
             "istValue": 0.4,
-            "percentage": 21
+            "percentage": 20
           },
           {
             "name": "6x Perfect Amethyst",
             "count": 2,
             "istValue": 0.5,
-            "percentage": 11
+            "percentage": 10
+          },
+          {
+            "name": "2x Ist Rune",
+            "count": 1,
+            "istValue": 2,
+            "percentage": 5
           },
           {
             "name": "2x Um Rune",
@@ -3151,78 +3173,67 @@
         },
         "dateRange": {
           "oldest": "2026-07-04T16:09:22.852Z",
-          "newest": "2026-07-05T18:59:40.711Z"
+          "newest": "2026-07-06T00:07:55.609Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/harlequin-crest?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Tal Rasha's Adjudication": {
       "item_id": "3508566971",
       "tiers": {
         "floor": 0.4,
         "typical": 0.5,
-        "good": 0.8,
-        "high": 1.0
+        "good": 1.0,
+        "high": 1.0833333333333333
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 21,
-        "excludedTrades": 79,
-        "average": 0.6301587301587303,
+        "valuedTrades": 18,
+        "excludedTrades": 82,
+        "average": 0.6212962962962965,
         "percentiles": {
           "floor": 0.4,
           "typical": 0.5,
-          "good": 0.8,
-          "high": 1
+          "good": 1,
+          "high": 1.0833333333333333
         },
         "distribution": [
           {
             "name": "Mal Rune",
-            "count": 9,
+            "count": 8,
             "istValue": 0.5,
-            "percentage": 43
+            "percentage": 44
           },
           {
             "name": "Ist Rune",
             "count": 4,
             "istValue": 1,
-            "percentage": 19
+            "percentage": 22
           },
           {
             "name": "Um Rune",
             "count": 3,
             "istValue": 0.4,
-            "percentage": 14
+            "percentage": 17
           },
           {
             "name": "13x Perfect Amethyst",
             "count": 1,
             "istValue": 1.0833333333333333,
-            "percentage": 5
+            "percentage": 6
           },
           {
             "name": "Pul Rune",
             "count": 1,
             "istValue": 0.25,
-            "percentage": 5
+            "percentage": 6
           },
           {
             "name": "Um Rune + Pul Rune",
             "count": 1,
             "istValue": 0.65,
-            "percentage": 5
-          },
-          {
-            "name": "2x Um Rune",
-            "count": 1,
-            "istValue": 0.8,
-            "percentage": 5
-          },
-          {
-            "name": "Mal Rune + Pul Rune",
-            "count": 1,
-            "istValue": 0.75,
-            "percentage": 5
+            "percentage": 6
           }
         ],
         "runeValues": {
@@ -3250,11 +3261,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-04T01:53:27.998Z",
+          "oldest": "2026-07-04T08:07:20.240Z",
           "newest": "2026-07-05T21:18:30.771Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/tal-rasha%27s-adjudication?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "The Oculus": {
       "item_id": "2181188084",
@@ -3354,7 +3366,8 @@
           "newest": "2026-07-05T19:12:38.206Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/the-oculus?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Tal Rasha's Howling Wind": {
       "item_id": "2994169422",
@@ -3368,7 +3381,7 @@
         "totalTrades": 100,
         "valuedTrades": 26,
         "excludedTrades": 74,
-        "average": 0.7477564102564103,
+        "average": 0.7419871794871795,
         "percentiles": {
           "floor": 0.25,
           "typical": 0.4,
@@ -3378,21 +3391,21 @@
         "distribution": [
           {
             "name": "Um Rune",
-            "count": 8,
+            "count": 7,
             "istValue": 0.4,
-            "percentage": 31
+            "percentage": 27
+          },
+          {
+            "name": "Pul Rune",
+            "count": 5,
+            "istValue": 0.25,
+            "percentage": 19
           },
           {
             "name": "Mal Rune",
             "count": 5,
             "istValue": 0.5,
             "percentage": 19
-          },
-          {
-            "name": "Pul Rune",
-            "count": 4,
-            "istValue": 0.25,
-            "percentage": 15
           },
           {
             "name": "5x Perfect Amethyst",
@@ -3462,11 +3475,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-03T18:57:55.273Z",
-          "newest": "2026-07-05T22:15:50.564Z"
+          "oldest": "2026-07-04T01:52:42.633Z",
+          "newest": "2026-07-05T23:53:23.359Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/tal-rasha%27s-guardianship?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Chance Guards": {
       "item_id": "2987524188",
@@ -3478,9 +3492,9 @@
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 22,
-        "excludedTrades": 78,
-        "average": 0.4469696969696969,
+        "valuedTrades": 21,
+        "excludedTrades": 79,
+        "average": 0.4603174603174603,
         "percentiles": {
           "floor": 0.16666666666666666,
           "typical": 0.4,
@@ -3492,43 +3506,43 @@
             "name": "Um Rune",
             "count": 4,
             "istValue": 0.4,
-            "percentage": 18
+            "percentage": 19
           },
           {
             "name": "Ist Rune",
             "count": 2,
             "istValue": 1,
-            "percentage": 9
+            "percentage": 10
           },
           {
             "name": "Gul Rune",
             "count": 2,
             "istValue": 1.25,
-            "percentage": 9
+            "percentage": 10
           },
           {
             "name": "2x Perfect Ruby",
             "count": 2,
             "istValue": 0.16666666666666666,
-            "percentage": 9
-          },
-          {
-            "name": "2x Perfect Amethyst",
-            "count": 2,
-            "istValue": 0.16666666666666666,
-            "percentage": 9
+            "percentage": 10
           },
           {
             "name": "Perfect Amethyst",
             "count": 2,
             "istValue": 0.08333333333333333,
-            "percentage": 9
+            "percentage": 10
           },
           {
             "name": "Mal Rune",
             "count": 2,
             "istValue": 0.5,
-            "percentage": 9
+            "percentage": 10
+          },
+          {
+            "name": "2x Perfect Amethyst",
+            "count": 1,
+            "istValue": 0.16666666666666666,
+            "percentage": 5
           },
           {
             "name": "3x Ral Rune",
@@ -3592,85 +3606,92 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-01T17:23:18.638Z",
+          "oldest": "2026-07-01T21:24:44.231Z",
           "newest": "2026-07-05T13:43:12.069Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/chance-guards?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Tal Rasha's Fire-Spun Cloth": {
       "item_id": "2481158566",
       "tiers": {
         "floor": 0.16666666666666666,
-        "typical": 0.25,
-        "good": 0.41666666666666663,
+        "typical": 0.3333333333333333,
+        "good": 0.4,
         "high": 1.0
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 13,
-        "excludedTrades": 87,
-        "average": 0.3384615384615385,
+        "valuedTrades": 18,
+        "excludedTrades": 82,
+        "average": 0.3259259259259259,
         "percentiles": {
           "floor": 0.16666666666666666,
-          "typical": 0.25,
-          "good": 0.41666666666666663,
+          "typical": 0.3333333333333333,
+          "good": 0.4,
           "high": 1
         },
         "distribution": [
           {
             "name": "2x Perfect Amethyst",
-            "count": 3,
+            "count": 4,
             "istValue": 0.16666666666666666,
-            "percentage": 23
+            "percentage": 22
+          },
+          {
+            "name": "Um Rune",
+            "count": 4,
+            "istValue": 0.4,
+            "percentage": 22
           },
           {
             "name": "3x Perfect Amethyst",
             "count": 2,
             "istValue": 0.25,
-            "percentage": 15
+            "percentage": 11
           },
           {
             "name": "Mal Rune",
             "count": 2,
             "istValue": 0.5,
-            "percentage": 15
+            "percentage": 11
+          },
+          {
+            "name": "2x Ral Rune",
+            "count": 1,
+            "istValue": 0.1,
+            "percentage": 6
           },
           {
             "name": "4x Perfect Amethyst",
             "count": 1,
             "istValue": 0.3333333333333333,
-            "percentage": 8
+            "percentage": 6
           },
           {
             "name": "Perfect Amethyst",
             "count": 1,
             "istValue": 0.08333333333333333,
-            "percentage": 8
+            "percentage": 6
           },
           {
             "name": "2x Perfect Ruby",
             "count": 1,
             "istValue": 0.16666666666666666,
-            "percentage": 8
+            "percentage": 6
           },
           {
             "name": "Ist Rune",
             "count": 1,
             "istValue": 1,
-            "percentage": 8
-          },
-          {
-            "name": "Um Rune",
-            "count": 1,
-            "istValue": 0.4,
-            "percentage": 8
+            "percentage": 6
           },
           {
             "name": "5x Perfect Amethyst",
             "count": 1,
             "istValue": 0.41666666666666663,
-            "percentage": 8
+            "percentage": 6
           }
         ],
         "runeValues": {
@@ -3699,72 +3720,79 @@
         },
         "dateRange": {
           "oldest": "2026-07-02T16:11:59.703Z",
-          "newest": "2026-07-05T19:18:25.891Z"
+          "newest": "2026-07-06T02:15:39.106Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/tal-rasha%27s-fine-spun-cloth?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Wartraveler": {
       "item_id": "3159884683",
       "tiers": {
         "floor": 0.4,
         "typical": 1.0,
-        "good": 2.5,
+        "good": 4.0,
         "high": 9.0
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 26,
-        "excludedTrades": 74,
-        "average": 2.323397435897436,
+        "valuedTrades": 28,
+        "excludedTrades": 72,
+        "average": 2.3806547619047618,
         "percentiles": {
           "floor": 0.4,
           "typical": 1,
-          "good": 2.5,
+          "good": 4,
           "high": 9
         },
         "distribution": [
           {
+            "name": "Ohm Rune",
+            "count": 3,
+            "istValue": 4.5,
+            "percentage": 11
+          },
+          {
             "name": "Ist Rune",
             "count": 3,
             "istValue": 1,
-            "percentage": 12
+            "percentage": 11
+          },
+          {
+            "name": "Vex Rune",
+            "count": 2,
+            "istValue": 2.5,
+            "percentage": 7
           },
           {
             "name": "Mal Rune",
             "count": 2,
             "istValue": 0.5,
-            "percentage": 8
+            "percentage": 7
           },
           {
             "name": "2x Ist Rune",
             "count": 2,
             "istValue": 2,
-            "percentage": 8
-          },
-          {
-            "name": "Ohm Rune",
-            "count": 2,
-            "istValue": 4.5,
-            "percentage": 8
+            "percentage": 7
           },
           {
             "name": "Um Rune",
             "count": 2,
             "istValue": 0.4,
-            "percentage": 8
-          },
-          {
-            "name": "Gul Rune",
-            "count": 2,
-            "istValue": 1.25,
-            "percentage": 8
+            "percentage": 7
           },
           {
             "name": "Um Rune + Pul Rune",
             "count": 2,
             "istValue": 0.65,
-            "percentage": 8
+            "percentage": 7
+          },
+          {
+            "name": "6x Perfect Amethyst",
+            "count": 1,
+            "istValue": 0.5,
+            "percentage": 4
           },
           {
             "name": "Lo Rune + Ist Rune",
@@ -3797,15 +3825,15 @@
             "percentage": 4
           },
           {
-            "name": "Sur Rune",
+            "name": "Gul Rune",
             "count": 1,
-            "istValue": 12,
+            "istValue": 1.25,
             "percentage": 4
           },
           {
-            "name": "Vex Rune",
+            "name": "Sur Rune",
             "count": 1,
-            "istValue": 2.5,
+            "istValue": 12,
             "percentage": 4
           },
           {
@@ -3858,11 +3886,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-03T18:05:10.190Z",
-          "newest": "2026-07-05T20:57:36.104Z"
+          "oldest": "2026-07-03T22:26:57.311Z",
+          "newest": "2026-07-06T02:24:57.007Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/war-traveler?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Rare MF Ring": {
       "skipped": true,
@@ -3882,9 +3911,9 @@
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 43,
-        "excludedTrades": 57,
-        "average": 9.620348837209303,
+        "valuedTrades": 44,
+        "excludedTrades": 56,
+        "average": 9.969886363636364,
         "percentiles": {
           "floor": 2,
           "typical": 4.5,
@@ -3894,9 +3923,15 @@
         "distribution": [
           {
             "name": "Vex Rune",
-            "count": 7,
+            "count": 8,
             "istValue": 2.5,
-            "percentage": 16
+            "percentage": 18
+          },
+          {
+            "name": "Ber Rune",
+            "count": 4,
+            "istValue": 24,
+            "percentage": 9
           },
           {
             "name": "2x Ist Rune",
@@ -3909,12 +3944,6 @@
             "count": 4,
             "istValue": 4.5,
             "percentage": 9
-          },
-          {
-            "name": "Ber Rune",
-            "count": 3,
-            "istValue": 24,
-            "percentage": 7
           },
           {
             "name": "Jah Rune",
@@ -4041,12 +4070,6 @@
             "count": 1,
             "istValue": 5,
             "percentage": 2
-          },
-          {
-            "name": "Ist Rune + Mal Rune",
-            "count": 1,
-            "istValue": 1.5,
-            "percentage": 2
           }
         ],
         "runeValues": {
@@ -4074,11 +4097,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-03T08:56:16.472Z",
-          "newest": "2026-07-05T21:44:56.592Z"
+          "oldest": "2026-07-03T09:37:14.291Z",
+          "newest": "2026-07-06T02:28:45.052Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/gheed%27s-fortune?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "7% MF SC": {
       "skipped": true,
@@ -4182,7 +4206,8 @@
           "newest": "2026-07-05T18:52:43.041Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/tal-rasha%27s-horadric-crest?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     },
     "Tal Rasha's Lidless Eye": {
       "item_id": "2185308355",
@@ -4190,43 +4215,43 @@
         "floor": 0.125,
         "typical": 0.25,
         "good": 0.5,
-        "high": 0.8333333333333333
+        "high": 1.0
       },
       "raw_response": {
         "totalTrades": 100,
-        "valuedTrades": 23,
-        "excludedTrades": 77,
-        "average": 0.3326086956521739,
+        "valuedTrades": 22,
+        "excludedTrades": 78,
+        "average": 0.36287878787878786,
         "percentiles": {
           "floor": 0.125,
           "typical": 0.25,
           "good": 0.5,
-          "high": 0.8333333333333333
+          "high": 1
         },
         "distribution": [
           {
             "name": "2x Perfect Amethyst",
-            "count": 5,
+            "count": 4,
             "istValue": 0.16666666666666666,
-            "percentage": 22
+            "percentage": 18
           },
           {
             "name": "Lem Rune",
             "count": 4,
             "istValue": 0.125,
-            "percentage": 17
+            "percentage": 18
           },
           {
             "name": "Pul Rune",
             "count": 3,
             "istValue": 0.25,
-            "percentage": 13
+            "percentage": 14
           },
           {
-            "name": "Mal Rune",
-            "count": 3,
-            "istValue": 0.5,
-            "percentage": 13
+            "name": "Ist Rune",
+            "count": 2,
+            "istValue": 1,
+            "percentage": 9
           },
           {
             "name": "Perfect Amethyst",
@@ -4235,40 +4260,40 @@
             "percentage": 9
           },
           {
+            "name": "Mal Rune",
+            "count": 2,
+            "istValue": 0.5,
+            "percentage": 9
+          },
+          {
             "name": "Um Rune",
             "count": 1,
             "istValue": 0.4,
-            "percentage": 4
+            "percentage": 5
           },
           {
             "name": "10x Perfect Amethyst",
             "count": 1,
             "istValue": 0.8333333333333333,
-            "percentage": 4
+            "percentage": 5
           },
           {
             "name": "Mal Rune + 3x Perfect Amethyst",
             "count": 1,
             "istValue": 0.75,
-            "percentage": 4
+            "percentage": 5
           },
           {
             "name": "4x Perfect Amethyst",
             "count": 1,
             "istValue": 0.3333333333333333,
-            "percentage": 4
-          },
-          {
-            "name": "Ist Rune",
-            "count": 1,
-            "istValue": 1,
-            "percentage": 4
+            "percentage": 5
           },
           {
             "name": "7x Perfect Amethyst",
             "count": 1,
             "istValue": 0.5833333333333333,
-            "percentage": 4
+            "percentage": 5
           }
         ],
         "runeValues": {
@@ -4296,11 +4321,12 @@
           "Ral Rune": 0.05
         },
         "dateRange": {
-          "oldest": "2026-07-03T07:10:11.245Z",
-          "newest": "2026-07-05T21:19:32.388Z"
+          "oldest": "2026-07-03T09:06:29.922Z",
+          "newest": "2026-07-06T01:31:25.746Z"
         },
         "version": "1.3.0"
-      }
+      },
+      "trade_url": "https://traderie.com/diablo2resurrected/price-check/tal-rasha%27s-lidless-eye?prop_Platform=PC&prop_Mode=softcore&prop_Ladder=true&prop_Game%20version=reign%20of%20the%20warlock"
     }
   }
 }

@@ -21,6 +21,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 import d2r_data
+import trade_snapshots
 
 @dataclass(frozen=True)
 class PresetItem:
@@ -295,6 +296,8 @@ def _make_socket_item(item_id: str, entry: dict) -> dict:
         "enemyColdResPct": entry.get("enemyColdResPct", 0),
     }
     result: dict = {"id": item_id, "name": item_id}
+    if item_id in trade_snapshots.RUNE_ORDER:
+        result["is_rune"] = True
     if entry.get("unique"):
         result["unique"] = True
     if slot_stats_cfg:

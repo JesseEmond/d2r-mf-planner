@@ -601,8 +601,9 @@ const potentialUpgrades = computed(() => {
     const baseTotal = currentBuild.ettvd.value?.total ?? 0;
 
     const priceEntry = ITEM_PRICES.value[targetItem.name] ?? null;
-    const price    = priceEntry === null ? '?' : (priceEntry.buy_rune_equiv ?? '< Pul');
+    const price    = priceEntry === null ? '?' : ('~ ' + (priceEntry.buy_rune_equiv ?? '< Pul'));
     const priceIst = priceEntry?.buy_iv ?? null;
+    const tradeUrl = priceEntry?.trade_url ?? null;
     const valueScore = priceIst > 0 ? ettvdDelta / priceIst : ettvdDelta;
 
     rows.push({
@@ -618,6 +619,7 @@ const potentialUpgrades = computed(() => {
       ettvdRelPct,
       price,
       priceIst,
+      tradeUrl,
       valueScore,
     });
   }
@@ -647,6 +649,7 @@ const potentialUpgrades = computed(() => {
     const baseTotal = currentBuild.ettvd.value?.total ?? 0;
 
     const sockItems = getTargetSlotSockets(id);
+    const allRunes = sockItems.every(si => si.is_rune);
     let totalPriceIst = 0;
     let hasAllPrices = sockItems.length > 0;
     for (const si of sockItems) {
@@ -654,9 +657,14 @@ const potentialUpgrades = computed(() => {
       if (pe?.buy_iv != null) { totalPriceIst += pe.buy_iv; } else { hasAllPrices = false; }
     }
     const priceIst = hasAllPrices ? totalPriceIst : null;
-    const price = sockItems.length === 1
-      ? (() => { const pe = ITEM_PRICES.value[sockItems[0].name] ?? null; return pe === null ? '?' : (pe.buy_rune_equiv ?? '< Pul'); })()
-      : (priceIst !== null ? '~' + priceIst.toFixed(1) + ' Ist' : '?');
+    const price = allRunes
+      ? sockItems.map(si => si.name).join(' + ')
+      : sockItems.length === 1
+        ? (() => { const pe = ITEM_PRICES.value[sockItems[0].name] ?? null; return pe === null ? '?' : ('~ ' + (pe.buy_rune_equiv ?? '< Pul')); })()
+        : (priceIst !== null ? '~ ' + priceIst.toFixed(1) + ' Ist' : '?');
+    const tradeUrl = (!allRunes && sockItems.length === 1)
+      ? (ITEM_PRICES.value[sockItems[0].name]?.trade_url ?? null)
+      : null;
     const valueScore = priceIst > 0 ? ettvdDelta / priceIst : ettvdDelta;
 
     rows.push({
@@ -673,6 +681,7 @@ const potentialUpgrades = computed(() => {
       ettvdRelPct,
       price,
       priceIst,
+      tradeUrl,
       valueScore,
     });
   }
@@ -1958,7 +1967,10 @@ const app = createApp({
                         </tooltip-popup>
                       </td>
                       <td class="upgrades-td upgrades-price">
-                        <tooltip-popup v-if="row.priceIst != null" :text="'Raw ist value: ' + row.priceIst.toFixed(2)"><span>{{ row.price }}</span></tooltip-popup>
+                        <tooltip-popup v-if="row.priceIst != null" :text="'Raw ist value: ' + row.priceIst.toFixed(2) + (row.tradeUrl ? ' · Click to price check on Traderie.' : '')">
+                          <a v-if="row.tradeUrl" :href="row.tradeUrl" target="_blank" rel="noopener" class="price-link">{{ row.price }}</a>
+                          <span v-else>{{ row.price }}</span>
+                        </tooltip-popup>
                         <span v-else>{{ row.price }}</span>
                       </td>
                       <td class="upgrades-td upgrades-grade">
