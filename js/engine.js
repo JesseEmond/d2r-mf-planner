@@ -83,6 +83,7 @@ export class Stats {
       enemyColdResPct: this.enemyColdResPct * n,
     });
   }
+  subtract(other) { return this.add(Stats.from(other).scale(-1)); }
   static zero() { return new Stats(); }
   static from(obj) { return new Stats(obj ?? {}); }
 }
