@@ -7,7 +7,1692 @@
     "prop_Ladder": "true",
     "prop_Game version": "reign of the warlock"
   },
-  "runes": {},
+  "runes": {
+    "Pul": {
+      "item_id": "2899268590",
+      "tiers": {
+        "floor": 0.5833333333333333,
+        "typical": 0.5833333333333333,
+        "good": 0.65,
+        "high": 1.0
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 27,
+        "excludedTrades": 73,
+        "average": 0.6015432098765432,
+        "percentiles": {
+          "floor": 0.5833333333333333,
+          "typical": 0.5833333333333333,
+          "good": 0.65,
+          "high": 1
+        },
+        "distribution": [
+          {
+            "name": "7x Perfect Amethyst",
+            "count": 11,
+            "istValue": 0.5833333333333333,
+            "percentage": 41
+          },
+          {
+            "name": "13x Ral Rune",
+            "count": 10,
+            "istValue": 0.65,
+            "percentage": 37
+          },
+          {
+            "name": "Um Rune",
+            "count": 3,
+            "istValue": 0.4,
+            "percentage": 11
+          },
+          {
+            "name": "Ist Rune",
+            "count": 2,
+            "istValue": 1,
+            "percentage": 7
+          },
+          {
+            "name": "Lem Rune",
+            "count": 1,
+            "istValue": 0.125,
+            "percentage": 4
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-04T03:10:39.025Z",
+          "newest": "2026-07-05T23:47:17.069Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Um": {
+      "item_id": "2654038235",
+      "tiers": {
+        "floor": 0.375,
+        "typical": 0.6666666666666666,
+        "good": 0.75,
+        "high": 0.75
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 28,
+        "excludedTrades": 72,
+        "average": 0.6214285714285713,
+        "percentiles": {
+          "floor": 0.375,
+          "typical": 0.6666666666666666,
+          "good": 0.75,
+          "high": 0.75
+        },
+        "distribution": [
+          {
+            "name": "8x Perfect Amethyst",
+            "count": 11,
+            "istValue": 0.6666666666666666,
+            "percentage": 39
+          },
+          {
+            "name": "15x Ral Rune",
+            "count": 5,
+            "istValue": 0.75,
+            "percentage": 18
+          },
+          {
+            "name": "Pul Rune + Lem Rune",
+            "count": 3,
+            "istValue": 0.375,
+            "percentage": 11
+          },
+          {
+            "name": "9x Perfect Amethyst",
+            "count": 2,
+            "istValue": 0.75,
+            "percentage": 7
+          },
+          {
+            "name": "3x Lem Rune",
+            "count": 1,
+            "istValue": 0.375,
+            "percentage": 4
+          },
+          {
+            "name": "6x Ral Rune",
+            "count": 1,
+            "istValue": 0.30000000000000004,
+            "percentage": 4
+          },
+          {
+            "name": "Ist Rune",
+            "count": 1,
+            "istValue": 1,
+            "percentage": 4
+          },
+          {
+            "name": "2x Perfect Amethyst + 7x Ral Rune",
+            "count": 1,
+            "istValue": 0.5166666666666667,
+            "percentage": 4
+          },
+          {
+            "name": "2x Pul Rune",
+            "count": 1,
+            "istValue": 0.5,
+            "percentage": 4
+          },
+          {
+            "name": "Pul Rune + 2x Lem Rune",
+            "count": 1,
+            "istValue": 0.5,
+            "percentage": 4
+          },
+          {
+            "name": "Mal Rune",
+            "count": 1,
+            "istValue": 0.5,
+            "percentage": 4
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-03T14:20:54.399Z",
+          "newest": "2026-07-05T23:46:31.393Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Mal": {
+      "item_id": "2401638276",
+      "tiers": {
+        "floor": 0.8500000000000001,
+        "typical": 1.0,
+        "good": 1.1666666666666665,
+        "high": 1.1666666666666665
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 16,
+        "excludedTrades": 84,
+        "average": 1.0135416666666666,
+        "percentiles": {
+          "floor": 0.8500000000000001,
+          "typical": 1,
+          "good": 1.1666666666666665,
+          "high": 1.1666666666666665
+        },
+        "distribution": [
+          {
+            "name": "Ist Rune",
+            "count": 5,
+            "istValue": 1,
+            "percentage": 31
+          },
+          {
+            "name": "14x Perfect Amethyst",
+            "count": 4,
+            "istValue": 1.1666666666666665,
+            "percentage": 25
+          },
+          {
+            "name": "20x Ral Rune",
+            "count": 3,
+            "istValue": 1,
+            "percentage": 19
+          },
+          {
+            "name": "17x Ral Rune",
+            "count": 3,
+            "istValue": 0.8500000000000001,
+            "percentage": 19
+          },
+          {
+            "name": "12x Perfect Amethyst",
+            "count": 1,
+            "istValue": 1,
+            "percentage": 6
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-04T17:51:19.058Z",
+          "newest": "2026-07-05T15:24:03.434Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Ist": {
+      "item_id": "2290642411",
+      "tiers": {
+        "floor": 1.2000000000000002,
+        "typical": 1.4166666666666665,
+        "good": 1.5,
+        "high": 8.0
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 13,
+        "excludedTrades": 87,
+        "average": 2.6333333333333333,
+        "percentiles": {
+          "floor": 1.2000000000000002,
+          "typical": 1.4166666666666665,
+          "good": 1.5,
+          "high": 8
+        },
+        "distribution": [
+          {
+            "name": "18x Perfect Amethyst",
+            "count": 3,
+            "istValue": 1.5,
+            "percentage": 23
+          },
+          {
+            "name": "Gul Rune",
+            "count": 2,
+            "istValue": 1.25,
+            "percentage": 15
+          },
+          {
+            "name": "Lo Rune",
+            "count": 2,
+            "istValue": 8,
+            "percentage": 15
+          },
+          {
+            "name": "24x Ral Rune",
+            "count": 2,
+            "istValue": 1.2000000000000002,
+            "percentage": 15
+          },
+          {
+            "name": "17x Perfect Amethyst",
+            "count": 1,
+            "istValue": 1.4166666666666665,
+            "percentage": 8
+          },
+          {
+            "name": "16x Perfect Amethyst + Perfect Ruby",
+            "count": 1,
+            "istValue": 1.4166666666666665,
+            "percentage": 8
+          },
+          {
+            "name": "2x Vex Rune",
+            "count": 1,
+            "istValue": 5,
+            "percentage": 8
+          },
+          {
+            "name": "2x Mal Rune",
+            "count": 1,
+            "istValue": 1,
+            "percentage": 8
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-05T10:17:06.105Z",
+          "newest": "2026-07-05T23:41:56.773Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Gul": {
+      "item_id": "4160776515",
+      "tiers": {
+        "floor": 1.0,
+        "typical": 1.125,
+        "good": 1.5,
+        "high": 1.5
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 31,
+        "excludedTrades": 69,
+        "average": 1.2655913978494624,
+        "percentiles": {
+          "floor": 1,
+          "typical": 1.125,
+          "good": 1.5,
+          "high": 1.5
+        },
+        "distribution": [
+          {
+            "name": "18x Perfect Amethyst",
+            "count": 7,
+            "istValue": 1.5,
+            "percentage": 23
+          },
+          {
+            "name": "Ist Rune",
+            "count": 5,
+            "istValue": 1,
+            "percentage": 16
+          },
+          {
+            "name": "2x Mal Rune",
+            "count": 5,
+            "istValue": 1,
+            "percentage": 16
+          },
+          {
+            "name": "Ist Rune + Lem Rune",
+            "count": 5,
+            "istValue": 1.125,
+            "percentage": 16
+          },
+          {
+            "name": "30x Ral Rune",
+            "count": 2,
+            "istValue": 1.5,
+            "percentage": 6
+          },
+          {
+            "name": "Ist Rune + Pul Rune",
+            "count": 2,
+            "istValue": 1.25,
+            "percentage": 6
+          },
+          {
+            "name": "10x Perfect Amethyst",
+            "count": 1,
+            "istValue": 0.8333333333333333,
+            "percentage": 3
+          },
+          {
+            "name": "Ist Rune + Um Rune",
+            "count": 1,
+            "istValue": 1.4,
+            "percentage": 3
+          },
+          {
+            "name": "17x Perfect Amethyst",
+            "count": 1,
+            "istValue": 1.4166666666666665,
+            "percentage": 3
+          },
+          {
+            "name": "Vex Rune + Lem Rune",
+            "count": 1,
+            "istValue": 2.625,
+            "percentage": 3
+          },
+          {
+            "name": "Mal Rune + 10x Perfect Amethyst",
+            "count": 1,
+            "istValue": 1.3333333333333333,
+            "percentage": 3
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-01T09:10:18.165Z",
+          "newest": "2026-07-05T17:17:38.062Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Vex": {
+      "item_id": "3806138905",
+      "tiers": {
+        "floor": 2.4,
+        "typical": 2.65,
+        "good": 4.5,
+        "high": 24.0
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 16,
+        "excludedTrades": 84,
+        "average": 4.9125,
+        "percentiles": {
+          "floor": 2.4,
+          "typical": 2.65,
+          "good": 4.5,
+          "high": 24
+        },
+        "distribution": [
+          {
+            "name": "2x Ist Rune + Um Rune",
+            "count": 3,
+            "istValue": 2.4,
+            "percentage": 19
+          },
+          {
+            "name": "3x Ist Rune",
+            "count": 2,
+            "istValue": 3,
+            "percentage": 13
+          },
+          {
+            "name": "2x Ist Rune + Mal Rune",
+            "count": 2,
+            "istValue": 2.5,
+            "percentage": 13
+          },
+          {
+            "name": "Sur Rune",
+            "count": 1,
+            "istValue": 12,
+            "percentage": 6
+          },
+          {
+            "name": "Ohm Rune",
+            "count": 1,
+            "istValue": 4.5,
+            "percentage": 6
+          },
+          {
+            "name": "Ist Rune + 2x Mal Rune",
+            "count": 1,
+            "istValue": 2,
+            "percentage": 6
+          },
+          {
+            "name": "Ber Rune",
+            "count": 1,
+            "istValue": 24,
+            "percentage": 6
+          },
+          {
+            "name": "Ist Rune + 4x Um Rune + Pul Rune",
+            "count": 1,
+            "istValue": 2.85,
+            "percentage": 6
+          },
+          {
+            "name": "4x Mal Rune",
+            "count": 1,
+            "istValue": 2,
+            "percentage": 6
+          },
+          {
+            "name": "Lo Rune",
+            "count": 1,
+            "istValue": 8,
+            "percentage": 6
+          },
+          {
+            "name": "Gul Rune + Ist Rune + Um Rune",
+            "count": 1,
+            "istValue": 2.65,
+            "percentage": 6
+          },
+          {
+            "name": "Ist Rune + 2x Mal Rune + Um Rune",
+            "count": 1,
+            "istValue": 2.4,
+            "percentage": 6
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-03T12:34:54.265Z",
+          "newest": "2026-07-05T21:42:11.387Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Ohm": {
+      "item_id": "3896329590",
+      "tiers": {
+        "floor": 4.25,
+        "typical": 4.75,
+        "good": 5.0,
+        "high": 27.0
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 14,
+        "excludedTrades": 86,
+        "average": 6.796428571428572,
+        "percentiles": {
+          "floor": 4.25,
+          "typical": 4.75,
+          "good": 5,
+          "high": 27
+        },
+        "distribution": [
+          {
+            "name": "5x Ist Rune",
+            "count": 2,
+            "istValue": 5,
+            "percentage": 14
+          },
+          {
+            "name": "120x Ral Rune",
+            "count": 1,
+            "istValue": 6,
+            "percentage": 7
+          },
+          {
+            "name": "Gul Rune + 3x Ist Rune",
+            "count": 1,
+            "istValue": 4.25,
+            "percentage": 7
+          },
+          {
+            "name": "27x Ist Rune",
+            "count": 1,
+            "istValue": 27,
+            "percentage": 7
+          },
+          {
+            "name": "Vex Rune + 2x Ist Rune",
+            "count": 1,
+            "istValue": 4.5,
+            "percentage": 7
+          },
+          {
+            "name": "Sur Rune",
+            "count": 1,
+            "istValue": 12,
+            "percentage": 7
+          },
+          {
+            "name": "4x Ist Rune + 3x Perfect Amethyst + 5x Ral Rune",
+            "count": 1,
+            "istValue": 4.5,
+            "percentage": 7
+          },
+          {
+            "name": "4x Ist Rune + Pul Rune",
+            "count": 1,
+            "istValue": 4.25,
+            "percentage": 7
+          },
+          {
+            "name": "Vex Rune + Ist Rune + Mal Rune + Um Rune",
+            "count": 1,
+            "istValue": 4.4,
+            "percentage": 7
+          },
+          {
+            "name": "4x Ist Rune",
+            "count": 1,
+            "istValue": 4,
+            "percentage": 7
+          },
+          {
+            "name": "2x Vex Rune",
+            "count": 1,
+            "istValue": 5,
+            "percentage": 7
+          },
+          {
+            "name": "4x Ist Rune + 3x Pul Rune",
+            "count": 1,
+            "istValue": 4.75,
+            "percentage": 7
+          },
+          {
+            "name": "4x Ist Rune + Mal Rune",
+            "count": 1,
+            "istValue": 4.5,
+            "percentage": 7
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-04T07:42:01.715Z",
+          "newest": "2026-07-05T23:21:28.776Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Lo": {
+      "item_id": "3632079454",
+      "tiers": {
+        "floor": 7.5,
+        "typical": 8.0,
+        "good": 8.5,
+        "high": 9.0
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 25,
+        "excludedTrades": 75,
+        "average": 8.74,
+        "percentiles": {
+          "floor": 7.5,
+          "typical": 8,
+          "good": 8.5,
+          "high": 9
+        },
+        "distribution": [
+          {
+            "name": "8x Ist Rune",
+            "count": 5,
+            "istValue": 8,
+            "percentage": 20
+          },
+          {
+            "name": "2x Ohm Rune",
+            "count": 4,
+            "istValue": 9,
+            "percentage": 16
+          },
+          {
+            "name": "Vex Rune + 6x Ist Rune",
+            "count": 2,
+            "istValue": 8.5,
+            "percentage": 8
+          },
+          {
+            "name": "7x Ist Rune + Mal Rune",
+            "count": 2,
+            "istValue": 7.5,
+            "percentage": 8
+          },
+          {
+            "name": "Ohm Rune + Vex Rune + Ist Rune + Mal Rune",
+            "count": 1,
+            "istValue": 8.5,
+            "percentage": 4
+          },
+          {
+            "name": "3x Vex Rune",
+            "count": 1,
+            "istValue": 7.5,
+            "percentage": 4
+          },
+          {
+            "name": "2x Gul Rune + 6x Ist Rune",
+            "count": 1,
+            "istValue": 8.5,
+            "percentage": 4
+          },
+          {
+            "name": "Ohm Rune + 3x Ist Rune + Mal Rune",
+            "count": 1,
+            "istValue": 8,
+            "percentage": 4
+          },
+          {
+            "name": "Cham Rune",
+            "count": 1,
+            "istValue": 8,
+            "percentage": 4
+          },
+          {
+            "name": "2x Vex Rune + 4x Ist Rune",
+            "count": 1,
+            "istValue": 9,
+            "percentage": 4
+          },
+          {
+            "name": "2x Vex Rune + 2x Ist Rune + Mal Rune + Pul Rune",
+            "count": 1,
+            "istValue": 7.75,
+            "percentage": 4
+          },
+          {
+            "name": "Ohm Rune + Vex Rune + Ist Rune",
+            "count": 1,
+            "istValue": 8,
+            "percentage": 4
+          },
+          {
+            "name": "2x Vex Rune + 2x Ist Rune",
+            "count": 1,
+            "istValue": 7,
+            "percentage": 4
+          },
+          {
+            "name": "2x Gul Rune + 4x Ist Rune",
+            "count": 1,
+            "istValue": 6.5,
+            "percentage": 4
+          },
+          {
+            "name": "Ber Rune",
+            "count": 1,
+            "istValue": 24,
+            "percentage": 4
+          },
+          {
+            "name": "Vex Rune + Gul Rune + 4x Ist Rune",
+            "count": 1,
+            "istValue": 7.75,
+            "percentage": 4
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-04T10:38:59.997Z",
+          "newest": "2026-07-05T20:10:39.138Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Sur": {
+      "item_id": "3382986705",
+      "tiers": {
+        "floor": 10.0,
+        "typical": 11.75,
+        "good": 15.0,
+        "high": 40.0
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 27,
+        "excludedTrades": 73,
+        "average": 15.52037037037037,
+        "percentiles": {
+          "floor": 10,
+          "typical": 11.75,
+          "good": 15,
+          "high": 40
+        },
+        "distribution": [
+          {
+            "name": "11x Ist Rune",
+            "count": 5,
+            "istValue": 11,
+            "percentage": 19
+          },
+          {
+            "name": "10x Ist Rune",
+            "count": 3,
+            "istValue": 10,
+            "percentage": 11
+          },
+          {
+            "name": "6x Vex Rune",
+            "count": 3,
+            "istValue": 15,
+            "percentage": 11
+          },
+          {
+            "name": "Ber Rune",
+            "count": 2,
+            "istValue": 24,
+            "percentage": 7
+          },
+          {
+            "name": "Lo Rune + Ohm Rune",
+            "count": 2,
+            "istValue": 12.5,
+            "percentage": 7
+          },
+          {
+            "name": "Lo Rune",
+            "count": 1,
+            "istValue": 8,
+            "percentage": 4
+          },
+          {
+            "name": "10x Ist Rune + Mal Rune + Um Rune",
+            "count": 1,
+            "istValue": 10.9,
+            "percentage": 4
+          },
+          {
+            "name": "Lo Rune + Ist Rune + 2x Mal Rune",
+            "count": 1,
+            "istValue": 10,
+            "percentage": 4
+          },
+          {
+            "name": "Jah Rune",
+            "count": 1,
+            "istValue": 40,
+            "percentage": 4
+          },
+          {
+            "name": "Lo Rune + Vex Rune + 2x Ist Rune",
+            "count": 1,
+            "istValue": 12.5,
+            "percentage": 4
+          },
+          {
+            "name": "Lo Rune + Vex Rune",
+            "count": 1,
+            "istValue": 10.5,
+            "percentage": 4
+          },
+          {
+            "name": "Jah Rune + Ber Rune",
+            "count": 1,
+            "istValue": 64,
+            "percentage": 4
+          },
+          {
+            "name": "3x Gul Rune + 8x Ist Rune",
+            "count": 1,
+            "istValue": 11.75,
+            "percentage": 4
+          },
+          {
+            "name": "Lo Rune + Vex Rune + Ist Rune + Mal Rune + Um Rune",
+            "count": 1,
+            "istValue": 12.4,
+            "percentage": 4
+          },
+          {
+            "name": "Ohm Rune + Vex Rune + 3x Ist Rune",
+            "count": 1,
+            "istValue": 10,
+            "percentage": 4
+          },
+          {
+            "name": "12x Ist Rune",
+            "count": 1,
+            "istValue": 12,
+            "percentage": 4
+          },
+          {
+            "name": "14x Ist Rune",
+            "count": 1,
+            "istValue": 14,
+            "percentage": 4
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-02T07:08:15.494Z",
+          "newest": "2026-07-05T16:35:56.096Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Ber": {
+      "item_id": "4149485449",
+      "tiers": {
+        "floor": 18.0,
+        "typical": 22.0,
+        "good": 24.25,
+        "high": 40.0
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 31,
+        "excludedTrades": 69,
+        "average": 23.830645161290324,
+        "percentiles": {
+          "floor": 18,
+          "typical": 22,
+          "good": 24.25,
+          "high": 40
+        },
+        "distribution": [
+          {
+            "name": "Jah Rune",
+            "count": 5,
+            "istValue": 40,
+            "percentage": 16
+          },
+          {
+            "name": "Sur Rune + Lo Rune",
+            "count": 2,
+            "istValue": 20,
+            "percentage": 6
+          },
+          {
+            "name": "2x Lo Rune + 2x Ohm Rune",
+            "count": 2,
+            "istValue": 25,
+            "percentage": 6
+          },
+          {
+            "name": "5x Ohm Rune",
+            "count": 2,
+            "istValue": 22.5,
+            "percentage": 6
+          },
+          {
+            "name": "22x Ist Rune",
+            "count": 2,
+            "istValue": 22,
+            "percentage": 6
+          },
+          {
+            "name": "2x Lo Rune + Ohm Rune",
+            "count": 1,
+            "istValue": 20.5,
+            "percentage": 3
+          },
+          {
+            "name": "2x Ohm Rune + 4x Vex Rune + 2x Ist Rune",
+            "count": 1,
+            "istValue": 21,
+            "percentage": 3
+          },
+          {
+            "name": "21x Ist Rune",
+            "count": 1,
+            "istValue": 21,
+            "percentage": 3
+          },
+          {
+            "name": "Vex Rune + 18x Ist Rune",
+            "count": 1,
+            "istValue": 20.5,
+            "percentage": 3
+          },
+          {
+            "name": "Ohm Rune + 13x Ist Rune",
+            "count": 1,
+            "istValue": 17.5,
+            "percentage": 3
+          },
+          {
+            "name": "4x Ohm Rune + Vex Rune",
+            "count": 1,
+            "istValue": 20.5,
+            "percentage": 3
+          },
+          {
+            "name": "Sur Rune + Lo Rune + 2x Ist Rune",
+            "count": 1,
+            "istValue": 22,
+            "percentage": 3
+          },
+          {
+            "name": "3x Ohm Rune + 3x Vex Rune + 3x Ist Rune",
+            "count": 1,
+            "istValue": 24,
+            "percentage": 3
+          },
+          {
+            "name": "Ohm Rune + 15x Ist Rune",
+            "count": 1,
+            "istValue": 19.5,
+            "percentage": 3
+          },
+          {
+            "name": "Ohm Rune + 2x Vex Rune + 13x Ist Rune",
+            "count": 1,
+            "istValue": 22.5,
+            "percentage": 3
+          },
+          {
+            "name": "2x Ohm Rune + 2x Vex Rune + 4x Ist Rune",
+            "count": 1,
+            "istValue": 18,
+            "percentage": 3
+          },
+          {
+            "name": "Zod Rune",
+            "count": 1,
+            "istValue": 16,
+            "percentage": 3
+          },
+          {
+            "name": "Lo Rune + Ohm Rune + 9x Ist Rune",
+            "count": 1,
+            "istValue": 21.5,
+            "percentage": 3
+          },
+          {
+            "name": "Cham Rune + Lo Rune",
+            "count": 1,
+            "istValue": 16,
+            "percentage": 3
+          },
+          {
+            "name": "20x Ist Rune",
+            "count": 1,
+            "istValue": 20,
+            "percentage": 3
+          },
+          {
+            "name": "Lo Rune + Ohm Rune",
+            "count": 1,
+            "istValue": 12.5,
+            "percentage": 3
+          },
+          {
+            "name": "Gul Rune + 23x Ist Rune",
+            "count": 1,
+            "istValue": 24.25,
+            "percentage": 3
+          },
+          {
+            "name": "Sur Rune + Lo Rune + Vex Rune",
+            "count": 1,
+            "istValue": 22.5,
+            "percentage": 3
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-04T04:39:28.411Z",
+          "newest": "2026-07-05T23:48:46.552Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Jah": {
+      "item_id": "2552039455",
+      "tiers": {
+        "floor": 25.0,
+        "typical": 26.5,
+        "good": 27.75,
+        "high": 28.5
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 26,
+        "excludedTrades": 74,
+        "average": 26.471153846153847,
+        "percentiles": {
+          "floor": 25,
+          "typical": 26.5,
+          "good": 27.75,
+          "high": 28.5
+        },
+        "distribution": [
+          {
+            "name": "Ber Rune + Ohm Rune",
+            "count": 5,
+            "istValue": 28.5,
+            "percentage": 19
+          },
+          {
+            "name": "Ber Rune + Vex Rune",
+            "count": 4,
+            "istValue": 26.5,
+            "percentage": 15
+          },
+          {
+            "name": "Ber Rune + Vex Rune + Ist Rune",
+            "count": 3,
+            "istValue": 27.5,
+            "percentage": 12
+          },
+          {
+            "name": "Sur Rune + Cham Rune",
+            "count": 1,
+            "istValue": 20,
+            "percentage": 4
+          },
+          {
+            "name": "Sur Rune + 3x Ohm Rune",
+            "count": 1,
+            "istValue": 25.5,
+            "percentage": 4
+          },
+          {
+            "name": "Ber Rune + Ist Rune",
+            "count": 1,
+            "istValue": 25,
+            "percentage": 4
+          },
+          {
+            "name": "2x Lo Rune + Ohm Rune + 5x Ist Rune",
+            "count": 1,
+            "istValue": 25.5,
+            "percentage": 4
+          },
+          {
+            "name": "Ber Rune",
+            "count": 1,
+            "istValue": 24,
+            "percentage": 4
+          },
+          {
+            "name": "3x Lo Rune + Ohm Rune",
+            "count": 1,
+            "istValue": 28.5,
+            "percentage": 4
+          },
+          {
+            "name": "2x Sur Rune",
+            "count": 1,
+            "istValue": 24,
+            "percentage": 4
+          },
+          {
+            "name": "2x Sur Rune + Vex Rune + Gul Rune",
+            "count": 1,
+            "istValue": 27.75,
+            "percentage": 4
+          },
+          {
+            "name": "25x Ist Rune",
+            "count": 1,
+            "istValue": 25,
+            "percentage": 4
+          },
+          {
+            "name": "Ber Rune + 2x Ist Rune",
+            "count": 1,
+            "istValue": 26,
+            "percentage": 4
+          },
+          {
+            "name": "Ber Rune + Vex Rune + Mal Rune",
+            "count": 1,
+            "istValue": 27,
+            "percentage": 4
+          },
+          {
+            "name": "3x Lo Rune + 3x Ist Rune",
+            "count": 1,
+            "istValue": 27,
+            "percentage": 4
+          },
+          {
+            "name": "Ber Rune + 2x Ist Rune + Mal Rune",
+            "count": 1,
+            "istValue": 26.5,
+            "percentage": 4
+          },
+          {
+            "name": "Sur Rune + Lo Rune + Vex Rune + 3x Ist Rune",
+            "count": 1,
+            "istValue": 25.5,
+            "percentage": 4
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-04T18:16:36.074Z",
+          "newest": "2026-07-05T22:33:45.061Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Cham": {
+      "item_id": "3191411278",
+      "tiers": {
+        "floor": 12.0,
+        "typical": 12.5,
+        "good": 20.0,
+        "high": 40.0
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 40,
+        "excludedTrades": 60,
+        "average": 16.732499999999998,
+        "percentiles": {
+          "floor": 12,
+          "typical": 12.5,
+          "good": 20,
+          "high": 40
+        },
+        "distribution": [
+          {
+            "name": "Lo Rune + Ohm Rune",
+            "count": 10,
+            "istValue": 12.5,
+            "percentage": 25
+          },
+          {
+            "name": "Ber Rune",
+            "count": 5,
+            "istValue": 24,
+            "percentage": 13
+          },
+          {
+            "name": "Sur Rune",
+            "count": 4,
+            "istValue": 12,
+            "percentage": 10
+          },
+          {
+            "name": "Jah Rune",
+            "count": 4,
+            "istValue": 40,
+            "percentage": 10
+          },
+          {
+            "name": "Sur Rune + Ist Rune",
+            "count": 2,
+            "istValue": 13,
+            "percentage": 5
+          },
+          {
+            "name": "Lo Rune + 2x Vex Rune",
+            "count": 2,
+            "istValue": 13,
+            "percentage": 5
+          },
+          {
+            "name": "12x Ist Rune",
+            "count": 1,
+            "istValue": 12,
+            "percentage": 3
+          },
+          {
+            "name": "Sur Rune + Vex Rune",
+            "count": 1,
+            "istValue": 14.5,
+            "percentage": 3
+          },
+          {
+            "name": "Lo Rune + Vex Rune + Ist Rune",
+            "count": 1,
+            "istValue": 11.5,
+            "percentage": 3
+          },
+          {
+            "name": "Sur Rune + Lo Rune",
+            "count": 1,
+            "istValue": 20,
+            "percentage": 3
+          },
+          {
+            "name": "8x Ist Rune",
+            "count": 1,
+            "istValue": 8,
+            "percentage": 3
+          },
+          {
+            "name": "Zod Rune",
+            "count": 1,
+            "istValue": 16,
+            "percentage": 3
+          },
+          {
+            "name": "12x Ist Rune + Mal Rune",
+            "count": 1,
+            "istValue": 12.5,
+            "percentage": 3
+          },
+          {
+            "name": "Lo Rune + 2x Gul Rune",
+            "count": 1,
+            "istValue": 10.5,
+            "percentage": 3
+          },
+          {
+            "name": "10x Ist Rune",
+            "count": 1,
+            "istValue": 10,
+            "percentage": 3
+          },
+          {
+            "name": "Lo Rune + Vex Rune + Gul Rune + Ist Rune + 2x Um Rune",
+            "count": 1,
+            "istValue": 13.55,
+            "percentage": 3
+          },
+          {
+            "name": "13x Ist Rune",
+            "count": 1,
+            "istValue": 13,
+            "percentage": 3
+          },
+          {
+            "name": "11x Ist Rune",
+            "count": 1,
+            "istValue": 11,
+            "percentage": 3
+          },
+          {
+            "name": "Lo Rune + Vex Rune + Gul Rune",
+            "count": 1,
+            "istValue": 11.75,
+            "percentage": 3
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-06-30T05:08:36.277Z",
+          "newest": "2026-07-05T17:26:57.521Z"
+        },
+        "version": "1.3.0"
+      }
+    },
+    "Zod": {
+      "item_id": "4067651730",
+      "tiers": {
+        "floor": 23.0,
+        "typical": 28.5,
+        "good": 40.0,
+        "high": 42.5
+      },
+      "raw_response": {
+        "totalTrades": 100,
+        "valuedTrades": 15,
+        "excludedTrades": 85,
+        "average": 29.8,
+        "percentiles": {
+          "floor": 23,
+          "typical": 28.5,
+          "good": 40,
+          "high": 42.5
+        },
+        "distribution": [
+          {
+            "name": "Jah Rune",
+            "count": 3,
+            "istValue": 40,
+            "percentage": 20
+          },
+          {
+            "name": "Ber Rune",
+            "count": 2,
+            "istValue": 24,
+            "percentage": 13
+          },
+          {
+            "name": "Ber Rune + Ohm Rune",
+            "count": 2,
+            "istValue": 28.5,
+            "percentage": 13
+          },
+          {
+            "name": "23x Ist Rune",
+            "count": 1,
+            "istValue": 23,
+            "percentage": 7
+          },
+          {
+            "name": "20x Ist Rune",
+            "count": 1,
+            "istValue": 20,
+            "percentage": 7
+          },
+          {
+            "name": "Ber Rune + Ist Rune",
+            "count": 1,
+            "istValue": 25,
+            "percentage": 7
+          },
+          {
+            "name": "Ber Rune + Lo Rune",
+            "count": 1,
+            "istValue": 32,
+            "percentage": 7
+          },
+          {
+            "name": "2x Sur Rune + 2x Ohm Rune",
+            "count": 1,
+            "istValue": 33,
+            "percentage": 7
+          },
+          {
+            "name": "Ber Rune + Vex Rune",
+            "count": 1,
+            "istValue": 26.5,
+            "percentage": 7
+          },
+          {
+            "name": "Sur Rune + Cham Rune",
+            "count": 1,
+            "istValue": 20,
+            "percentage": 7
+          },
+          {
+            "name": "Jah Rune + Vex Rune",
+            "count": 1,
+            "istValue": 42.5,
+            "percentage": 7
+          }
+        ],
+        "runeValues": {
+          "Jah Rune": 40,
+          "Ber Rune": 24,
+          "Zod Rune": 16,
+          "Sur Rune": 12,
+          "Cham Rune": 8,
+          "Lo Rune": 8,
+          "Ohm Rune": 4.5,
+          "Vex Rune": 2.5,
+          "Gul Rune": 1.25,
+          "Ist Rune": 1,
+          "Mal Rune": 0.5,
+          "Um Rune": 0.4,
+          "Pul Rune": 0.25,
+          "Lem Rune": 0.125,
+          "Perfect Amethyst": 0.08333333333333333,
+          "Perfect Topaz": 0.08333333333333333,
+          "Perfect Sapphire": 0.08333333333333333,
+          "Perfect Ruby": 0.08333333333333333,
+          "Perfect Emerald": 0.08333333333333333,
+          "Perfect Diamond": 0.08333333333333333,
+          "Perfect Skull": 0.08333333333333333,
+          "Ral Rune": 0.05
+        },
+        "dateRange": {
+          "oldest": "2026-07-02T08:13:48.985Z",
+          "newest": "2026-07-05T21:57:00.607Z"
+        },
+        "version": "1.3.0"
+      }
+    }
+  },
   "gear_items": {
     "Nightwing's Veil": {
       "item_id": "4075888669",

@@ -17,12 +17,31 @@ import extract_combat_stats
 import extract_gear_stats
 import extract_skill_data
 import run_targets
+import trade_snapshots
 
 ROOT = Path(__file__).parent.parent
 VALUABLES_IN = ROOT / "data" / "valuables.json"
 DROP_ODDS_IN = ROOT / "data" / "drop_odds.json"
 RUN_CONFIG_IN = ROOT / "public" / "data" / "run_config.json"
 OUT = ROOT / "public" / "data" / "db.json"
+
+
+def _build_item_prices(snapshot: dict) -> dict:
+    """Build {display_name: {iv, rune_equiv}} for items with price data in snapshot."""
+    name_map = {item.name: item.display_name for item in extract_gear_stats.get_preset_items()}
+    prices = {}
+    for snap_name, data in snapshot.get("gear_items", {}).items():
+        if not data or data.get("skipped") or data.get("error"):
+            continue
+        tiers = data.get("tiers") or {}
+        iv = tiers.get("typical")
+        if iv is None:
+            continue
+        display_name = name_map.get(snap_name, snap_name)
+        combo = trade_snapshots.find_best_rune_combo(iv, snapshot)
+        rune_equiv = trade_snapshots.format_rune_combo(combo) if combo else None
+        prices[display_name] = {"iv": iv, "rune_equiv": rune_equiv}
+    return prices
 
 
 def _build_runs(run_config_data: dict, monsters: dict, minion_id_to_key: dict) -> dict:
@@ -95,17 +114,24 @@ def main() -> None:
     skill_data = extract_skill_data.extract()
     runs = _build_runs(run_config_data, monsters, minion_id_to_key)
 
+    try:
+        snapshot = trade_snapshots.load_latest_snapshot()
+        item_prices = _build_item_prices(snapshot)
+    except FileNotFoundError:
+        item_prices = {}
+
     db = {
         "valuables": valuables,
         "monsters": monsters,
         "runs": runs,
         "gear": gear,
         "skill_data": skill_data,
+        "item_prices": item_prices,
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)
     OUT.write_text(json.dumps(db, indent=2))
-    print(f"Wrote {len(valuables)} valuables, {len(db['monsters'])} monsters, {len(runs)} runs → {OUT}")
+    print(f"Wrote {len(valuables)} valuables, {len(db['monsters'])} monsters, {len(runs)} runs, {len(item_prices)} item prices → {OUT}")
 
 
 if __name__ == "__main__":
