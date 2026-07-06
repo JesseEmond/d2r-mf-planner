@@ -15928,6 +15928,12 @@
       "sell_rune_equiv": null,
       "buy_iv": 0.5,
       "buy_rune_equiv": "Pul"
+    },
+    "Ist": {
+      "sell_iv": 1.4166666666666665,
+      "sell_rune_equiv": "2\u00d7 Um",
+      "buy_iv": 1.5,
+      "buy_rune_equiv": "Mal + Pul"
     }
   }
 }
