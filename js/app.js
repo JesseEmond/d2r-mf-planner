@@ -562,6 +562,7 @@ const potentialUpgrades = computed(() => {
     const currentPresetId = state.gear[id].preset;
     const targetPresetId  = targetPreset.value.slots[id];
     if (currentPresetId === targetPresetId) continue; // already equipped
+    if (currentPresetId === 'custom' && state.gear[id].custom?.name?.trim() === targetItem.name) continue; // custom item identified as target
 
     const swapped = swappedBuilds[id];
     const statDelta = {
