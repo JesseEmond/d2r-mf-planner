@@ -17,6 +17,7 @@ const SET_LEVEL_BONUSES = ref({});
 const SET_SIZES = ref({});
 const SOCKET_ITEMS = ref([]);
 const ITEM_PRICES = ref({});
+const priceSnapshotDate = ref(null);
 
 // ── State helpers ──────────────────────────────────────────────────────────
 
@@ -597,6 +598,7 @@ const potentialUpgrades = computed(() => {
 
     const swapped = swappedBuilds[id];
     const { statDelta, ettvdDelta, ettvdRelPct } = buildDelta(swapped, currentBuild);
+    const baseTotal = currentBuild.ettvd.value?.total ?? 0;
 
     const priceEntry = ITEM_PRICES.value[targetItem.name] ?? null;
     const price    = priceEntry === null ? '?' : (priceEntry.buy_rune_equiv ?? '< Pul');
@@ -608,6 +610,10 @@ const potentialUpgrades = computed(() => {
       slot: label,
       itemName: targetItem.name,
       statDelta,
+      statBefore: currentBuild.gearTotals.value,
+      statAfter: swapped.gearTotals.value,
+      ettvdBefore: baseTotal,
+      ettvdAfter: baseTotal + ettvdDelta,
       ettvdDelta,
       ettvdRelPct,
       price,
@@ -638,6 +644,7 @@ const potentialUpgrades = computed(() => {
 
     const swapped = socketSwappedBuilds[id];
     const { statDelta, ettvdDelta, ettvdRelPct } = buildDelta(swapped, currentBuild);
+    const baseTotal = currentBuild.ettvd.value?.total ?? 0;
 
     const sockItems = getTargetSlotSockets(id);
     let totalPriceIst = 0;
@@ -658,6 +665,10 @@ const potentialUpgrades = computed(() => {
       itemName: sockItems.map(si => si.name).join(', '),
       isSocketRow: true,
       statDelta,
+      statBefore: currentBuild.gearTotals.value,
+      statAfter: swapped.gearTotals.value,
+      ettvdBefore: baseTotal,
+      ettvdAfter: baseTotal + ettvdDelta,
       ettvdDelta,
       ettvdRelPct,
       price,
@@ -1268,10 +1279,15 @@ function fmtEttvdRelPct(pct) {
   return sign + Math.abs(pct).toFixed(1) + '%';
 }
 
+function fmtEttvdAbsolute(secs) {
+  if (!secs) return '---';
+  return _fmtEttvdSeconds(secs);
+}
+
 // relEttvdPerIstValue = % ETTVD improvement per ~Ist-rune-equivalent cost. Positive = good deal.
-function fmtRelativeEttvdPerPrice(relEttvdPerIstValue) {
+function fmtRelativeEttvdPerPrice(relEttvdPerIstValue, decimals = 1) {
   const sign = relEttvdPerIstValue >= 0 ? '+' : '';
-  return sign + relEttvdPerIstValue.toFixed(1) + ' %ETTVD/~ist';
+  return sign + relEttvdPerIstValue.toFixed(decimals) + ' %ETTVD/~ist';
 }
 
 const STAT_DELTA_LABELS = {
@@ -1279,12 +1295,21 @@ const STAT_DELTA_LABELS = {
   coldSkills: '+Cold Skills', coldDmgPct: 'Cold Dmg%', enemyColdResPct: 'ECR%',
 };
 
-function statDeltaEntries(delta) {
+function statDeltaEntries(delta, before, after, itemName) {
   return Object.entries(delta)
     .filter(([, v]) => v !== 0)
     .map(([key, val]) => {
       const sign = val > 0 ? '+' : '';
-      return { label: `${sign}${val} ${STAT_DELTA_LABELS[key] ?? key}`, positive: val > 0 };
+      const statLabel = STAT_DELTA_LABELS[key] ?? key;
+      const label = `${sign}${val} ${statLabel}`;
+      let tooltip = null;
+      if (before && after) {
+        const bv = Math.round(before[key] ?? 0);
+        const av = Math.round(after[key] ?? 0);
+        const afterDesc = itemName ? `With ${itemName}: ${av}` : `After: ${av}`;
+        tooltip = `Current gear: ${bv} ${statLabel} · ${afterDesc} ${statLabel}`;
+      }
+      return { label, positive: val > 0, tooltip };
     });
 }
 
@@ -1372,6 +1397,7 @@ const app = createApp({
         SET_SIZES.value = db.gear.set_sizes ?? {};
         SOCKET_ITEMS.value = db.gear.socket_items ?? [];
         ITEM_PRICES.value = db.item_prices ?? {};
+        priceSnapshotDate.value = db.price_snapshot_date ?? null;
         TARGET_GEAR_PRESETS.value = Object.entries(db.gear.presets).map(
           ([id, preset]) => ({ id, name: id, slots: preset, sockets: preset.sockets ?? {}, charms: preset.charms ?? [] })
         );
@@ -1520,7 +1546,10 @@ const app = createApp({
       totalUpgradePriceIst,
       fmtEttvdDelta,
       fmtEttvdRelPct,
+      fmtEttvdAbsolute,
+      fmtRelativeEttvdPerPrice,
       statDeltaEntries,
+      priceSnapshotDate,
     };
   },
   template: `
@@ -1905,7 +1934,7 @@ const app = createApp({
                       <th class="upgrades-th"><tooltip-popup text="Target item to acquire for this slot">Item</tooltip-popup></th>
                       <th class="upgrades-th"><tooltip-popup text="Stat changes from equipping this item alongside your current gear, accounting for set bonuses gained or lost across the full gear set">Stat Δ</tooltip-popup></th>
                       <th class="upgrades-th"><tooltip-popup text="Change in Expected Time To Valuable Drop from equipping only this item alongside your current gear. Negative = faster drops.">ΔETTVD</tooltip-popup></th>
-                      <th class="upgrades-th"><tooltip-popup text="Approximate trading price from Traderie snapshot">Price</tooltip-popup></th>
+                      <th class="upgrades-th"><tooltip-popup text="Approximate trading price from Traderie. Prices use the 'good' tier ist value from Traderie listings — 'ist value' is Traderie's unit of account and does not mean literally one Ist rune.">Price</tooltip-popup> <tooltip-popup :text="priceSnapshotDate ? 'Price snapshot from ' + priceSnapshotDate + '. Double-check prices on Traderie before trading — values fluctuate.' : 'Double-check prices on Traderie before trading — values fluctuate.'"><span class="info-icon">i</span></tooltip-popup></th>
                       <th class="upgrades-th"><tooltip-popup text="Rank within this upgrade list — S+ has the best ETTVD improvement per cost, F the worst. Grades are relative to each other, not an absolute quality score.">Rank</tooltip-popup></th>
                     </tr>
                   </thead>
@@ -1915,19 +1944,28 @@ const app = createApp({
                       <td class="upgrades-td upgrades-item">{{ row.itemName }}</td>
                       <td class="upgrades-td">
                         <div class="upgrades-stat-delta-wrap">
-                          <span
-                            v-for="entry in statDeltaEntries(row.statDelta)" :key="entry.label"
-                            :class="['delta-pill', entry.positive ? 'delta-pill-pos' : 'delta-pill-neg']"
-                          >{{ entry.label }}</span>
+                          <tooltip-popup
+                            v-for="entry in statDeltaEntries(row.statDelta, row.statBefore, row.statAfter, row.itemName)" :key="entry.label"
+                            :text="entry.tooltip"
+                          ><span :class="['delta-pill', entry.positive ? 'delta-pill-pos' : 'delta-pill-neg']">{{ entry.label }}</span></tooltip-popup>
                           <span v-if="Object.values(row.statDelta).every(v => v === 0)" class="delta-none">—</span>
                         </div>
                       </td>
                       <td class="upgrades-td" :class="row.ettvdDelta < 0 ? 'delta-val-pos' : 'delta-val-neg'">
-                        <div>{{ fmtEttvdDelta(row.ettvdDelta) }}</div>
-                        <div class="ettvd-rel-pct">{{ fmtEttvdRelPct(row.ettvdRelPct) }}</div>
+                        <tooltip-popup :text="'Before: ' + fmtEttvdAbsolute(row.ettvdBefore) + ' → After: ' + fmtEttvdAbsolute(row.ettvdAfter)">
+                          <div>{{ fmtEttvdDelta(row.ettvdDelta) }}</div>
+                          <div class="ettvd-rel-pct">{{ fmtEttvdRelPct(row.ettvdRelPct) }}</div>
+                        </tooltip-popup>
                       </td>
-                      <td class="upgrades-td upgrades-price">{{ row.price }}</td>
-                      <td class="upgrades-td upgrades-grade"><span :class="'grade-tier-' + row.gradeTier" class="grade-badge">{{ row.grade }}</span></td>
+                      <td class="upgrades-td upgrades-price">
+                        <tooltip-popup v-if="row.priceIst != null" :text="'Raw ist value: ' + row.priceIst.toFixed(2)"><span>{{ row.price }}</span></tooltip-popup>
+                        <span v-else>{{ row.price }}</span>
+                      </td>
+                      <td class="upgrades-td upgrades-grade">
+                        <tooltip-popup :text="row.priceIst != null ? fmtEttvdDelta(row.ettvdDelta) + ' ΔETTVD ÷ ' + row.priceIst.toFixed(2) + ' ist = ' + fmtRelativeEttvdPerPrice(row.ettvdRelPct / row.priceIst, 3) : 'No price data — ranked by ΔETTVD only'">
+                          <span :class="'grade-tier-' + row.gradeTier" class="grade-badge">{{ row.grade }}</span>
+                        </tooltip-popup>
+                      </td>
                     </tr>
                   </tbody>
                 </table>
