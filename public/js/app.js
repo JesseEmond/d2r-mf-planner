@@ -433,7 +433,7 @@ function makeBuild(getSlotStats) {
     effectiveColdMastery, fcrBreakpoint, fcrTooltip, fcrBadgeClass,
     blizzDps, iceBlastDps, totalDps, combatAssumptions, blizzTooltip, iceBlastTooltip,
     runStats, runDropProbs, totalDropProbs, ettvd, runTimeSummary,
-    activeSetBonuses,
+    activeSetBonuses, gearTotals,
   };
 }
 
@@ -571,6 +571,13 @@ const socketSwappedBuilds = Object.fromEntries(
     ])
 );
 
+function buildDelta(swapped, base) {
+  return {
+    statDelta: swapped.gearTotals.value.subtract(base.gearTotals.value),
+    ettvdDelta: (swapped.ettvd.value?.total ?? 0) - (base.ettvd.value?.total ?? 0),
+  };
+}
+
 const potentialUpgrades = computed(() => {
   if (!targetPreset.value) return [];
   const rows = [];
@@ -586,15 +593,7 @@ const potentialUpgrades = computed(() => {
     if (currentPresetId === 'custom' && state.gear[id].custom?.name?.trim() === targetItem.name) continue; // custom item identified as target
 
     const swapped = swappedBuilds[id];
-    const statDelta = {
-      fcr:             (swapped.totalFCR.value             ?? 0) - (currentBuild.totalFCR.value             ?? 0),
-      mf:              (swapped.totalMF.value              ?? 0) - (currentBuild.totalMF.value              ?? 0),
-      allSkills:       (swapped.totalAllSkills.value       ?? 0) - (currentBuild.totalAllSkills.value       ?? 0),
-      coldSkills:      (swapped.totalColdSkills.value      ?? 0) - (currentBuild.totalColdSkills.value      ?? 0),
-      coldDmgPct:      (swapped.totalColdDmgPct.value      ?? 0) - (currentBuild.totalColdDmgPct.value      ?? 0),
-      enemyColdResPct: (swapped.totalEnemyColdResPct.value ?? 0) - (currentBuild.totalEnemyColdResPct.value ?? 0),
-    };
-    const ettvdDelta = (swapped.ettvd.value?.total ?? 0) - (currentBuild.ettvd.value?.total ?? 0);
+    const { statDelta, ettvdDelta } = buildDelta(swapped, currentBuild);
 
     const priceEntry = ITEM_PRICES.value[targetItem.name] ?? null;
     const price    = priceEntry === null ? '?' : (priceEntry.buy_rune_equiv ?? '< Pul');
@@ -634,15 +633,7 @@ const potentialUpgrades = computed(() => {
     if ([...targetSockIds].sort().join(',') === [...currentSockIds].sort().join(',')) continue;
 
     const swapped = socketSwappedBuilds[id];
-    const statDelta = {
-      fcr:             (swapped.totalFCR.value             ?? 0) - (currentBuild.totalFCR.value             ?? 0),
-      mf:              (swapped.totalMF.value              ?? 0) - (currentBuild.totalMF.value              ?? 0),
-      allSkills:       (swapped.totalAllSkills.value       ?? 0) - (currentBuild.totalAllSkills.value       ?? 0),
-      coldSkills:      (swapped.totalColdSkills.value      ?? 0) - (currentBuild.totalColdSkills.value      ?? 0),
-      coldDmgPct:      (swapped.totalColdDmgPct.value      ?? 0) - (currentBuild.totalColdDmgPct.value      ?? 0),
-      enemyColdResPct: (swapped.totalEnemyColdResPct.value ?? 0) - (currentBuild.totalEnemyColdResPct.value ?? 0),
-    };
-    const ettvdDelta = (swapped.ettvd.value?.total ?? 0) - (currentBuild.ettvd.value?.total ?? 0);
+    const { statDelta, ettvdDelta } = buildDelta(swapped, currentBuild);
 
     const sockItems = getTargetSlotSockets(id);
     let totalPriceIst = 0;
