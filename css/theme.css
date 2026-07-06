@@ -1072,6 +1072,8 @@ abbr { text-decoration: underline dashed; text-decoration-color: var(--color-tex
 .delta-val-pos { color: #5ab85a; white-space: nowrap; }
 .delta-val-neg { color: #b85a5a; white-space: nowrap; }
 
+.ettvd-rel-pct { font-size: 0.78em; opacity: 0.75; }
+
 .upgrades-price {
   white-space: nowrap;
 }

@@ -572,9 +572,12 @@ const socketSwappedBuilds = Object.fromEntries(
 );
 
 function buildDelta(swapped, base) {
+  const baseTotal = base.ettvd.value?.total ?? 0;
+  const ettvdDelta = (swapped.ettvd.value?.total ?? 0) - baseTotal;
   return {
     statDelta: swapped.gearTotals.value.subtract(base.gearTotals.value),
-    ettvdDelta: (swapped.ettvd.value?.total ?? 0) - (base.ettvd.value?.total ?? 0),
+    ettvdDelta,
+    ettvdRelPct: baseTotal !== 0 ? (ettvdDelta / baseTotal) * 100 : 0,
   };
 }
 
@@ -593,7 +596,7 @@ const potentialUpgrades = computed(() => {
     if (currentPresetId === 'custom' && state.gear[id].custom?.name?.trim() === targetItem.name) continue; // custom item identified as target
 
     const swapped = swappedBuilds[id];
-    const { statDelta, ettvdDelta } = buildDelta(swapped, currentBuild);
+    const { statDelta, ettvdDelta, ettvdRelPct } = buildDelta(swapped, currentBuild);
 
     const priceEntry = ITEM_PRICES.value[targetItem.name] ?? null;
     const price    = priceEntry === null ? '?' : (priceEntry.buy_rune_equiv ?? '< Pul');
@@ -606,6 +609,7 @@ const potentialUpgrades = computed(() => {
       itemName: targetItem.name,
       statDelta,
       ettvdDelta,
+      ettvdRelPct,
       price,
       priceIst,
       valueScore,
@@ -633,7 +637,7 @@ const potentialUpgrades = computed(() => {
     if ([...targetSockIds].sort().join(',') === [...currentSockIds].sort().join(',')) continue;
 
     const swapped = socketSwappedBuilds[id];
-    const { statDelta, ettvdDelta } = buildDelta(swapped, currentBuild);
+    const { statDelta, ettvdDelta, ettvdRelPct } = buildDelta(swapped, currentBuild);
 
     const sockItems = getTargetSlotSockets(id);
     let totalPriceIst = 0;
@@ -655,6 +659,7 @@ const potentialUpgrades = computed(() => {
       isSocketRow: true,
       statDelta,
       ettvdDelta,
+      ettvdRelPct,
       price,
       priceIst,
       valueScore,
@@ -708,6 +713,13 @@ const totalUpgradeEttvdDelta = computed(() => {
   // Real computation: full target build vs. full current build, so set bonuses interact correctly.
   if (!targetBuild.ettvd.value || !currentBuild.ettvd.value) return null;
   return targetBuild.ettvd.value.total - currentBuild.ettvd.value.total;
+});
+
+const totalUpgradeEttvdRelPct = computed(() => {
+  if (totalUpgradeEttvdDelta.value == null) return null;
+  const base = currentBuild.ettvd.value?.total ?? 0;
+  if (base === 0) return null;
+  return (totalUpgradeEttvdDelta.value / base) * 100;
 });
 
 const totalUpgradePriceIst = computed(() =>
@@ -1251,6 +1263,11 @@ function fmtEttvdDelta(secs) {
   return sign + _fmtEttvdSeconds(secs);
 }
 
+function fmtEttvdRelPct(pct) {
+  const sign = pct < 0 ? '-' : '+';
+  return sign + Math.abs(pct).toFixed(1) + '%';
+}
+
 // relEttvdPerIstValue = % ETTVD improvement per ~Ist-rune-equivalent cost. Positive = good deal.
 function fmtRelativeEttvdPerPrice(relEttvdPerIstValue) {
   const sign = relEttvdPerIstValue >= 0 ? '+' : '';
@@ -1499,8 +1516,10 @@ const app = createApp({
       // Potential Upgrades
       potentialUpgrades,
       totalUpgradeEttvdDelta,
+      totalUpgradeEttvdRelPct,
       totalUpgradePriceIst,
       fmtEttvdDelta,
+      fmtEttvdRelPct,
       statDeltaEntries,
     };
   },
@@ -1901,7 +1920,10 @@ const app = createApp({
                           <span v-if="Object.values(row.statDelta).every(v => v === 0)" class="delta-none">—</span>
                         </div>
                       </td>
-                      <td class="upgrades-td" :class="row.ettvdDelta < 0 ? 'delta-val-pos' : 'delta-val-neg'">{{ fmtEttvdDelta(row.ettvdDelta) }}</td>
+                      <td class="upgrades-td" :class="row.ettvdDelta < 0 ? 'delta-val-pos' : 'delta-val-neg'">
+                        <div>{{ fmtEttvdDelta(row.ettvdDelta) }}</div>
+                        <div class="ettvd-rel-pct">{{ fmtEttvdRelPct(row.ettvdRelPct) }}</div>
+                      </td>
                       <td class="upgrades-td upgrades-price">{{ row.price }}</td>
                       <td class="upgrades-td upgrades-grade"><span :class="'grade-tier-' + row.gradeTier" class="grade-badge">{{ row.grade }}</span></td>
                     </tr>
@@ -1921,7 +1943,8 @@ const app = createApp({
               <tooltip-popup text="Total ETTVD delta and cost if all listed upgrades are purchased. The ETTVD delta uses the full target build (combining all set bonuses) rather than summing individual item deltas.">Upgrade Summary</tooltip-popup>
             </h2>
             <div :class="['upgrades-summary-ettvd', totalUpgradeEttvdDelta == null ? 'ettvd-empty' : totalUpgradeEttvdDelta < 0 ? 'delta-val-pos' : 'delta-val-neg']">
-              {{ totalUpgradeEttvdDelta != null ? fmtEttvdDelta(totalUpgradeEttvdDelta) : '---' }}
+              <div>{{ totalUpgradeEttvdDelta != null ? fmtEttvdDelta(totalUpgradeEttvdDelta) : '---' }}</div>
+              <div v-if="totalUpgradeEttvdRelPct != null" class="ettvd-rel-pct">{{ fmtEttvdRelPct(totalUpgradeEttvdRelPct) }}</div>
             </div>
             <div class="upgrades-summary-label">ETTVD if all upgrades bought</div>
             <div class="upgrades-cost-breakdown">
