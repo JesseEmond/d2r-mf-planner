@@ -1084,6 +1084,12 @@ abbr { text-decoration: underline dashed; text-decoration-color: var(--color-tex
   white-space: nowrap;
 }
 
+.price-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
 .upgrades-grade { white-space: nowrap; }
 .grade-badge {
   font-family: system-ui, sans-serif;
