@@ -16,6 +16,7 @@ const TARGET_GEAR_PRESETS = ref([]);
 const SET_LEVEL_BONUSES = ref({});
 const SET_SIZES = ref({});
 const SOCKET_ITEMS = ref([]);
+const ITEM_PRICES = ref({});
 
 // ── State helpers ──────────────────────────────────────────────────────────
 
@@ -526,36 +527,31 @@ const targetSunders = computed(() =>
 const UPGRADE_GRADES     = ['S+','S','S-','A+','A','A-','B+','B','B-','C+','C','C-','D+','D','D-','F'];
 const UPGRADE_GRADE_TIER = [  0,  0,  0,   1,  1,  1,   2,  2,  2,   3,  3,  3,   4,  4,  4,  5 ];
 
-// Static fake placeholders per slot — every field will be replaced with real computed values.
-//
-// TODO: statDelta — diff of (current gear with this slot swapped to the target item) vs.
-//   current gear totals. Must run computeSetBonuses on both configs to capture set bonus
-//   gains/losses from the swap.
-//
-// TODO: ettvdDelta — computeEttvd(swapped build) - computeEttvd(current build), where
-//   the swapped build is current gear with only this one slot set to the target item.
-//
-// TODO: price — item's snap_price string from db.json (populated by the trade pipeline in
-//   build_db.py). Format: human-readable rune string, e.g. "Vex" or "Jah + Ber".
-//
-// TODO: priceIst — numeric Ist-rune-equivalent for the item's price, from db.json field
-//   snap_price_ist (total price normalised so Ist = 1). Used for the ΔETTVD/Cost sort key.
-const _FAKE_UPGRADE_DATA = {
-  head:   { statDelta: { fcr:  0, mf: 70, allSkills: 2, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -7200, price: 'Vex',       priceIst:  2.2  },
-  armor:  { statDelta: { fcr:  0, mf:  0, allSkills: 2, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -5400, price: 'Jah + Ber', priceIst: 18.0  },
-  weapon: { statDelta: { fcr: 15, mf:  0, allSkills: 3, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -3600, price: 'Ko',        priceIst:  0.1  },
-  shield: { statDelta: { fcr: 10, mf:  0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -2700, price: 'Pul',       priceIst:  0.6  },
-  amulet: { statDelta: { fcr:  0, mf:  0, allSkills: 2, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta:  1800, price: 'Um',        priceIst:  0.9  },
-  gloves: { statDelta: { fcr: 20, mf: 20, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta:  -900, price: 'Ral',       priceIst:  0.05 },
-  belt:   { statDelta: { fcr:  0, mf: 24, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -1800, price: 'Shael',     priceIst:  0.15 },
-  boots:  { statDelta: { fcr:  0, mf: 25, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta:  -600, price: 'Ort',       priceIst:  0.08 },
-  ring1:  { statDelta: { fcr: 10, mf:  0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -2400, price: 'Ist',       priceIst:  1.0  },
-  ring2:  { statDelta: { fcr: 10, mf:  0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -1200, price: 'Mal',       priceIst:  0.85 },
-};
+// One swapped build per gear slot: current gear with only that slot replaced by the target item.
+// The swapped slot uses the target base item + the player's current sockets (prices are per-item).
+const swappedBuilds = Object.fromEntries(
+  GEAR_SLOTS
+    .filter(({ id }) => id !== 'charms')
+    .map(({ id: swapId }) => [
+      swapId,
+      makeBuild((slotId) => {
+        if (slotId === swapId) {
+          const item = getTargetSlotItem(slotId);
+          const currentSockStats = (state.gear[slotId].sockets ?? []).reduce(
+            (t, s) => t.add(socketItemStats(s, slotId)), Stats.zero()
+          );
+          if (!item) return currentSockStats;
+          return { ...item, ...Stats.from(item).add(currentSockStats) };
+        }
+        return slotId === 'charms'
+          ? charmSlotStats(state.gear.charms)
+          : slotStats(state.gear[slotId], slotId);
+      }),
+    ])
+);
 
 const potentialUpgrades = computed(() => {
   if (!targetPreset.value) return [];
-  const currentEttvdTotal = currentBuild.ettvd.value?.total ?? null;
   const rows = [];
 
   for (const { id, label } of GEAR_SLOTS) {
@@ -567,23 +563,30 @@ const potentialUpgrades = computed(() => {
     const targetPresetId  = targetPreset.value.slots[id];
     if (currentPresetId === targetPresetId) continue; // already equipped
 
-    const fake = _FAKE_UPGRADE_DATA[id] ?? {
-      statDelta: { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 },
-      ettvdDelta: -1800, price: '?', priceIst: 1,
+    const swapped = swappedBuilds[id];
+    const statDelta = {
+      fcr:             (swapped.totalFCR.value             ?? 0) - (currentBuild.totalFCR.value             ?? 0),
+      mf:              (swapped.totalMF.value              ?? 0) - (currentBuild.totalMF.value              ?? 0),
+      allSkills:       (swapped.totalAllSkills.value       ?? 0) - (currentBuild.totalAllSkills.value       ?? 0),
+      coldSkills:      (swapped.totalColdSkills.value      ?? 0) - (currentBuild.totalColdSkills.value      ?? 0),
+      coldDmgPct:      (swapped.totalColdDmgPct.value      ?? 0) - (currentBuild.totalColdDmgPct.value      ?? 0),
+      enemyColdResPct: (swapped.totalEnemyColdResPct.value ?? 0) - (currentBuild.totalEnemyColdResPct.value ?? 0),
     };
+    const ettvdDelta = (swapped.ettvd.value?.total ?? 0) - (currentBuild.ettvd.value?.total ?? 0);
 
-    // TODO: valueScore — ettvdDelta / priceIst. More negative = better value.
-    //   When ettvdDelta and priceIst are real, this formula is correct as-is.
-    const valueScore = fake.priceIst > 0 ? fake.ettvdDelta / fake.priceIst : 0;
+    const priceEntry = ITEM_PRICES.value[targetItem.name] ?? null;
+    const price    = priceEntry === null ? '?' : (priceEntry.rune_equiv ?? '< Pul');
+    const priceIst = priceEntry?.iv ?? null;
+    const valueScore = priceIst > 0 ? ettvdDelta / priceIst : ettvdDelta;
 
     rows.push({
       slotId: id,
       slot: label,
       itemName: targetItem.name,
-      statDelta: fake.statDelta,
-      ettvdDelta: fake.ettvdDelta,
-      price: fake.price,
-      priceIst: fake.priceIst,
+      statDelta,
+      ettvdDelta,
+      price,
+      priceIst,
       valueScore,
     });
 
@@ -594,27 +597,38 @@ const potentialUpgrades = computed(() => {
   // TODO: add charm upgrade rows — compare targetPresetCharms vs. state.gear.charms for
   //   any charm entries in target not already present in current gear.
 
-  // Ascending: most negative valueScore first (best value upgrade at top)
-  rows.sort((a, b) => a.valueScore - b.valueScore);
+  // Split into priced (known value) and unpriced (no price entry) groups.
+  const priced   = rows.filter(r => r.priceIst !== null);
+  const unpriced = rows.filter(r => r.priceIst === null);
 
-  // Assign letter grades: evenly spaced buckets across the full [min, max] range of valueScores.
-  if (rows.length > 1) {
-    const min = rows[0].valueScore;
-    const max = rows[rows.length - 1].valueScore;
+  // Priced: best value (most negative ettvdDelta / priceIst) first.
+  priced.sort((a, b) => a.valueScore - b.valueScore);
+
+  // Assign letter grades across priced rows only.
+  if (priced.length > 1) {
+    const min = priced[0].valueScore;
+    const max = priced[priced.length - 1].valueScore;
     const range = max - min;
     const n = UPGRADE_GRADES.length;
-    for (const row of rows) {
+    for (const row of priced) {
       const t = range > 0 ? (row.valueScore - min) / range : 0;
       const idx = Math.min(n - 1, Math.floor(t * n));
       row.grade     = UPGRADE_GRADES[idx];
       row.gradeTier = UPGRADE_GRADE_TIER[idx];
     }
-  } else if (rows.length === 1) {
-    rows[0].grade = 'S+';
-    rows[0].gradeTier = 0;
+  } else if (priced.length === 1) {
+    priced[0].grade = 'S+';
+    priced[0].gradeTier = 0;
   }
 
-  return rows;
+  // Unpriced: sort by ettvdDelta ascending (most negative first), grade as '?' (gray).
+  unpriced.sort((a, b) => a.ettvdDelta - b.ettvdDelta);
+  for (const row of unpriced) {
+    row.grade     = '?';
+    row.gradeTier = 6;
+  }
+
+  return [...priced, ...unpriced];
 });
 
 const totalUpgradeEttvdDelta = computed(() => {
@@ -623,9 +637,8 @@ const totalUpgradeEttvdDelta = computed(() => {
   return targetBuild.ettvd.value.total - currentBuild.ettvd.value.total;
 });
 
-// TODO: replace with a sum of real snap_price_ist values once per-item price data is wired.
 const totalUpgradePriceIst = computed(() =>
-  potentialUpgrades.value.reduce((s, r) => s + r.priceIst, 0)
+  potentialUpgrades.value.reduce((s, r) => s + (r.priceIst ?? 0), 0)
 );
 
 const targetSlots = computed(() => {
@@ -1253,6 +1266,7 @@ const app = createApp({
         SET_LEVEL_BONUSES.value = db.gear.set_level_bonuses ?? {};
         SET_SIZES.value = db.gear.set_sizes ?? {};
         SOCKET_ITEMS.value = db.gear.socket_items ?? [];
+        ITEM_PRICES.value = db.item_prices ?? {};
         TARGET_GEAR_PRESETS.value = Object.entries(db.gear.presets).map(
           ([id, preset]) => ({ id, name: id, slots: preset, sockets: preset.sockets ?? {}, charms: preset.charms ?? [] })
         );
@@ -1772,7 +1786,6 @@ const app = createApp({
         <div class="left-col">
           <section class="gear-panel upgrades-panel">
             <h2 class="panel-title">Potential Upgrades</h2>
-            <p class="upgrades-fake-notice">Stat Δ, ΔETTVD, and prices are placeholder values — real data pending.</p>
             <p v-if="!potentialUpgrades.length" class="placeholder">All target gear is already equipped.</p>
             <template v-else>
               <div class="upgrades-table-wrap">
