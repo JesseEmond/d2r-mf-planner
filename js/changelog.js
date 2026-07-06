@@ -1,10 +1,14 @@
 // UNRELEASED: add entries here while developing. Must be empty before running gh-deploy.sh.
-export const UNRELEASED = [
-  'Added Potential Upgrades section: shows which target gear you still need, with stat deltas, ETTVD impact, trading price, and a value grade (S+ to F)',
-];
+export const UNRELEASED = [];
 
 // RELEASES: most recent first. Each entry is one deploy.
 export const RELEASES = [
+  {
+    date: '2026-07-05',
+    changes: [
+      'Added Potential Upgrades section: shows which target gear you still need, with stat deltas, ETTVD impact, Traderie trading price, and a value rank (S+ to F)',
+    ],
+  },
   {
     date: '2026-06-24',
     changes: [
