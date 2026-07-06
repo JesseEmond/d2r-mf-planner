@@ -1967,7 +1967,7 @@ const app = createApp({
                         </tooltip-popup>
                       </td>
                       <td class="upgrades-td upgrades-price">
-                        <tooltip-popup v-if="row.priceIst != null" :text="'Raw ist value: ' + row.priceIst.toFixed(2) + (row.tradeUrl ? ' · Click to price check on Traderie.' : '')">
+                        <tooltip-popup v-if="row.priceIst != null" :text="'Raw ist value: ' + row.priceIst.toFixed(2) + (row.tradeUrl ? ' · Click to see offers on Traderie.' : '')">
                           <a v-if="row.tradeUrl" :href="row.tradeUrl" target="_blank" rel="noopener" class="price-link">{{ row.price }}</a>
                           <span v-else>{{ row.price }}</span>
                         </tooltip-popup>
