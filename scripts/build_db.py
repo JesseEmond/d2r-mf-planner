@@ -139,8 +139,10 @@ def main() -> None:
     try:
         snapshot = trade_snapshots.load_latest_snapshot()
         item_prices = _build_item_prices(snapshot)
+        price_snapshot_date = trade_snapshots.get_latest_snapshot_date()
     except FileNotFoundError:
         item_prices = {}
+        price_snapshot_date = None
 
     db = {
         "valuables": valuables,
@@ -149,6 +151,7 @@ def main() -> None:
         "gear": gear,
         "skill_data": skill_data,
         "item_prices": item_prices,
+        "price_snapshot_date": price_snapshot_date,
     }
 
     OUT.parent.mkdir(parents=True, exist_ok=True)

@@ -53,6 +53,14 @@ def load_latest_snapshot(date: Optional[str] = None) -> dict:
         return json.load(f)
 
 
+def get_latest_snapshot_date() -> Optional[str]:
+    """Return the date string (YYYY-MM-DD) of the most recent snapshot, or None."""
+    candidates = sorted(SNAPSHOTS_DIR.glob("snapshot-????-??-??.json"))
+    if not candidates:
+        return None
+    return candidates[-1].stem[len("snapshot-"):]
+
+
 # ---------------------------------------------------------------------------
 # IST value lookups
 # ---------------------------------------------------------------------------
