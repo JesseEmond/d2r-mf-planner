@@ -996,6 +996,145 @@ abbr { text-decoration: underline dashed; text-decoration-color: var(--color-tex
 /* Gold highlight for "Any valuable" row in Drop Odds */
 .breakdown-row.breakdown-highlight { color: var(--color-unique); font-weight: 600; }
 
+/* ── Potential Upgrades ───────────────────────────────────────────────────── */
+
+.upgrades-panel {}
+
+.upgrades-table-wrap {
+  overflow-x: auto;
+}
+
+.upgrades-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.78rem;
+  font-family: system-ui, sans-serif;
+}
+
+.upgrades-th {
+  text-align: left;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--color-text-muted);
+  padding: 0.2rem 0.6rem 0.4rem;
+  border-bottom: 1px solid var(--color-border);
+  white-space: nowrap;
+  cursor: help;
+}
+
+.upgrades-td {
+  padding: 0.35rem 0.6rem;
+  vertical-align: middle;
+  color: var(--color-text-dim);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+}
+
+.upgrades-row:last-child .upgrades-td {
+  border-bottom: none;
+}
+
+.upgrades-slot {
+  color: var(--color-text-muted);
+  white-space: nowrap;
+}
+
+.upgrades-item {
+  color: var(--color-text);
+  white-space: nowrap;
+}
+
+.upgrades-stat-delta-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem;
+  align-items: center;
+}
+
+.delta-pill {
+  font-size: 0.68rem;
+  padding: 1px 5px;
+  border-radius: 3px;
+  white-space: nowrap;
+}
+.delta-pill-pos { background: #0d1f0d; color: #5ab85a; border: 1px solid #1a4a1a; }
+.delta-pill-neg { background: #1f0d0d; color: #b85a5a; border: 1px solid #4a1a1a; }
+
+.delta-none {
+  color: var(--color-text-faint);
+}
+
+.delta-val-pos { color: #5ab85a; white-space: nowrap; }
+.delta-val-neg { color: #b85a5a; white-space: nowrap; }
+
+.upgrades-price {
+  white-space: nowrap;
+}
+
+.upgrades-grade { white-space: nowrap; }
+.grade-badge {
+  font-family: system-ui, sans-serif;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid;
+  letter-spacing: 0.05em;
+  display: inline-block;
+}
+.grade-tier-0 { color: #6090ff; border-color: #2a3a80; background: #0c1428; } /* S — blue */
+.grade-tier-1 { color: #5ab85a; border-color: #1a4a1a; background: #0d1f0d; } /* A — green */
+.grade-tier-2 { color: #b0c030; border-color: #3a4410; background: #141808; } /* B — yellow-green */
+.grade-tier-3 { color: #c8a030; border-color: #4a3a10; background: #1a1508; } /* C — amber */
+.grade-tier-4 { color: #c07030; border-color: #4a2810; background: #1a1008; } /* D — orange */
+.grade-tier-5 { color: #b84040; border-color: #4a1a1a; background: #1f0d0d; } /* F — red */
+
+.upgrades-fake-notice {
+  font-size: 0.72rem;
+  font-family: system-ui, sans-serif;
+  font-style: italic;
+  color: var(--color-text-faint);
+  border: 1px dashed var(--color-border);
+  border-radius: 3px;
+  padding: 0.25rem 0.6rem;
+  margin: 0 0 0.6rem;
+}
+
+.upgrades-note {
+  font-size: 0.75rem;
+  color: var(--color-text-dim);
+  font-family: system-ui, sans-serif;
+  margin: 0.6rem 0 0;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--color-border);
+  line-height: 1.4;
+}
+
+/* Upgrades summary (right panel) */
+.upgrades-summary-block {}
+
+.upgrades-summary-ettvd {
+  font-size: 2rem;
+  font-weight: 700;
+  text-align: center;
+  letter-spacing: 0.02em;
+  padding: 0.4rem 0 0.2rem;
+  line-height: 1.1;
+}
+
+.upgrades-summary-label {
+  text-align: center;
+  font-size: 0.7rem;
+  font-family: system-ui, sans-serif;
+  color: var(--color-text-muted);
+  margin-bottom: 0.5rem;
+}
+
+.upgrades-cost-breakdown {
+  border-top: 1px solid var(--color-border);
+  padding-top: 0.4rem;
+}
+
 @media (max-width: 640px) {
   .app-header {
     padding: 0.75rem 1rem 0.4rem;

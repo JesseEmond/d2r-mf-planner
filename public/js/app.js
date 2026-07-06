@@ -519,6 +519,115 @@ const targetSunders = computed(() =>
   [...new Set(targetPresetCharms.value.map(c => c.item?.sunder).filter(Boolean))]
 );
 
+// ── Potential Upgrades ─────────────────────────────────────────────────────
+
+// Grade scale for upgrade value. Index 0 = best (S+), index 15 = worst (F).
+// Tier drives the color class: 0=blue(S), 1=green(A), 2=yellow-green(B), 3=amber(C), 4=orange(D), 5=red(F).
+const UPGRADE_GRADES     = ['S+','S','S-','A+','A','A-','B+','B','B-','C+','C','C-','D+','D','D-','F'];
+const UPGRADE_GRADE_TIER = [  0,  0,  0,   1,  1,  1,   2,  2,  2,   3,  3,  3,   4,  4,  4,  5 ];
+
+// Static fake placeholders per slot — every field will be replaced with real computed values.
+//
+// TODO: statDelta — diff of (current gear with this slot swapped to the target item) vs.
+//   current gear totals. Must run computeSetBonuses on both configs to capture set bonus
+//   gains/losses from the swap.
+//
+// TODO: ettvdDelta — computeEttvd(swapped build) - computeEttvd(current build), where
+//   the swapped build is current gear with only this one slot set to the target item.
+//
+// TODO: price — item's snap_price string from db.json (populated by the trade pipeline in
+//   build_db.py). Format: human-readable rune string, e.g. "Vex" or "Jah + Ber".
+//
+// TODO: priceIst — numeric Ist-rune-equivalent for the item's price, from db.json field
+//   snap_price_ist (total price normalised so Ist = 1). Used for the ΔETTVD/Cost sort key.
+const _FAKE_UPGRADE_DATA = {
+  head:   { statDelta: { fcr:  0, mf: 70, allSkills: 2, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -7200, price: 'Vex',       priceIst:  2.2  },
+  armor:  { statDelta: { fcr:  0, mf:  0, allSkills: 2, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -5400, price: 'Jah + Ber', priceIst: 18.0  },
+  weapon: { statDelta: { fcr: 15, mf:  0, allSkills: 3, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -3600, price: 'Ko',        priceIst:  0.1  },
+  shield: { statDelta: { fcr: 10, mf:  0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -2700, price: 'Pul',       priceIst:  0.6  },
+  amulet: { statDelta: { fcr:  0, mf:  0, allSkills: 2, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta:  1800, price: 'Um',        priceIst:  0.9  },
+  gloves: { statDelta: { fcr: 20, mf: 20, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta:  -900, price: 'Ral',       priceIst:  0.05 },
+  belt:   { statDelta: { fcr:  0, mf: 24, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -1800, price: 'Shael',     priceIst:  0.15 },
+  boots:  { statDelta: { fcr:  0, mf: 25, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta:  -600, price: 'Ort',       priceIst:  0.08 },
+  ring1:  { statDelta: { fcr: 10, mf:  0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -2400, price: 'Ist',       priceIst:  1.0  },
+  ring2:  { statDelta: { fcr: 10, mf:  0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 }, ettvdDelta: -1200, price: 'Mal',       priceIst:  0.85 },
+};
+
+const potentialUpgrades = computed(() => {
+  if (!targetPreset.value) return [];
+  const currentEttvdTotal = currentBuild.ettvd.value?.total ?? null;
+  const rows = [];
+
+  for (const { id, label } of GEAR_SLOTS) {
+    if (id === 'charms') continue;
+    const targetItem = getTargetSlotItem(id);
+    if (!targetItem) continue;
+
+    const currentPresetId = state.gear[id].preset;
+    const targetPresetId  = targetPreset.value.slots[id];
+    if (currentPresetId === targetPresetId) continue; // already equipped
+
+    const fake = _FAKE_UPGRADE_DATA[id] ?? {
+      statDelta: { fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0 },
+      ettvdDelta: -1800, price: '?', priceIst: 1,
+    };
+
+    // TODO: valueScore — ettvdDelta / priceIst. More negative = better value.
+    //   When ettvdDelta and priceIst are real, this formula is correct as-is.
+    const valueScore = fake.priceIst > 0 ? fake.ettvdDelta / fake.priceIst : 0;
+
+    rows.push({
+      slotId: id,
+      slot: label,
+      itemName: targetItem.name,
+      statDelta: fake.statDelta,
+      ettvdDelta: fake.ettvdDelta,
+      price: fake.price,
+      priceIst: fake.priceIst,
+      valueScore,
+    });
+
+    // TODO: add socket upgrade rows — compare getTargetSlotSockets(id) vs. state.gear[id].sockets
+    //   for any socket items in target not present in current gear.
+  }
+
+  // TODO: add charm upgrade rows — compare targetPresetCharms vs. state.gear.charms for
+  //   any charm entries in target not already present in current gear.
+
+  // Ascending: most negative valueScore first (best value upgrade at top)
+  rows.sort((a, b) => a.valueScore - b.valueScore);
+
+  // Assign letter grades: evenly spaced buckets across the full [min, max] range of valueScores.
+  if (rows.length > 1) {
+    const min = rows[0].valueScore;
+    const max = rows[rows.length - 1].valueScore;
+    const range = max - min;
+    const n = UPGRADE_GRADES.length;
+    for (const row of rows) {
+      const t = range > 0 ? (row.valueScore - min) / range : 0;
+      const idx = Math.min(n - 1, Math.floor(t * n));
+      row.grade     = UPGRADE_GRADES[idx];
+      row.gradeTier = UPGRADE_GRADE_TIER[idx];
+    }
+  } else if (rows.length === 1) {
+    rows[0].grade = 'S+';
+    rows[0].gradeTier = 0;
+  }
+
+  return rows;
+});
+
+const totalUpgradeEttvdDelta = computed(() => {
+  // Real computation: full target build vs. full current build, so set bonuses interact correctly.
+  if (!targetBuild.ettvd.value || !currentBuild.ettvd.value) return null;
+  return targetBuild.ettvd.value.total - currentBuild.ettvd.value.total;
+});
+
+// TODO: replace with a sum of real snap_price_ist values once per-item price data is wired.
+const totalUpgradePriceIst = computed(() =>
+  potentialUpgrades.value.reduce((s, r) => s + r.priceIst, 0)
+);
+
 const targetSlots = computed(() => {
   const out = {};
   for (const { id } of GEAR_SLOTS) {
@@ -1035,6 +1144,32 @@ function _fmtEttvd(secs) {
   return m > 0 ? `${h}h ${m}min` : `${h}h`;
 }
 
+function fmtEttvdDelta(secs) {
+  if (secs === 0) return '0';
+  const sign = secs < 0 ? '-' : '+';
+  return sign + _fmtEttvd(Math.abs(secs));
+}
+
+// relEttvdPerIstValue = % ETTVD improvement per ~Ist-rune-equivalent cost. Positive = good deal.
+function fmtRelativeEttvdPerPrice(relEttvdPerIstValue) {
+  const sign = relEttvdPerIstValue >= 0 ? '+' : '';
+  return sign + relEttvdPerIstValue.toFixed(1) + ' %ETTVD/~ist';
+}
+
+const STAT_DELTA_LABELS = {
+  fcr: 'FCR', mf: 'MF', allSkills: '+All Skills',
+  coldSkills: '+Cold Skills', coldDmgPct: 'Cold Dmg%', enemyColdResPct: 'ECR%',
+};
+
+function statDeltaEntries(delta) {
+  return Object.entries(delta)
+    .filter(([, v]) => v !== 0)
+    .map(([key, val]) => {
+      const sign = val > 0 ? '+' : '';
+      return { label: `${sign}${val} ${STAT_DELTA_LABELS[key] ?? key}`, positive: val > 0 };
+    });
+}
+
 // ── TimeToValuableDropSummary component ────────────────────────────────────
 
 const ETTVD_ROWS = [
@@ -1258,6 +1393,13 @@ const app = createApp({
       targetPresetCharms,
       gearSunders,
       targetSunders,
+
+      // Potential Upgrades
+      potentialUpgrades,
+      totalUpgradeEttvdDelta,
+      totalUpgradePriceIst,
+      fmtEttvdDelta,
+      statDeltaEntries,
     };
   },
   template: `
@@ -1622,6 +1764,72 @@ const app = createApp({
           <!-- Target ETTVD -->
           <time-to-valuable-drop-summary :ettvd="targetEttvd" :is-target="true" />
 
+        </div>
+
+        <hr class="section-divider" />
+
+        <!-- Potential Upgrades -->
+        <div class="left-col">
+          <section class="gear-panel upgrades-panel">
+            <h2 class="panel-title">Potential Upgrades</h2>
+            <p class="upgrades-fake-notice">Stat Δ, ΔETTVD, and prices are placeholder values — real data pending.</p>
+            <p v-if="!potentialUpgrades.length" class="placeholder">All target gear is already equipped.</p>
+            <template v-else>
+              <div class="upgrades-table-wrap">
+                <table class="upgrades-table">
+                  <thead>
+                    <tr>
+                      <th class="upgrades-th"><tooltip-popup text="Equipment slot for this upgrade">Slot</tooltip-popup></th>
+                      <th class="upgrades-th"><tooltip-popup text="Target item to acquire for this slot">Item</tooltip-popup></th>
+                      <th class="upgrades-th"><tooltip-popup text="Stat changes from equipping this item alongside your current gear, accounting for set bonuses gained or lost across the full gear set">Stat Δ</tooltip-popup></th>
+                      <th class="upgrades-th"><tooltip-popup text="Change in Expected Time To Valuable Drop from equipping only this item alongside your current gear. Negative = faster drops.">ΔETTVD</tooltip-popup></th>
+                      <th class="upgrades-th"><tooltip-popup text="Approximate trading price from Traderie snapshot">Price</tooltip-popup></th>
+                      <th class="upgrades-th"><tooltip-popup text="Relative value grade for this upgrade — S+ is the best ETTVD improvement per cost, F is the worst. Grades are assigned by dividing the full range of values into evenly spaced buckets.">Value</tooltip-popup></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="row in potentialUpgrades" :key="row.slotId" class="upgrades-row">
+                      <td class="upgrades-td upgrades-slot">{{ row.slot }}</td>
+                      <td class="upgrades-td upgrades-item">{{ row.itemName }}</td>
+                      <td class="upgrades-td">
+                        <div class="upgrades-stat-delta-wrap">
+                          <span
+                            v-for="entry in statDeltaEntries(row.statDelta)" :key="entry.label"
+                            :class="['delta-pill', entry.positive ? 'delta-pill-pos' : 'delta-pill-neg']"
+                          >{{ entry.label }}</span>
+                          <span v-if="Object.values(row.statDelta).every(v => v === 0)" class="delta-none">—</span>
+                        </div>
+                      </td>
+                      <td class="upgrades-td" :class="row.ettvdDelta < 0 ? 'delta-val-pos' : 'delta-val-neg'">{{ fmtEttvdDelta(row.ettvdDelta) }}</td>
+                      <td class="upgrades-td upgrades-price">{{ row.price }}</td>
+                      <td class="upgrades-td upgrades-grade"><span :class="'grade-tier-' + row.gradeTier" class="grade-badge">{{ row.grade }}</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <p v-if="potentialUpgrades.some(r => r.ettvdDelta > 0)" class="upgrades-note">
+                <em>* Items marked with a positive ΔETTVD highlight upgrades that may temporarily worsen drop efficiency on their own — expected until the rest of the complementary gear is also obtained.</em>
+              </p>
+            </template>
+          </section>
+        </div>
+
+        <div class="side-panel">
+          <section class="summary-block upgrades-summary-block">
+            <h2 class="panel-title">
+              <tooltip-popup text="Total ETTVD delta and cost if all listed upgrades are purchased. The ETTVD delta uses the full target build (combining all set bonuses) rather than summing individual item deltas.">Upgrade Summary</tooltip-popup>
+            </h2>
+            <div :class="['upgrades-summary-ettvd', totalUpgradeEttvdDelta == null ? 'ettvd-empty' : totalUpgradeEttvdDelta < 0 ? 'delta-val-pos' : 'delta-val-neg']">
+              {{ totalUpgradeEttvdDelta != null ? fmtEttvdDelta(totalUpgradeEttvdDelta) : '---' }}
+            </div>
+            <div class="upgrades-summary-label">ETTVD if all upgrades bought</div>
+            <div class="upgrades-cost-breakdown">
+              <div class="breakdown-row breakdown-total">
+                <span>Total cost</span>
+                <span>{{ potentialUpgrades.length ? '~' + totalUpgradePriceIst.toFixed(1) + ' Ist' : '—' }}</span>
+              </div>
+            </div>
+          </section>
         </div>
 
       </main>
