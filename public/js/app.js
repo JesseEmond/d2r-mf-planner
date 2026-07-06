@@ -1826,8 +1826,10 @@ const app = createApp({
             <div v-if="targetPresetCharms.length" class="target-charms-block">
               <div class="target-charms-header">Charms</div>
               <div v-for="c in targetPresetCharms" :key="c.id" class="target-slot-row">
-                <span class="slot-label">{{ c.count > 1 ? c.count + '×' : '' }}</span>
-                <span class="target-slot-name">{{ c.name }}</span>
+                <div class="target-charm-meta">
+                  <span class="slot-label">{{ c.count > 1 ? c.count + '×' : '' }}</span>
+                  <span class="target-slot-name">{{ c.name }}</span>
+                </div>
                 <stat-pills :stats="c.stats" :sunder="c.item?.sunder" />
               </div>
             </div>

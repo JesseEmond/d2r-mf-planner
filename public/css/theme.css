@@ -802,6 +802,12 @@ body {
 .target-charms-block .slot-label {
   width: calc(var(--col-label) - var(--block-indent));
 }
+.target-charm-meta {
+  display: flex;
+  align-items: center;
+  gap: var(--col-gap);
+}
+.target-charms-block .stat-pills { margin-top: 0; }
 .target-charms-header {
   font-size: 0.7rem;
   font-weight: 600;
