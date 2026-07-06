@@ -1943,7 +1943,7 @@ const app = createApp({
                       <th class="upgrades-th"><tooltip-popup text="Target item to acquire for this slot">Item</tooltip-popup></th>
                       <th class="upgrades-th"><tooltip-popup text="Stat changes from equipping this item alongside your current gear, accounting for set bonuses gained or lost across the full gear set">Stat Δ</tooltip-popup></th>
                       <th class="upgrades-th"><tooltip-popup text="Change in Expected Time To Valuable Drop from equipping only this item alongside your current gear. Negative = faster drops.">ΔETTVD</tooltip-popup></th>
-                      <th class="upgrades-th"><tooltip-popup text="Approximate trading price from Traderie. Prices use the 'good' tier ist value from Traderie listings — 'ist value' is Traderie's unit of account and does not mean literally one Ist rune.">Price</tooltip-popup> <tooltip-popup :text="priceSnapshotDate ? 'Price snapshot from ' + priceSnapshotDate + '. Double-check prices on Traderie before trading — values fluctuate.' : 'Double-check prices on Traderie before trading — values fluctuate.'"><span class="info-icon">i</span></tooltip-popup></th>
+                      <th class="upgrades-th"><tooltip-popup text="Approximate trading price from Traderie. Prices use the 'good' tier ist value from Traderie listings — 'ist value' is Traderie's unit of account and does not mean literally one Ist rune. Filtered to: Ladder · PC · Softcore · Reign of the Warlock.">Price</tooltip-popup> <tooltip-popup :text="priceSnapshotDate ? 'Price snapshot from ' + priceSnapshotDate + '. Double-check prices on Traderie before trading — values fluctuate.' : 'Double-check prices on Traderie before trading — values fluctuate.'"><span class="info-icon">i</span></tooltip-popup></th>
                       <th class="upgrades-th"><tooltip-popup text="Rank within this upgrade list — S+ has the best ETTVD improvement per cost, F the worst. Grades are relative to each other, not an absolute quality score.">Rank</tooltip-popup></th>
                     </tr>
                   </thead>
@@ -1971,7 +1971,7 @@ const app = createApp({
                           <a v-if="row.tradeUrl" :href="row.tradeUrl" target="_blank" rel="noopener" class="price-link">{{ row.price }}</a>
                           <span v-else>{{ row.price }}</span>
                         </tooltip-popup>
-                        <span v-else>{{ row.price }}</span>
+                        <tooltip-popup v-else text="No trade value data available for this item yet"><span>{{ row.price }}</span></tooltip-popup>
                       </td>
                       <td class="upgrades-td upgrades-grade">
                         <tooltip-popup :text="row.priceIst != null ? fmtEttvdDelta(row.ettvdDelta) + ' ΔETTVD ÷ ' + row.priceIst.toFixed(2) + ' ist = ' + fmtRelativeEttvdPerPrice(row.ettvdRelPct / row.priceIst, 3) : 'No price data — ranked by ΔETTVD only'">
