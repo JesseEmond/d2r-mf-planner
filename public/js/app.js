@@ -1904,7 +1904,7 @@ const app = createApp({
                       <th class="upgrades-th"><tooltip-popup text="Stat changes from equipping this item alongside your current gear, accounting for set bonuses gained or lost across the full gear set">Stat Δ</tooltip-popup></th>
                       <th class="upgrades-th"><tooltip-popup text="Change in Expected Time To Valuable Drop from equipping only this item alongside your current gear. Negative = faster drops.">ΔETTVD</tooltip-popup></th>
                       <th class="upgrades-th"><tooltip-popup text="Approximate trading price from Traderie snapshot">Price</tooltip-popup></th>
-                      <th class="upgrades-th"><tooltip-popup text="Relative value grade for this upgrade — S+ is the best ETTVD improvement per cost, F is the worst. Grades are assigned by dividing the full range of values into evenly spaced buckets.">Value</tooltip-popup></th>
+                      <th class="upgrades-th"><tooltip-popup text="Rank within this upgrade list — S+ has the best ETTVD improvement per cost, F the worst. Grades are relative to each other, not an absolute quality score.">Rank</tooltip-popup></th>
                     </tr>
                   </thead>
                   <tbody>
