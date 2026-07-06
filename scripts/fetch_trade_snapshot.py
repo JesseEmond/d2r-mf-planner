@@ -59,11 +59,11 @@ PRICE_CHECK_PARAMS: dict[str, object] = {
     "prop_Game version": "reign of the warlock",
 }
 
-TRADERIE_PRICE_CHECK_BASE = "https://traderie.com/diablo2resurrected/price-check"
+TRADERIE_PRICE_CHECK_BASE = "https://traderie.com/diablo2resurrected/product"
 
 
 def _price_check_url(search_term: str) -> str:
-    slug = quote(search_term.lower().replace(" ", "-"), safe="-")
+    slug = quote(search_term.lower().replace("'", "").replace(" ", "-"), safe="-")
     params = {k: v for k, v in PRICE_CHECK_PARAMS.items() if k != "limit"}
     return f"{TRADERIE_PRICE_CHECK_BASE}/{slug}?{urlencode(params, quote_via=quote)}"
 
