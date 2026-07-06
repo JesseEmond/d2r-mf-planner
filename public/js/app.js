@@ -576,8 +576,8 @@ const potentialUpgrades = computed(() => {
     const ettvdDelta = (swapped.ettvd.value?.total ?? 0) - (currentBuild.ettvd.value?.total ?? 0);
 
     const priceEntry = ITEM_PRICES.value[targetItem.name] ?? null;
-    const price    = priceEntry === null ? '?' : (priceEntry.rune_equiv ?? '< Pul');
-    const priceIst = priceEntry?.iv ?? null;
+    const price    = priceEntry === null ? '?' : (priceEntry.buy_rune_equiv ?? '< Pul');
+    const priceIst = priceEntry?.buy_iv ?? null;
     const valueScore = priceIst > 0 ? ettvdDelta / priceIst : ettvdDelta;
 
     rows.push({

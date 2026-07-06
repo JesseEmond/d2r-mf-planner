@@ -27,7 +27,11 @@ OUT = ROOT / "public" / "data" / "db.json"
 
 
 def _build_item_prices(snapshot: dict) -> dict:
-    """Build {display_name: {iv, rune_equiv}} for items with price data in snapshot."""
+    """Build {display_name: {sell_iv, sell_rune_equiv, buy_iv, buy_rune_equiv}} for items with price data.
+
+    sell_iv/sell_rune_equiv use the 'typical' tier (sell price).
+    buy_iv/buy_rune_equiv use the 'good' tier (buy price).
+    """
     name_map = {item.name: item.display_name for item in extract_gear_stats.get_preset_items()}
     prices = {}
     for snap_name, data in snapshot.get("gear_items", {}).items():
@@ -38,9 +42,12 @@ def _build_item_prices(snapshot: dict) -> dict:
         if iv is None:
             continue
         display_name = name_map.get(snap_name, snap_name)
-        combo = trade_snapshots.find_best_rune_combo(iv, snapshot)
-        rune_equiv = trade_snapshots.format_rune_combo(combo) if combo else None
-        prices[display_name] = {"iv": iv, "rune_equiv": rune_equiv}
+        sell_combo = trade_snapshots.find_best_rune_combo(iv, snapshot)
+        sell_rune_equiv = trade_snapshots.format_rune_combo(sell_combo) if sell_combo else None
+        buy_iv = tiers.get("good")
+        buy_combo = trade_snapshots.find_best_rune_combo(buy_iv, snapshot) if buy_iv is not None else None
+        buy_rune_equiv = trade_snapshots.format_rune_combo(buy_combo) if buy_combo else None
+        prices[display_name] = {"sell_iv": iv, "sell_rune_equiv": sell_rune_equiv, "buy_iv": buy_iv, "buy_rune_equiv": buy_rune_equiv}
     return prices
 
 
