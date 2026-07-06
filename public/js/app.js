@@ -550,6 +550,27 @@ const swappedBuilds = Object.fromEntries(
     ])
 );
 
+// One swapped build per gear slot: current gear with only that slot's sockets replaced by target sockets.
+// The swapped slot uses the current base item + target sockets (for computing socket-only upgrade value).
+const socketSwappedBuilds = Object.fromEntries(
+  GEAR_SLOTS
+    .filter(({ id }) => id !== 'charms')
+    .map(({ id: swapId }) => [
+      swapId,
+      makeBuild((slotId) => {
+        if (slotId === swapId) {
+          const targetSockStats = getTargetSlotSocketStats(slotId);
+          if (!state.gear[slotId].preset) return targetSockStats;
+          const baseResult = slotStats({ ...state.gear[slotId], sockets: [] }, slotId);
+          return { ...baseResult, ...Stats.from(baseResult).add(targetSockStats) };
+        }
+        return slotId === 'charms'
+          ? charmSlotStats(state.gear.charms)
+          : slotStats(state.gear[slotId], slotId);
+      }),
+    ])
+);
+
 const potentialUpgrades = computed(() => {
   if (!targetPreset.value) return [];
   const rows = [];
@@ -590,9 +611,63 @@ const potentialUpgrades = computed(() => {
       priceIst,
       valueScore,
     });
+  }
 
-    // TODO: add socket upgrade rows — compare getTargetSlotSockets(id) vs. state.gear[id].sockets
-    //   for any socket items in target not present in current gear.
+  // Socket upgrade rows — slots where the item already matches the target but sockets differ.
+  for (const { id, label } of GEAR_SLOTS) {
+    if (id === 'charms') continue;
+
+    const targetSockIds = targetPreset.value?.sockets[id] ?? [];
+    if (!targetSockIds.length) continue;
+
+    const currentPresetId = state.gear[id].preset;
+    if (!currentPresetId) continue;
+    const targetPresetId = targetPreset.value.slots[id];
+    const targetItem = getTargetSlotItem(id);
+
+    const itemMatches = currentPresetId === targetPresetId ||
+      (currentPresetId === 'custom' && targetItem &&
+       state.gear[id].custom?.name?.trim() === targetItem.name);
+    if (!itemMatches) continue;
+
+    const currentSockIds = (state.gear[id].sockets ?? []).map(s => s.preset).filter(Boolean);
+    if ([...targetSockIds].sort().join(',') === [...currentSockIds].sort().join(',')) continue;
+
+    const swapped = socketSwappedBuilds[id];
+    const statDelta = {
+      fcr:             (swapped.totalFCR.value             ?? 0) - (currentBuild.totalFCR.value             ?? 0),
+      mf:              (swapped.totalMF.value              ?? 0) - (currentBuild.totalMF.value              ?? 0),
+      allSkills:       (swapped.totalAllSkills.value       ?? 0) - (currentBuild.totalAllSkills.value       ?? 0),
+      coldSkills:      (swapped.totalColdSkills.value      ?? 0) - (currentBuild.totalColdSkills.value      ?? 0),
+      coldDmgPct:      (swapped.totalColdDmgPct.value      ?? 0) - (currentBuild.totalColdDmgPct.value      ?? 0),
+      enemyColdResPct: (swapped.totalEnemyColdResPct.value ?? 0) - (currentBuild.totalEnemyColdResPct.value ?? 0),
+    };
+    const ettvdDelta = (swapped.ettvd.value?.total ?? 0) - (currentBuild.ettvd.value?.total ?? 0);
+
+    const sockItems = getTargetSlotSockets(id);
+    let totalPriceIst = 0;
+    let hasAllPrices = sockItems.length > 0;
+    for (const si of sockItems) {
+      const pe = ITEM_PRICES.value[si.name] ?? null;
+      if (pe?.buy_iv != null) { totalPriceIst += pe.buy_iv; } else { hasAllPrices = false; }
+    }
+    const priceIst = hasAllPrices ? totalPriceIst : null;
+    const price = sockItems.length === 1
+      ? (() => { const pe = ITEM_PRICES.value[sockItems[0].name] ?? null; return pe === null ? '?' : (pe.buy_rune_equiv ?? '< Pul'); })()
+      : (priceIst !== null ? '~' + priceIst.toFixed(1) + ' Ist' : '?');
+    const valueScore = priceIst > 0 ? ettvdDelta / priceIst : ettvdDelta;
+
+    rows.push({
+      slotId: id + ':sockets',
+      slot: label,
+      itemName: sockItems.map(si => si.name).join(', '),
+      isSocketRow: true,
+      statDelta,
+      ettvdDelta,
+      price,
+      priceIst,
+      valueScore,
+    });
   }
 
   // TODO: add charm upgrade rows — compare targetPresetCharms vs. state.gear.charms for
@@ -1824,7 +1899,7 @@ const app = createApp({
                   </thead>
                   <tbody>
                     <tr v-for="row in potentialUpgrades" :key="row.slotId" class="upgrades-row">
-                      <td class="upgrades-td upgrades-slot">{{ row.slot }}</td>
+                      <td class="upgrades-td upgrades-slot">{{ row.slot }}<span v-if="row.isSocketRow" class="upgrades-socket-tag"> (socket)</span></td>
                       <td class="upgrades-td upgrades-item">{{ row.itemName }}</td>
                       <td class="upgrades-td">
                         <div class="upgrades-stat-delta-wrap">

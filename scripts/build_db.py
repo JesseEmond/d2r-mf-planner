@@ -32,22 +32,37 @@ def _build_item_prices(snapshot: dict) -> dict:
     sell_iv/sell_rune_equiv use the 'typical' tier (sell price).
     buy_iv/buy_rune_equiv use the 'good' tier (buy price).
     """
-    name_map = {item.name: item.display_name for item in extract_gear_stats.get_preset_items()}
+    preset_items = extract_gear_stats.get_preset_items()
+    name_map = {item.name: item.display_name for item in preset_items}
     prices = {}
+
+    def _add_price(display_name: str, sell_iv: float, buy_iv: float | None, exclude: str | None = None) -> None:
+        sell_combo = trade_snapshots.find_best_rune_combo(sell_iv, snapshot, exclude=exclude)
+        sell_rune_equiv = trade_snapshots.format_rune_combo(sell_combo) if sell_combo else None
+        buy_combo = trade_snapshots.find_best_rune_combo(buy_iv, snapshot, exclude=exclude) if buy_iv is not None else None
+        buy_rune_equiv = trade_snapshots.format_rune_combo(buy_combo) if buy_combo else None
+        prices[display_name] = {"sell_iv": sell_iv, "sell_rune_equiv": sell_rune_equiv, "buy_iv": buy_iv, "buy_rune_equiv": buy_rune_equiv}
+
     for snap_name, data in snapshot.get("gear_items", {}).items():
         if not data or data.get("skipped") or data.get("error"):
             continue
         tiers = data.get("tiers") or {}
-        iv = tiers.get("typical")
-        if iv is None:
+        sell_iv = tiers.get("typical")
+        if sell_iv is None:
             continue
-        display_name = name_map.get(snap_name, snap_name)
-        sell_combo = trade_snapshots.find_best_rune_combo(iv, snapshot)
-        sell_rune_equiv = trade_snapshots.format_rune_combo(sell_combo) if sell_combo else None
-        buy_iv = tiers.get("good")
-        buy_combo = trade_snapshots.find_best_rune_combo(buy_iv, snapshot) if buy_iv is not None else None
-        buy_rune_equiv = trade_snapshots.format_rune_combo(buy_combo) if buy_combo else None
-        prices[display_name] = {"sell_iv": iv, "sell_rune_equiv": sell_rune_equiv, "buy_iv": buy_iv, "buy_rune_equiv": buy_rune_equiv}
+        _add_price(name_map.get(snap_name, snap_name), sell_iv, tiers.get("good"))
+
+    rune_data = snapshot.get("runes", {})
+    for item in preset_items:
+        rune_entry = rune_data.get(item.name)
+        if not rune_entry or "error" in rune_entry:
+            continue
+        tiers = rune_entry.get("tiers") or {}
+        sell_iv = tiers.get("typical")
+        if sell_iv is None:
+            continue
+        _add_price(item.display_name, sell_iv, tiers.get("good"), exclude=item.name)
+
     return prices
 
 
