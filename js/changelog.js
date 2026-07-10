@@ -1,5 +1,8 @@
 // UNRELEASED: add entries here while developing. Must be empty before running gh-deploy.sh.
-export const UNRELEASED = [];
+export const UNRELEASED = [
+  'Potential Upgrades now suggests missing charms too, factoring in whether they\'d actually fit in your inventory',
+  'Charm picker now blocks picks/counts that would overflow your charm inventory space',
+];
 
 // RELEASES: most recent first. Each entry is one deploy.
 export const RELEASES = [

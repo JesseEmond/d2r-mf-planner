@@ -11,6 +11,14 @@ const CUSTOM_ITEM   = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, all
 const CUSTOM_CHARM  = { id: 'custom', name: 'Custom / Other', fcr: 0, mf: 0, allSkills: 0, coldSkills: 0, coldDmgPct: 0, enemyColdResPct: 0, unique: false };
 const CUSTOM_SOCKET = { id: 'custom', name: 'Custom / Other' };
 
+// Charm inventory capacity model — see docs/gear_data.md "Inventory capacity model".
+// The usable charm space is 8 columns of height 4, plus one extra column of height 2
+// freed up by only carrying a Tome of Town Portal (no Tome of Identify) alongside the
+// Horadric Cube. Charms are always 1 tile wide, so packing reduces to independent 1-D
+// bins (columns) — no 2-D bin packing needed.
+const CHARM_COLUMN_HEIGHTS = [4, 4, 4, 4, 4, 4, 4, 4, 2];
+const CHARM_TILE_SIZE      = { small: 1, large: 2, grand: 3 };
+
 const PRESET_ITEMS = ref({});
 const TARGET_GEAR_PRESETS = ref([]);
 const SET_LEVEL_BONUSES = ref({});
@@ -286,6 +294,80 @@ function charmSunder(charm) {
     return presets.find(p => p.unique && p.name === name)?.sunder ?? null;
   }
   return presets.find(p => p.id === charm.preset)?.sunder ?? null;
+}
+
+// Resolves a charm gear-row to its catalog item (for size/unique lookups). Custom rows
+// are only resolvable when their typed name matches a known preset (mirrors charmSunder).
+function resolveCharmItem(charm) {
+  if (!charm.preset) return null;
+  const presets = PRESET_ITEMS.value['charms'] ?? [];
+  if (charm.preset === 'custom') {
+    const name = charm.custom?.name?.trim();
+    return presets.find(p => p.unique && p.name === name) ?? null;
+  }
+  return presets.find(p => p.id === charm.preset) ?? null;
+}
+
+// Places one item of `size` into whichever column has the tightest fit (best-fit), without
+// mutating `cols`. Returns the resulting columns, or null if it doesn't fit anywhere.
+function placeInColumns(cols, size) {
+  let best = -1;
+  for (let i = 0; i < cols.length; i++) {
+    if (cols[i] >= size && (best === -1 || cols[i] < cols[best])) best = i;
+  }
+  if (best === -1) return null;
+  const next = [...cols];
+  next[best] -= size;
+  return next;
+}
+
+// Packs the given charms into the inventory columns and returns each column's remaining
+// height. Placed largest-first (grand, then large, then small) so a large charm can't
+// "steal" space a grand charm still needs, and vice versa. Charms that don't fit (e.g. a
+// pre-existing over-capacity configuration) are skipped rather than blocking the rest.
+function packCharmColumns(charmsArray) {
+  let cols = [...CHARM_COLUMN_HEIGHTS];
+  const counts = { grand: 0, large: 0, small: 0 };
+  for (const charm of charmsArray) {
+    const item = resolveCharmItem(charm);
+    if (!item?.size) continue;
+    counts[item.size] += item.unique ? 1 : (charm.count ?? 1);
+  }
+  for (let i = 0; i < counts.grand; i++) cols = placeInColumns(cols, CHARM_TILE_SIZE.grand) ?? cols;
+  for (let i = 0; i < counts.large; i++) cols = placeInColumns(cols, CHARM_TILE_SIZE.large) ?? cols;
+  for (let i = 0; i < counts.small; i++) cols = placeInColumns(cols, CHARM_TILE_SIZE.small) ?? cols;
+  return cols;
+}
+
+// Whether the current charm inventory has room for one more charm of the given size.
+function hasRoomForCharm(size) {
+  const tileSize = CHARM_TILE_SIZE[size];
+  if (!tileSize) return false;
+  return placeInColumns(packCharmColumns(state.gear.charms), tileSize) !== null;
+}
+
+// How many additional charms of the given size would fit into the inventory alongside
+// `charmsArray` (used to cap the count input for a specific charm row).
+function maxAdditionalCharmCount(charmsArray, size) {
+  const tileSize = CHARM_TILE_SIZE[size];
+  if (!tileSize) return 0;
+  let cols = packCharmColumns(charmsArray);
+  let count = 0;
+  for (let next; (next = placeInColumns(cols, tileSize)) !== null; count++) {
+    cols = next;
+  }
+  return count;
+}
+
+// How many copies of a target charm entry are already present in the current gear
+// (matched by preset id, or by typed name for custom rows — mirrors charmSunder/resolveCharmItem).
+function currentCharmCount(charm) {
+  const qty = charm.item.unique ? 1 : undefined;
+  return state.gear.charms.reduce((sum, c) => {
+    const matches = c.preset === charm.id ||
+      (c.preset === 'custom' && c.custom?.name?.trim() === charm.name);
+    return matches ? sum + (qty ?? (c.count ?? 1)) : sum;
+  }, 0);
 }
 
 // ── Reactive state ─────────────────────────────────────────────────────────
@@ -572,6 +654,23 @@ const socketSwappedBuilds = Object.fromEntries(
     ])
 );
 
+// One build per target charm entry: current gear with one extra copy of that charm added.
+// Rebuilt whenever the target preset's charm list changes.
+const charmSwappedBuilds = computed(() =>
+  Object.fromEntries(
+    targetPresetCharms.value
+      .filter(c => c.item)
+      .map(c => [
+        c.id,
+        makeBuild((slotId) =>
+          slotId === 'charms'
+            ? charmSlotStats(state.gear.charms).add(Stats.from(c.item))
+            : slotStats(state.gear[slotId], slotId)
+        ),
+      ])
+  )
+);
+
 function buildDelta(swapped, base) {
   const baseTotal = base.ettvd.value?.total ?? 0;
   const ettvdDelta = (swapped.ettvd.value?.total ?? 0) - baseTotal;
@@ -686,8 +785,42 @@ const potentialUpgrades = computed(() => {
     });
   }
 
-  // TODO: add charm upgrade rows — compare targetPresetCharms vs. state.gear.charms for
-  //   any charm entries in target not already present in current gear.
+  // Charm upgrade rows — target charms where the current gear has fewer copies than the
+  // target, gated on the current inventory having room for at least one more.
+  const charmsLabel = GEAR_SLOTS.find(({ id }) => id === 'charms')?.label ?? 'Charms';
+  for (const charm of targetPresetCharms.value) {
+    if (!charm.item) continue;
+    if (currentCharmCount(charm) >= charm.count) continue;
+    if (!hasRoomForCharm(charm.item.size)) continue;
+
+    const swapped = charmSwappedBuilds.value[charm.id];
+    if (!swapped) continue;
+    const { statDelta, ettvdDelta, ettvdRelPct } = buildDelta(swapped, currentBuild);
+    const baseTotal = currentBuild.ettvd.value?.total ?? 0;
+
+    const priceEntry = ITEM_PRICES.value[charm.name] ?? null;
+    const price    = priceEntry === null ? '?' : ('~ ' + (priceEntry.buy_rune_equiv ?? '< Pul'));
+    const priceIst = priceEntry?.buy_iv ?? null;
+    const tradeUrl = priceEntry?.trade_url ?? null;
+    const valueScore = priceIst > 0 ? ettvdDelta / priceIst : ettvdDelta;
+
+    rows.push({
+      slotId: 'charms:' + charm.id,
+      slot: charmsLabel,
+      itemName: charm.name,
+      statDelta,
+      statBefore: currentBuild.gearTotals.value,
+      statAfter: swapped.gearTotals.value,
+      ettvdBefore: baseTotal,
+      ettvdAfter: baseTotal + ettvdDelta,
+      ettvdDelta,
+      ettvdRelPct,
+      price,
+      priceIst,
+      tradeUrl,
+      valueScore,
+    });
+  }
 
   // Partition rows into four buckets for display order and grading.
   const improving = rows.filter(r => r.priceIst !== null && r.ettvdDelta < 0);
@@ -1175,9 +1308,18 @@ const CharmsPanel = defineComponent({
       ));
     }
 
+    // Max total count of `size` charms that can fit alongside every *other* row.
+    function maxCountForSize(size, currentIdx) {
+      if (!size) return Infinity;
+      const others = props.modelValue.filter((c, i) => i !== currentIdx);
+      return maxAdditionalCharmCount(others, size);
+    }
+
     function updateCharmCount(idx, val) {
+      const item = (props.presets ?? []).find(p => p.id === props.modelValue[idx]?.preset);
+      const max = Math.max(1, maxCountForSize(item?.size, idx));
       emit_(props.modelValue.map((c, i) =>
-        i === idx ? { ...c, count: Math.max(1, val || 1) } : c
+        i === idx ? { ...c, count: Math.min(max, Math.max(1, val || 1)) } : c
       ));
     }
 
@@ -1193,13 +1335,23 @@ const CharmsPanel = defineComponent({
       return (props.presets ?? []).find(p => p.id === charm.preset)?.unique ?? false;
     }
 
-    function isDisabled(preset, currentIdx) {
+    function isUniqueConflict(preset, currentIdx) {
       if (!preset.unique) return false;
       return props.modelValue.some((c, i) => {
         if (i === currentIdx) return false;
         if (c.preset === preset.id) return true;
         return matchedUniquePreset(c)?.id === preset.id;
       });
+    }
+
+    function isDisabled(preset, currentIdx) {
+      return isUniqueConflict(preset, currentIdx) || maxCountForSize(preset.size, currentIdx) < 1;
+    }
+
+    function disabledReason(preset, currentIdx) {
+      if (isUniqueConflict(preset, currentIdx)) return 'Already using this unique charm';
+      if (maxCountForSize(preset.size, currentIdx) < 1) return 'Not enough inventory space for another ' + preset.size + ' charm';
+      return null;
     }
 
 
@@ -1210,7 +1362,7 @@ const CharmsPanel = defineComponent({
       return item?.sunder ?? null;
     }
 
-    return { addCharm, removeCharm, updateCharm, updateCharmCustomFull, updateCharmCount, isUniqueCharm, isDisabled, singleCharmStats, sunderLabel, matchedUniquePreset };
+    return { addCharm, removeCharm, updateCharm, updateCharmCustomFull, updateCharmCount, isUniqueCharm, isDisabled, disabledReason, maxCountForSize, singleCharmStats, sunderLabel, matchedUniquePreset };
   },
   template: `
     <div class="charms-panel">
@@ -1230,10 +1382,12 @@ const CharmsPanel = defineComponent({
               <option
                 v-for="p in presets" :key="p.id" :value="p.id"
                 :disabled="isDisabled(p, idx)"
+                :title="disabledReason(p, idx)"
               >{{ p.name }}</option>
             </select>
             <input v-if="charm.preset && !isUniqueCharm(charm)"
               type="number" min="1"
+              :max="maxCountForSize((presets ?? []).find(p => p.id === charm.preset)?.size, idx)"
               :value="charm.count ?? 1"
               @input="updateCharmCount(idx, +$event.target.value)"
               class="charm-count"
