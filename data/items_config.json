@@ -31,10 +31,10 @@
     "Annihilus"
   ],
   "custom_charms": {
-    "Sorc Torch":          {"fcr": 0, "mf": 0,  "allSkills": 3, "coldSkills": 0, "unique": true},
-    "+1 Cold Sorc Skiller":{"fcr": 0, "mf": 0,  "allSkills": 0, "coldSkills": 1, "unique": false},
-    "Cold Rupture (MF)":   {"fcr": 0, "mf": 25, "allSkills": 0, "coldSkills": 0, "enemyColdResPct": 10, "unique": true, "sunder": "cold"},
-    "7% MF SC":            {"fcr": 0, "mf": 7,  "allSkills": 0, "coldSkills": 0, "unique": false}
+    "Sorc Torch":          {"fcr": 0, "mf": 0,  "allSkills": 3, "coldSkills": 0, "unique": true,  "code": "cm2"},
+    "+1 Cold Sorc Skiller":{"fcr": 0, "mf": 0,  "allSkills": 0, "coldSkills": 1, "unique": false, "code": "cm3"},
+    "Cold Rupture (MF)":   {"fcr": 0, "mf": 25, "allSkills": 0, "coldSkills": 0, "enemyColdResPct": 10, "unique": true, "sunder": "cold", "code": "cs2"},
+    "7% MF SC":            {"fcr": 0, "mf": 7,  "allSkills": 0, "coldSkills": 0, "unique": false, "code": "cm1"}
   },
   "runewords": [
     "Heart of the Oak",

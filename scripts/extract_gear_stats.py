@@ -119,6 +119,27 @@ def _build_code_to_slot(type_index: dict[str, dict]) -> dict[str, str]:
     return code_to_slot
 
 
+CHARM_TILE_SIZE_NAMES = {1: "small", 2: "large", 3: "grand"}
+
+
+def _build_charm_code_to_size() -> dict[str, str]:
+    """Map charm base code (cm1/cm2/cm3/cs2) → inventory size name, from misc.txt's
+    invwidth/invheight columns (small=1 tile, large=2 tiles, grand=3 tiles)."""
+    code_to_size: dict[str, str] = {}
+    for row in d2r_data.csv_rows("misc.txt"):
+        code = row.get("code", "").strip()
+        if code not in CHARM_CODES or code in code_to_size:
+            continue
+        try:
+            tiles = int(row.get("invwidth", "").strip()) * int(row.get("invheight", "").strip())
+        except ValueError:
+            continue
+        size = CHARM_TILE_SIZE_NAMES.get(tiles)
+        if size:
+            code_to_size[code] = size
+    return code_to_size
+
+
 def _build_code_to_max_sockets() -> dict[str, int]:
     """Map item base code → maximum number of sockets from armor/misc/weapons data."""
     code_to_max: dict[str, int] = {}
@@ -330,6 +351,7 @@ def extract() -> dict:
     type_index = _build_item_type_index()
     code_to_slot = _build_code_to_slot(type_index)
     code_to_max_sockets = _build_code_to_max_sockets()
+    charm_code_to_size = _build_charm_code_to_size()
     name_to_display = d2r_data.get_item_names()
 
     unique_rows: dict[str, dict] = {}
@@ -464,16 +486,26 @@ def extract() -> dict:
         code = row.get("code", "").strip()
         if code not in CHARM_CODES:
             raise KeyError(f"Item '{internal_name}' has code '{code}' which is not a charm code")
+        size = charm_code_to_size.get(code)
+        if not size:
+            raise KeyError(f"No inventory size found for charm code '{code}' (item: '{internal_name}')")
 
         display_name = name_to_display.get(internal_name)
         if not display_name:
             raise KeyError(f"No display name found for '{internal_name}' in item-names.json")
 
         stats = _extract_stats(row, item_name=internal_name)
-        item = {"id": internal_name, "name": display_name, "unique": True, "max_sockets": 0, **stats}
+        item = {"id": internal_name, "name": display_name, "unique": True, "size": size, "max_sockets": 0, **stats}
         items_by_slot.setdefault("charms", []).append(item)
 
     for item_id, entry in custom_charms.items():
+        code = entry.get("code")
+        if not code:
+            raise KeyError(f"Custom charm '{item_id}' is missing required 'code' field "
+                            f"(base charm item code, e.g. cm1/cm2/cm3/cs2, used to derive inventory size)")
+        size = charm_code_to_size.get(code)
+        if not size:
+            raise KeyError(f"No inventory size found for charm code '{code}' (custom charm: '{item_id}')")
         stats = {
             "fcr":             entry.get("fcr", 0),
             "mf":              entry.get("mf", 0),
@@ -482,7 +514,8 @@ def extract() -> dict:
             "coldDmgPct":      entry.get("coldDmgPct", 0),
             "enemyColdResPct": entry.get("enemyColdResPct", 0),
         }
-        item: dict = {"id": item_id, "name": item_id, "unique": entry.get("unique", False), "max_sockets": 0, **stats}
+        item: dict = {"id": item_id, "name": item_id, "unique": entry.get("unique", False), "size": size,
+                      "max_sockets": 0, **stats}
         if entry.get("sunder"):
             item["sunder"] = entry["sunder"]
         items_by_slot.setdefault("charms", []).append(item)
